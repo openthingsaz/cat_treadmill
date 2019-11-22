@@ -1,0 +1,55 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+
+# CubeMX
+STM32L152-Discovery.elf.launch
+
+# Qt
+*.qbs.user
+
+# STM32Cube copied library and project folders
+# Drivers/*
+MDK-ARM/*
+EWARM/*
+# CrossWorks project files
+!*/*.hzp
+!*/*.hzs
+
+*.o
+.mxproject
+
+# others 
+.settings/
+.git/
+Debug/*
+/Debug/
