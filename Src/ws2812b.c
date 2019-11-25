@@ -268,7 +268,7 @@ const uint8_t leddata[256*4] = { // size = 256 * 3
   0X77 , 0X77 , 0X77 , 0X77 ,
 };
 
-extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi1;
 
 uint8_t ws_buffer[LED_BUFFER_LENGTH];
 void encode_byte( uint8_t data, int16_t buffer_index )
@@ -293,11 +293,11 @@ void generate_ws_buffer( uint8_t RData,uint8_t GData,uint8_t BData, int16_t led_
 void Send_2812(void)
  {
 #if 1
-    HAL_SPI_Transmit_DMA( &hspi2, ws_buffer, LED_BUFFER_LENGTH );
+    HAL_SPI_Transmit_DMA( &hspi1, ws_buffer, LED_BUFFER_LENGTH );
     // wait until finished
-    while(__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_BSY ));
+    while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
 #else
-    HAL_SPI_Transmit( &hspi2, ws_buffer, LED_BUFFER_LENGTH, 300 );
+    HAL_SPI_Transmit( &hspi1, ws_buffer, LED_BUFFER_LENGTH, 300 );
 #endif
  }
 
@@ -321,7 +321,7 @@ void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
 void initLEDMOSI(void)
 {
   uint8_t buffer0[2] = { 0, 0 };
-  HAL_SPI_Transmit(&hspi2, buffer0, 1, 100 );
+  HAL_SPI_Transmit(&hspi1, buffer0, 1, 100 );
 }
 
 void test_led_rgb(void) {
@@ -334,24 +334,27 @@ void test_led_rgb(void) {
   for ( i = 0; i < LED_NO; i++) {
     //setPixelColor( i, 250, 0, 0 );
     setAllPixelColor(0, 0, 0);
-    HAL_Delay(200);
+    HAL_Delay(400);
 
-    setPixelColor( i, 5, 0, 0 );
+    setPixelColor( i, 0, 50, 0 );
+    printf("i : %d\r\n", i);
+    HAL_Delay(400);
+  }
+  /*
+  // green
+  for ( i = 0; i < LED_NO; i++) {
+    //setPixelColor( i, 0, 250, 0 );
+    setPixelColor( i, 0, 5, 0 );
     HAL_Delay(200);
   }
-  // green
-//  for ( i = 0; i < LED_NO; i++) {
-//    //setPixelColor( i, 0, 250, 0 );
-//    setPixelColor( i, 0, 5, 0 );
-//    HAL_Delay(200);
-//  }
-//
-//  // blue
-//  for ( i = 0; i < LED_NO; i++) {
-//    //setPixelColor( i, 0, 250, 0 );
-//    setPixelColor( i, 0, 0, 5 );
-//    HAL_Delay(200);
-//  }
+
+  // blue
+  for ( i = 0; i < LED_NO; i++) {
+    //setPixelColor( i, 0, 250, 0 );
+    setPixelColor( i, 0, 0, 5 );
+    HAL_Delay(200);
+  }
+  */
 }
 
 /* USER CODE END 0 */

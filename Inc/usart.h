@@ -45,6 +45,7 @@ void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 #define MAX_SERIAL_BUF 1024
+#define PACKET_SIZE 12
 
 typedef struct
 {

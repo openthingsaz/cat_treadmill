@@ -21,6 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include <stdbool.h>
 int _write(int fd, char *str, int len)
 {
   for(int i=0; i<len; i++)
@@ -253,7 +254,11 @@ Buffer_Serial SerialTx;
 Buffer_Serial SerialRx;
 uint8_t rx1_data;
 uint8_t rx2_data;
-uint8_t rxBuf[MAX_SERIAL_BUF];
+uint8_t rxBuff[MAX_SERIAL_BUF];
+uint8_t packet[PACKET_SIZE];
+uint8_t inx = 0;
+
+
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -332,7 +337,10 @@ unsigned short crc16_ccitt(const void *buf, int len)
 	return crc;
 }
 
-
+#define STX 0x02
+#define ETX 0x03
+#define ACK 0x06
+#define NCK 0x15
 
 void process(void)
 {
@@ -340,7 +348,11 @@ void process(void)
   uint16_t tail = 0;
   uint16_t rxLen = 0;
   uint16_t txLen = 0;
+  uint16_t i = 0;
   uint32_t cmd = 0;
+  bool recv_end = 0;
+  //BLE_Cmd_Data ble_cmd;
+
 
   head = SerialRx.head;
   tail = SerialRx.tail;
@@ -358,14 +370,34 @@ void process(void)
 
     if (rxLen)
     {
-      memset(rxBuf, 0, sizeof(rxBuf));
-      memcpy(rxBuf, &SerialRx.buf[SerialRx.head], rxLen);
-      HAL_UART_Transmit(&huart1, rxBuf, rxLen, 100);
+      memset(rxBuff, 0, sizeof(rxBuff));
+      memcpy(rxBuff, &SerialRx.buf[SerialRx.head], rxLen);
 
-      for(int i =0; i<rxLen; i++) 
-        printf("%c\r\n", rxBuf[i]);
+      for (i=0; i<rxLen; i++) 
+      {
+        if (rxBuff[i] == STX)
+          continue;
 
+        else if (rxBuff[i] == ETX) 
+        {
+          recv_end = true;
+          
+        }
+        else 
+        {
+          packet[inx++] = rxBuff[i];
+        }
+      }
 
+      if (recv_end == true) 
+      {
+        //ble_cmd.addr = packet[0];
+        //ble_cmd.cmd = packet[1];
+        //memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
+        //memcpy(&ble_cmd.crc, &packet[6], sizeof(ble_cmd.crc));
+    	  ;
+      }
+      
       while(rxLen--)
       {
         if (MAX_SERIAL_BUF <= SerialRx.head + 1)

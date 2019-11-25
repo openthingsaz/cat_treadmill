@@ -32,6 +32,7 @@
 /* USER CODE BEGIN Includes */
 #include "mpu6050.h"
 #include "mdbt42q.h"
+#include "ws2812b.h"
 # include <stdio.h>
 # include <string.h>
 /* USER CODE END Includes */
@@ -70,8 +71,8 @@ void power_en(void)
 {
   // POWER Controler
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_RESET); // LED_3V3_PWR_nEN
-
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET); // LED_LMIT_EN, Hight Enable, Low Disable
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
 /* USER CODE END 0 */
 
@@ -125,11 +126,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  printf("Booting LittleCat Board!!!!\r\n");
+  printf("Booting LittleCat Board!!!!22\r\n");
   power_en();
   ble_gpio_init();
 
-
+  initLEDMOSI();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -143,7 +144,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      process();
+
+      //setPixelColor( 0, 0, 250, 0 );
+      //process();
+      test_led_rgb();
   }
 
   /* USER CODE END 3 */
