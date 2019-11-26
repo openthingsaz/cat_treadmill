@@ -60,7 +60,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-volatile uint32_t last_time=0, mpu_last_time=0;
+volatile uint32_t last_time=0, mpu_last_time=0, led_last_time=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,6 +89,10 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	float ledPos = 0;
+	float ledPos_before = 0;
+	int i = 0;
+	int user_angle = 270;
+  uint8_t buff[256];
   /* USER CODE END 1 */
   
 
@@ -127,7 +131,7 @@ int main(void)
   MX_NVIC_Init();
 
   /* USER CODE BEGIN 2 */
-  printf("Booting LittleCat Board!!!!22\r\n");
+  printf("Booting LittleCat Board!!!!221\r\n");
   power_en();
   ble_gpio_init();
   initLEDMOSI();
@@ -146,24 +150,43 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if ((time_ms() - mpu_last_time) > 4) { //5 milli second
-			Read_DMP();
-			ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
-			mpu_last_time = time_ms();
-		}
+    if ((time_ms() - mpu_last_time) > 4) { //5 milli second
+      Read_DMP();
+      ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
+      mpu_last_time = time_ms();
+    }
 
 		if ((time_ms() - last_time) > 500-1) { //500 milli second
-			LED_GREEN_TOGGLE;
-			vt100SetCursorPos( 3, 0);
-			vt100ClearLinetoEnd();
-			printf("Pitch \t: %1.2f\r\n", Pitch);
-			printf("Roll \t: %1.2f\r\n", Roll);
-			printf("ledPos \t: %d\r\n", (uint8_t)ledPos);
-			last_time = time_ms();
+      LED_GREEN_TOGGLE;
+      vt100SetCursorPos( 3, 0);
+      vt100ClearLinetoEnd();
+      //printf("Pitch \t: %1.2f\r\n", Pitch);
+      //printf("Roll \t: %1.2f\r\n", Roll);
+      printf("Roll \t: %d\r\n", (uint16_t)Roll);
+      printf("ledPos1 \t: %d\r\n", (uint16_t)ledPos);
+
+      last_time = time_ms();
+      //setAllPixelColor(0, 0, 0);
+
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "%d\r\n", (uint16_t)Roll);
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
 		}
-      //setPixelColor( 0, 0, 250, 0 );
-      //process();
-      test_led_rgb();
+
+
+    if ((time_ms() - led_last_time) > 50-1) { //500 milli second
+    //setPixelColor( (uint8_t)ledPos, 0, 250, 0 );
+      if (ledPos_before != ledPos){
+        //------printf("---------\r\n");
+        setAllPixelColor(0, 0, 0);
+        //if( ledPos > 100){
+        setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
+        //}
+        ledPos_before = ledPos;
+      }
+      led_last_time = time_ms();
+    }
+		 //setPixelColor( (uint8_t)ledPos, 0, 250, 0 );
   }
 
   /* USER CODE END 3 */
