@@ -60,6 +60,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 #define USE_I2C_DMA
+#define USE_DMP
+#define LED_TOTAL	216.0f
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
