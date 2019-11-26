@@ -5,7 +5,7 @@
   * @version V1.0
   * @date    29-August-2014
   * @brief   Header file for MPU6050.c module.
-  
+
   ******************************************************************************
   * @attention
   *
@@ -27,7 +27,7 @@
 
 #define MPU6050_I2C_PORT		hi2c1
 //#define MPU6050_I2C_PORT		hi2c2
-			
+
 #define MPU6050_DEVICE_ADDR         0xD0
 
 #define MPU6050_ADDRESS_AD0_LOW     0x68 // address pin low (GND), default for InvenSense evaluation board
@@ -355,10 +355,10 @@
 #define bool _Bool
 #define true 1
 #define false 0
-	
+
 #define	ALPHA	0.95         // Į������ ���İ�
 
-	
+
 #include "stm32f4xx_hal.h"
 
 typedef struct

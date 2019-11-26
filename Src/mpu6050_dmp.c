@@ -1,4 +1,4 @@
-#include "MPU6050.h"
+#include "mpu6050_dmp.h"
 //#include "IOI2C.h"
 #include "HAL_I2C.h"
 //#include "usart.h"
@@ -337,6 +337,22 @@ void Read_DMP(void)
 		Pitch = -asin(2 * q1 * q3 + 2 * q0 * q2) * RAD_TO_DEG;
 		Roll  = atan2(2 * q2 * q3 - 2 * q0 * q1, 2 * q0 * q0 + 2 * q3 * q3 - 1) * RAD_TO_DEG;
 		//Roll  = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1) * RAD_TO_DEG;
+
+		//		if(Roll < .0f) Rangle = fabs(Roll);
+		//		else if(Roll > .0f) Rangle = fabs(-180.0f + (Roll-180.0f));
+		//		else Rangle = .0f;
+
+				//if(q2 < 0) {
+		//			if(Pitch < .0f) {
+		//				sign = Pitch + Pangle;
+		//				if(sign < .0f)
+		//					Pangle = fabs(Pitch);
+		//				else
+		//					Pangle = fabs(Pitch) + (90.0f - Pitch);
+		//			}
+		//			else if(Pitch > .0f) Pangle = fabs(-90.0f + (Pitch-90.0f));
+		//			else Pangle = .0f;
+				//}
 #else
 //	    float dqw = qToFloat(quat[0], 30);
 //	    float dqx = qToFloat(quat[1], 30);
@@ -369,21 +385,6 @@ void Read_DMP(void)
 	    	if (Yaw < 0) Yaw = 360.0 + Yaw;
 	    }
 #endif
-//		if(Roll < .0f) Rangle = fabs(Roll);
-//		else if(Roll > .0f) Rangle = fabs(-180.0f + (Roll-180.0f));
-//		else Rangle = .0f;
-
-		//if(q2 < 0) {
-//			if(Pitch < .0f) {
-//				sign = Pitch + Pangle;
-//				if(sign < .0f)
-//					Pangle = fabs(Pitch);
-//				else
-//					Pangle = fabs(Pitch) + (90.0f - Pitch);
-//			}
-//			else if(Pitch > .0f) Pangle = fabs(-90.0f + (Pitch-90.0f));
-//			else Pangle = .0f;
-		//}
 	}
 }
 /**************************************************************************

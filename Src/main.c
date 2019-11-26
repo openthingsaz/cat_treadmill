@@ -146,13 +146,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if ((time_ms() - mpu_last_time) > 4) { //4 milli second
+		if ((time_ms() - mpu_last_time) > 4) { //5 milli second
 			Read_DMP();
 			ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
 			mpu_last_time = time_ms();
 		}
 
-		if ((time_ms() - last_time) > 500-1) { //1 second
+		if ((time_ms() - last_time) > 500-1) { //500 milli second
 			LED_GREEN_TOGGLE;
 			vt100SetCursorPos( 3, 0);
 			vt100ClearLinetoEnd();
