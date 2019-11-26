@@ -295,7 +295,9 @@ void Send_2812(void)
 #if 1
     HAL_SPI_Transmit_DMA( &hspi1, ws_buffer, LED_BUFFER_LENGTH );
     // wait until finished
-    while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
+    //while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
+
+
 #else
     HAL_SPI_Transmit( &hspi1, ws_buffer, LED_BUFFER_LENGTH, 300 );
 #endif
@@ -337,7 +339,7 @@ void test_led_rgb(void) {
     HAL_Delay(400);
 
     setPixelColor( i, 0, 50, 0 );
-    printf("i : %d\r\n", i);
+    //printf("i : %d\r\n", i);
     HAL_Delay(400);
   }
   /*
