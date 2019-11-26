@@ -30,11 +30,16 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "mpu6050.h"
 #include "mdbt42q.h"
 #include "ws2812b.h"
 # include <stdio.h>
 # include <string.h>
+
+#ifdef USE_DMP
+#include "mpu6050_dmp.h"
+#else
+#include "mpu6050.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,7 +60,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+volatile uint32_t last_time=0, mpu_last_time=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,10 +88,7 @@ void power_en(void)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
-
-
-
+	float ledPos = 0;
   /* USER CODE END 1 */
   
 
@@ -123,14 +125,14 @@ int main(void)
 
   /* Initialize interrupts */
   MX_NVIC_Init();
+
   /* USER CODE BEGIN 2 */
-
-
   printf("Booting LittleCat Board!!!!22\r\n");
   power_en();
   ble_gpio_init();
-
   initLEDMOSI();
+  time_setup();
+  DMP_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -144,7 +146,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		if ((time_ms() - mpu_last_time) > 4) { //4 milli second
+			Read_DMP();
+			ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
+			mpu_last_time = time_ms();
+		}
 
+		if ((time_ms() - last_time) > 500-1) { //1 second
+			LED_GREEN_TOGGLE;
+			vt100SetCursorPos( 3, 0);
+			vt100ClearLinetoEnd();
+			printf("Pitch \t: %1.2f\r\n", Pitch);
+			printf("Roll \t: %1.2f\r\n", Roll);
+			printf("ledPos \t: %d\r\n", (uint8_t)ledPos);
+			last_time = time_ms();
+		}
       //setPixelColor( 0, 0, 250, 0 );
       //process();
       test_led_rgb();
