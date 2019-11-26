@@ -75,9 +75,9 @@ static void MX_NVIC_Init(void);
 void power_en(void)
 {
   // POWER Controler
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET); // LED_LMIT_EN, Hight Enable, Low Disable
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
+  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
+  HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, 			LED_LMIT_EN_Pin, 			GPIO_PIN_SET); // LED_LMIT_EN, Hight Enable, Low Disable
+  HAL_GPIO_WritePin(LED_3V3_PWR_EN_GPIO_Port, 	LED_3V3_PWR_EN_Pin, 	GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
 /* USER CODE END 0 */
 
