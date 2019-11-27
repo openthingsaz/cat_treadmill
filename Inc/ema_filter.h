@@ -14,7 +14,7 @@ extern "C" {
 #endif
   
 /*EMA ALPHAS*/
-#define EMA_Alpha 0.86f ///< initialization of EMA alpha
+#define EMA_Alpha 0.76f ///< initialization of EMA alpha
   
   /**
   Section: Macro Declarations

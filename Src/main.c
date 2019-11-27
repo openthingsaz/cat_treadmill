@@ -91,8 +91,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	float ledPos = 0;
 	float ledPos_before = 0;
-	int i = 0;
-	int user_angle = 270;
+//	int user_angle = 270;
   uint8_t buff[256];
   /* USER CODE END 1 */
   
@@ -144,12 +143,14 @@ int main(void)
 
   DMP_Init();
 
+  printf("Calibration ready\r\n");
   // Waiting the device status until the stable state
-  for(register int i=0; i<1000; i++) {
+  for(register int i=0; i<2000; i++) {
 	  Read_DMP();
 	  HAL_Delay(5);
+	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
   }
-
+  printf("\r\nCalibration start\r\n");
   // Calibration of the mpu6050
   for(register int i=0; i<2000; i++)
   {
@@ -159,11 +160,15 @@ int main(void)
 	  DEMA_Filter( Yaw, &Cal_Filter[2] );
 //	  vt100SetCursorPos( 3, 0);
 //	  vt100ClearLinetoEnd();
-//	  printf("Roll   : [%7.2f]\r\n", Roll);
-//	  printf("\rDEMA : [%7.2f]\r\n", Cal_Filter[0].DEMA);
+//	  printf("\rRoll : %f\r\n", Roll);
+//	  printf("\rDEMA : %f\r\n", Cal_Filter[0].DEMA);
 	  HAL_Delay(5);
+	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
   }
-
+  base_roll		= Cal_Filter[0].DEMA;
+  base_pitch	= Cal_Filter[1].DEMA;
+  base_yaw		= Cal_Filter[2].DEMA;
+  printf("\r\nCalibration is done.\r\n");
   HAL_Delay(2000);
   Cal_done = 1;
   /* USER CODE END 2 */
@@ -172,20 +177,20 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uart_recv_int_enable();
   HAL_Delay(1000);
-
+  vt100ClearScreen();
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if ((time_ms() - mpu_last_time) > 4) { //5 milli second
+    if ((time_ms() - mpu_last_time) >= 5) { //5 milli second
       Read_DMP();
       ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
       mpu_last_time = time_ms();
     }
 
-		if ((time_ms() - last_time) > 500-1) { //500 milli second
+		if ((time_ms() - last_time) >= 500) { //500 milli second
       LED_GREEN_TOGGLE;
       vt100SetCursorPos( 3, 0);
       vt100ClearLinetoEnd();
