@@ -35,6 +35,21 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
+#define GET_STATUS  0x01
+#define SET_WAKEUP	0x02
+#define SET_SLEEP 0x03
+#define GET_DEGREE  0x04
+#define SET_LED_POS	0x05
+#define SET_LED_COLOR 0x06
+#define SET_RAND_LED_MODE 0x07
+#define SET_AUTO_TIME_OFF_MODE  0x08
+#define SET_N_TIME_AUTO_OFF 0x09
+#define GET_N_TIME_AUTO_OFF 0x10
+#define GET_BAT 0x11
+#define GET_RUN_TIME  0x12
+#define START 0x13
+#define STOP  0x14
+#define SET_TIME_SYNC 0x15
 
 /* USER CODE END Private defines */
 
@@ -56,6 +71,14 @@ typedef struct
 
 extern Buffer_Serial SerialTx; //송신은 head,tail 사용안하고 buf만 사용.
 extern Buffer_Serial SerialRx; //수신은 링버퍼 사용
+
+typedef struct
+{
+  uint8_t addr;
+  uint8_t cmd;
+  uint8_t data;
+  uint16_t crc;
+} BLE_Cmd_Data;
 
 void process(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
