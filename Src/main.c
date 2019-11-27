@@ -129,7 +129,6 @@ int main(void)
 
   /* Initialize interrupts */
   MX_NVIC_Init();
-
   /* USER CODE BEGIN 2 */
   printf("Booting LittleCat Board!!!!221\r\n");
   power_en();
@@ -144,6 +143,7 @@ int main(void)
   uart_recv_int_enable();
   HAL_Delay(1000);
 
+  HAL_UART_Transmit(&huart2, "AT+BAUDRATE9600\r\n", strlen("AT+BAUDRATE9600\r\n"), 100);
 
   while (1)
   {
@@ -156,22 +156,24 @@ int main(void)
       mpu_last_time = time_ms();
     }
 
-		if ((time_ms() - last_time) > 500-1) { //500 milli second
+    if ((time_ms() - last_time) > 500-1) { //500 milli second
+      /*
       LED_GREEN_TOGGLE;
       vt100SetCursorPos( 3, 0);
       vt100ClearLinetoEnd();
+      */
       //printf("Pitch \t: %1.2f\r\n", Pitch);
       //printf("Roll \t: %1.2f\r\n", Roll);
-      printf("Roll \t: %d\r\n", (uint16_t)Roll);
-      printf("ledPos1 \t: %d\r\n", (uint16_t)ledPos);
+      //printf("Roll \t: %d\r\n", (uint16_t)Roll);
+      //printf("ledPos1 \t: %d\r\n", (uint16_t)ledPos);
 
       last_time = time_ms();
       //setAllPixelColor(0, 0, 0);
 
       memset(buff, 0, sizeof(buff));
-      sprintf(buff, "%d\r\n", (uint16_t)Roll);
+      sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
       HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-		}
+    }
 
 
     if ((time_ms() - led_last_time) > 50-1) { //500 milli second
