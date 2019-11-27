@@ -371,7 +371,9 @@ extern	short gyro[3], accel[3];
 extern int16_t Gx_offset,Gy_offset,Gz_offset;
 extern float Acc1G_Values;
 extern float Pitch,Roll,Yaw, Rangle, Pangle, ledPos;
+extern float base_pitch,base_roll,base_yaw;
 extern float dqw, dqx, dqy, dqz;
+extern uint8_t Cal_done;
 //extern float q0,q1,q2,q3;
 //���ⲿ���õ�API
 void MPU6050_initialize(void); //��ʼ��
