@@ -1,34 +1,22 @@
-/**
-  ******************************************************************************
-  * @file    MPU6050.h
-  * @author  Waveshare Team
-  * @version V1.0
-  * @date    29-August-2014
-  * @brief   Header file for MPU6050.c module.
-
-  ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, WAVESHARE SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2014 Waveshare</center></h2>
-  ******************************************************************************
-  */
-
-
 #ifndef __MPU6050_H
 #define __MPU6050_H
+/**************************************************************************
+���ߣ�ƽ��С��֮��
+�ҵ��Ա�С�꣺http://shop114407458.taobao.com/
+ **************************************************************************/
+//#include "sys.h"
+#include "stdint.h"
+#include "math.h"
+#include "stdlib.h"
+#include "string.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "dmpKey.h"
+#include "dmpmap.h"
 
+#define PI 3.1415926535897932384626433832795
 
-#define MPU6050_I2C_PORT		hi2c1
-//#define MPU6050_I2C_PORT		hi2c2
-
-#define MPU6050_DEVICE_ADDR         0xD0
+#define devAddr  0xD0
 
 #define MPU6050_ADDRESS_AD0_LOW     0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU6050_ADDRESS_AD0_HIGH    0x69 // address pin high (VCC)
@@ -66,7 +54,7 @@
 #define MPU6050_RA_I2C_MST_CTRL     0x24
 #define MPU6050_RA_I2C_SLV0_ADDR    0x25
 #define MPU6050_RA_I2C_SLV0_REG     0x26
-#define MPU6050_RA_I2C_SLV0_CTRL    0x27
+# define MPU6050_RA_I2C_SLV0_CTRL    0x27
 #define MPU6050_RA_I2C_SLV1_ADDR    0x28
 #define MPU6050_RA_I2C_SLV1_REG     0x29
 #define MPU6050_RA_I2C_SLV1_CTRL    0x2A
@@ -236,6 +224,34 @@
 #define MPU6050_CLOCK_DIV_381       0xE
 #define MPU6050_CLOCK_DIV_364       0xF
 
+#define MPU6050_I2C_SLV_RW_BIT      7
+#define MPU6050_I2C_SLV_ADDR_BIT    6
+#define MPU6050_I2C_SLV_ADDR_LENGTH 7
+#define MPU6050_I2C_SLV_EN_BIT      7
+#define MPU6050_I2C_SLV_BYTE_SW_BIT 6
+#define MPU6050_I2C_SLV_REG_DIS_BIT 5
+#define MPU6050_I2C_SLV_GRP_BIT     4
+#define MPU6050_I2C_SLV_LEN_BIT     3
+#define MPU6050_I2C_SLV_LEN_LENGTH  4
+
+#define MPU6050_I2C_SLV4_RW_BIT         7
+#define MPU6050_I2C_SLV4_ADDR_BIT       6
+#define MPU6050_I2C_SLV4_ADDR_LENGTH    7
+#define MPU6050_I2C_SLV4_EN_BIT         7
+#define MPU6050_I2C_SLV4_INT_EN_BIT     6
+#define MPU6050_I2C_SLV4_REG_DIS_BIT    5
+#define MPU6050_I2C_SLV4_MST_DLY_BIT    4
+#define MPU6050_I2C_SLV4_MST_DLY_LENGTH 5
+
+#define MPU6050_MST_PASS_THROUGH_BIT    7
+#define MPU6050_MST_I2C_SLV4_DONE_BIT   6
+#define MPU6050_MST_I2C_LOST_ARB_BIT    5
+#define MPU6050_MST_I2C_SLV4_NACK_BIT   4
+#define MPU6050_MST_I2C_SLV3_NACK_BIT   3
+#define MPU6050_MST_I2C_SLV2_NACK_BIT   2
+#define MPU6050_MST_I2C_SLV1_NACK_BIT   1
+#define MPU6050_MST_I2C_SLV0_NACK_BIT   0
+
 #define MPU6050_INTCFG_INT_LEVEL_BIT        7
 #define MPU6050_INTCFG_INT_OPEN_BIT         6
 #define MPU6050_INTCFG_LATCH_INT_EN_BIT     5
@@ -266,8 +282,8 @@
 #define MPU6050_INTERRUPT_DMP_INT_BIT       1
 #define MPU6050_INTERRUPT_DATA_RDY_BIT      0
 
-//TODO: figure out what these actually do
-//UMPL source code is not very obivous
+// TODO: figure out what these actually do
+// UMPL source code is not very obivous
 #define MPU6050_DMPINT_5_BIT            5
 #define MPU6050_DMPINT_4_BIT            4
 #define MPU6050_DMPINT_3_BIT            3
@@ -351,57 +367,26 @@
 
 #define MPU6050_WHO_AM_I_BIT        6
 #define MPU6050_WHO_AM_I_LENGTH     6
+extern	short gyro[3], accel[3];
+extern int16_t Gx_offset,Gy_offset,Gz_offset;
+extern float Acc1G_Values;
+extern float Pitch,Roll,Yaw, Rangle, Pangle, ledPos;
 
-#define bool _Bool
-#define true 1
-#define false 0
+extern float base_pitch,base_roll,base_yaw;
+extern float dqw, dqx, dqy, dqz;
+extern uint8_t Cal_done;
 
-#define	ALPHA	0.95         // Į������ ���İ�
-
-
-#include "stm32f4xx_hal.h"
-
-typedef struct
-{
-	int16_t X;
-	int16_t Y;
-	int16_t Z;
-}MPU6050_TypeDef;
-
-
-typedef struct
-{
-	uint8_t Index;
-	int16_t AvgBuffer[8];
-}MPU6050_AvgTypeDef;
-
-/**
- * @brief  MPU6050 can have 2 different slave addresses, depends on it's input AD0 pin
- *         This feature allows you to use 2 different sensors with this library at the same time
-	* usage :  MPU6050_DEVICE0= MPU6050_DEVICE_ADDR | (uint8_t)DeviceNumber;
- */
-typedef enum {
-	MPU6050_Device_0 = 0,   /*!< AD0 pin is set to low */
-	MPU6050_Device_1 = 0x02 /*!< AD0 pin is set to high */
-} MPU6050_Device_t;
-
-uint8_t MPU6050_ReadOneByte(uint8_t RegAddr);
-void MPU6050_WriteOneByte(uint8_t RegAddr, uint8_t Data);
-bool MPU6050_WriteBits(uint8_t RegAddr, uint8_t BitStart, uint8_t Length, uint8_t Data);
-bool MPU6050_WriteOneBit(uint8_t RegAddr, uint8_t BitNum, uint8_t Data);
-bool MPU6050_ReadBuff(uint8_t RegAddr, uint8_t Num, uint8_t *pBuff);
-
-void MPU6050_Init(uint8_t lpf);
-bool MPU6050_Check(void);
-
-void Get_MPU6050_Offset(void);
-void MPU6050_GetData(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* tmpr);
-
-void MPU6050_SetLastReadAngleData(uint32_t time, float x, float y, float z, float x_gyro, float y_gyro, float z_gyro);
-void MPU6050_GetRawAccelGyro(int16_t * AccelGyro);
-void MPU6050_CalibrateSensors(void);
-void MPU6050_SendSerialAccelGryro( int16_t accelgyro[6] );
+//extern float q0,q1,q2,q3;
+//���ⲿ���õ�API
+void MPU6050_initialize(void); //��ʼ��
+uint8_t MPU6050_testConnection(void); //���MPU6050�Ƿ����
+//��ȡADCֵ
+void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
+void MPU6050_getlastMotion6(int16_t* ax, int16_t* ay, 
+														int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
+uint8_t MPU6050_getDeviceID(void); //��ȡMPU6050��ID
+void MPU6050_InitGyro_Offset(void);//��ʼ��������ƫ��
+void DMP_Init(void);
+void Read_DMP(void);
+int Read_Temperature(void);
 #endif
-
-/******************* (C) COPYRIGHT 2014 Waveshare *****END OF FILE*******************/
-

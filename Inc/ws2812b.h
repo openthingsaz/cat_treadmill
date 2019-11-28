@@ -20,7 +20,9 @@
 #include "main.h"
 
 
-#define LED_NO    3
+
+#define LED_NO    216
+
 #define LED_BUFFER_LENGTH (LED_NO*12)
 
 void SystemClock_Config(void);

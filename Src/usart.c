@@ -342,6 +342,59 @@ unsigned short crc16_ccitt(const void *buf, int len)
 #define ACK 0x06
 #define NCK 0x15
 
+void cmd_process(uint8_t cmd)
+{
+  switch (cmd) {
+    case GET_STATUS :
+      break;
+
+    case SET_WAKEUP :
+      break;
+
+    case SET_SLEEP :
+      break;
+
+    case GET_DEGREE :
+      break;
+    
+    case SET_LED_POS :
+      break;
+
+    case SET_LED_COLOR :
+      break;
+    
+    case SET_RAND_LED_MODE :
+      break;
+
+    case SET_AUTO_TIME_OFF_MODE :
+      break;
+
+    case SET_N_TIME_AUTO_OFF :
+      break;
+    
+    case GET_N_TIME_AUTO_OFF :
+      break;
+
+    case GET_BAT :
+      break;
+
+    case GET_RUN_TIME :
+      break;
+    
+    case START :
+      break;
+    
+    case STOP :
+      break;
+
+    case SET_TIME_SYNC :
+      break;
+
+
+    default :
+      printf("F등급입니다."); 
+  }
+}
 void process(void)
 {
   uint16_t head = 0;
@@ -350,8 +403,9 @@ void process(void)
   uint16_t txLen = 0;
   uint16_t i = 0;
   uint32_t cmd = 0;
-  bool recv_end = 0;
-  //BLE_Cmd_Data ble_cmd;
+  bool recv_end = false;
+  bool crc_chk = false;
+  BLE_Cmd_Data ble_cmd;
 
 
   head = SerialRx.head;
@@ -375,10 +429,12 @@ void process(void)
 
       for (i=0; i<rxLen; i++) 
       {
-        if (rxBuff[i] == STX)
+        //if (rxBuff[i] == STX)
+        if (rxBuff[i] == 'a')
           continue;
 
-        else if (rxBuff[i] == ETX) 
+        //else if (rxBuff[i] == ETX)
+        else if (rxBuff[i] == 'z')
         {
           recv_end = true;
           
@@ -391,11 +447,10 @@ void process(void)
 
       if (recv_end == true) 
       {
-        //ble_cmd.addr = packet[0];
-        //ble_cmd.cmd = packet[1];
-        //memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
-        //memcpy(&ble_cmd.crc, &packet[6], sizeof(ble_cmd.crc));
-    	  ;
+        ble_cmd.addr = packet[0];
+        ble_cmd.cmd = packet[1];
+        memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
+        memcpy(&ble_cmd.crc, &packet[6], sizeof(ble_cmd.crc));
       }
       
       while(rxLen--)
@@ -409,9 +464,16 @@ void process(void)
           SerialRx.head++; 
         }
       }
+
+      if (crc_chk == true) {
+        cmd_process(ble_cmd.cmd);
+      }
+      else {
+        //send NACK
+      }
       
-			SerialTx.buf[txLen++] = 0xf0;
-			SerialTx.buf[txLen++] = 0xf1;
+			//SerialTx.buf[txLen++] = 0xf0;
+			//SerialTx.buf[txLen++] = 0xf1;
 			HAL_UART_Transmit(&huart2, SerialTx.buf, txLen, 100);
     }
   }
