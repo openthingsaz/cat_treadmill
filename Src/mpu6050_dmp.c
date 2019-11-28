@@ -21,9 +21,11 @@
 #define q30  1073741824.0f // 2^30
 short gyro[3], accel[3], sensors;
 float Pitch,Roll,Yaw, Rangle=0.0f, Pangle=0.0f;
+
 float base_pitch=0.0f,base_roll=0.0f,base_yaw=0.0f;
 float dqw=1.0f,dqx=0.0f,dqy=0.0f,dqz=0.0f, sign=0.0f;
 uint8_t Cal_done = 0;
+
 
 static signed char gyro_orientation[9] = {-1, 0, 0,
 		0,-1, 0,
@@ -97,6 +99,7 @@ int16_t  MPU6050_FIFO[6][11];
 int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
 
+
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
  *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�듅�벝�삕ADC�뜝�룞�삕�뜝�뙠紐뚯삕�뜝�듅�벝�삕 FIFO�뜝�룞�삕�뜝�띂竊뚦뜝�룞�삕�뜝�룞�삕�뜝�떙�먯삕�뜝�룞�삕�뜝�룞�삕
@@ -107,6 +110,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 	unsigned char i ;
 	int32_t sum=0;
 	for(i=1;i<10;i++){	//FIFO �뜝�룞�삕�뜝�룞�삕
+
 		MPU6050_FIFO[0][i-1]=MPU6050_FIFO[0][i];
 		MPU6050_FIFO[1][i-1]=MPU6050_FIFO[1][i];
 		MPU6050_FIFO[2][i-1]=MPU6050_FIFO[2][i];
@@ -122,7 +126,9 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 	MPU6050_FIFO[5][9]=gz;
 
 	sum=0;
+
 	for(i=0;i<10;i++){	//�뜝�룞�삕�뭹�뜝�룞�삕�뜝�룞�삕罹ㅵ룯�뜝�룞�삕�뜝�떕째�룞�삕�뜝�뙇占�
+
 		sum+=MPU6050_FIFO[0][i];
 	}
 	MPU6050_FIFO[0][10]=sum/10;
@@ -158,6 +164,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 	MPU6050_FIFO[5][10]=sum/10;
 }
 
+
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setClockSource(uint8_t source)
  *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕  MPU6050 �뜝�룞�삕�뢿�뜝�룞�삕�꺗
@@ -189,6 +196,7 @@ void MPU6050_setFullScaleGyroRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
 }
 
+
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setFullScaleAccelRange(uint8_t range)
  *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕  MPU6050 �뜝�룞�삕�뜝�뙐�삊�뀞�벝�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
@@ -196,6 +204,7 @@ void MPU6050_setFullScaleGyroRange(uint8_t range) {
 void MPU6050_setFullScaleAccelRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
+
 
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setSleepEnabled(uint8_t enabled)
@@ -210,12 +219,14 @@ void MPU6050_setSleepEnabled(uint8_t enabled) {
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		uint8_t MPU6050_getDeviceID(void)
  *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�삤  MPU6050 WHO_AM_I �뜝�룞�삕烏�	 �뜝�룞�삕�뜝�룞�삕�뜝�룞�삕 0x68
+
  *******************************************************************************/
 uint8_t MPU6050_getDeviceID(void) {
 
 	IICreadBytes(devAddr, MPU6050_RA_WHO_AM_I, 1, buffer);
 	return buffer[0];
 }
+
 
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		uint8_t MPU6050_testConnection(void)
@@ -227,21 +238,26 @@ uint8_t MPU6050_testConnection(void) {
 	else return 0;
 }
 
+
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setI2CMasterModeEnabled(uint8_t enabled)
  *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕 MPU6050 �뜝�떎琉꾩삕礪쭭UX I2C�뜝�뙥�벝�삕�뜝�룞�삕�뜝�룞�삕
+
  *******************************************************************************/
 void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
 }
 
+
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setI2CBypassEnabled(uint8_t enabled)
  *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕 MPU6050 �뜝�떎琉꾩삕礪쭭UX I2C�뜝�뙥�벝�삕�뜝�룞�삕�뜝�룞�삕
+
  *******************************************************************************/
 void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
 }
+
 
 /**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
  *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_initialize(void)
@@ -260,10 +276,12 @@ void MPU6050_initialize(void) {
 
 
 /**************************************************************************
+
 �뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�뙟節륁삕MPU6050�뜝�룞�삕�뜝�룞�삕DMP�뜝�떇�냲�삕瓦��뜝�룞�삕
 �뜝�룞�삕歟뜹뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
 �뜝�룞�삕�뜝�룞�삕  餓ㅵ뜝�룞�삕�뜝�룞�삕
 �뜝�룞�삕    �뜝�뙥節륁삕�떛�뜝�룞�삕遼쇔뜝�룞�삕獒귛뜝�룞�삕
+
  **************************************************************************/
 void DMP_Init(void)
 { 
@@ -287,8 +305,10 @@ void DMP_Init(void)
 		if(!dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation)))
 			printf("dmp_set_orientation complete ......\r\n");
 		if(!dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
+
 				DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
 				DMP_FEATURE_GYRO_CAL))
+
 			printf("dmp_enable_feature complete ......\r\n");
 		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))
 			printf("dmp_set_fifo_rate complete ......\r\n");
@@ -313,6 +333,7 @@ float qToFloat(long number, unsigned char q)
 �뜝�룞�삕歟뜹뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
 �뜝�룞�삕�뜝�룞�삕  餓ㅵ뜝�룞�삕�뜝�룞�삕
 �뜝�룞�삕    �뜝�뙥節륁삕�떛�뜝�룞�삕遼쇔뜝�룞�삕獒귛뜝�룞�삕
+
  **************************************************************************/
 //int8_t sign=3, sign_hold=0;//sign_back=3;
 void Read_DMP(void)
@@ -322,6 +343,7 @@ void Read_DMP(void)
 	long quat[4];
 	uint8_t degrees = 1;
 	//	float gravity0, gravity1, gravity2, ypr0, ypr1, ypr2;
+
 	int8_t req;
 
 	req = dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
@@ -343,6 +365,7 @@ void Read_DMP(void)
 		//		if(Roll < .0f) Rangle = fabs(Roll);
 		//		else if(Roll > .0f) Rangle = fabs(-180.0f + (Roll-180.0f));
 		//		else Rangle = .0f;
+
 
 		//if(q2 < 0) {
 		//			if(Pitch < .0f) {
@@ -393,6 +416,7 @@ void Read_DMP(void)
 				if (Yaw < 0) Yaw = 360.0 + Yaw;
 			}
 		}
+
 #endif
 	}
 }
