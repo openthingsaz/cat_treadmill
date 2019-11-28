@@ -121,8 +121,8 @@ void Error_Handler(void);
 #define GPIO_PA11_GPIO_Port GPIOA
 #define GPIO_PA12_Pin GPIO_PIN_12
 #define GPIO_PA12_GPIO_Port GPIOA
-#define LED_3V3_PWR_EN_Pin GPIO_PIN_10
-#define LED_3V3_PWR_EN_GPIO_Port GPIOC
+#define LED_3V3_PWR_nEN_Pin GPIO_PIN_10
+#define LED_3V3_PWR_nEN_GPIO_Port GPIOC
 #define PERI_3V3_PWR_nEN_Pin GPIO_PIN_11
 #define PERI_3V3_PWR_nEN_GPIO_Port GPIOC
 #define BATT_ALRT_INT_Pin GPIO_PIN_12
