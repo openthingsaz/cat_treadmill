@@ -77,8 +77,11 @@ void power_en(void)
   // POWER Controler
   HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
   HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, 			LED_LMIT_EN_Pin, 			GPIO_PIN_SET); // LED_LMIT_EN, Hight Enable, Low Disable
-  HAL_GPIO_WritePin(LED_3V3_PWR_EN_GPIO_Port, 	LED_3V3_PWR_EN_Pin, 	GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
+  HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, 	LED_3V3_PWR_nEN_Pin, 	GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
+
+float ledPos = 0;
+	float ledPos_before = 0;
 /* USER CODE END 0 */
 
 /**
@@ -88,8 +91,7 @@ void power_en(void)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	float ledPos = 0;
-	float ledPos_before = 0;
+
 	int i = 0;
 	int user_angle = 270;
   uint8_t buff[256];
@@ -143,52 +145,26 @@ int main(void)
   uart_recv_int_enable();
   HAL_Delay(1000);
 
-  HAL_UART_Transmit(&huart2, "AT+BAUDRATE9600\r\n", strlen("AT+BAUDRATE9600\r\n"), 100);
+  HAL_TIM_Base_Start_IT(&htim10);
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if ((time_ms() - mpu_last_time) > 4) { //5 milli second
-      Read_DMP();
-      ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
-      mpu_last_time = time_ms();
-    }
-
-    if ((time_ms() - last_time) > 500-1) { //500 milli second
-      /*
-      LED_GREEN_TOGGLE;
-      vt100SetCursorPos( 3, 0);
-      vt100ClearLinetoEnd();
-      */
-      //printf("Pitch \t: %1.2f\r\n", Pitch);
-      //printf("Roll \t: %1.2f\r\n", Roll);
-      //printf("Roll \t: %d\r\n", (uint16_t)Roll);
-      //printf("ledPos1 \t: %d\r\n", (uint16_t)ledPos);
-
-      last_time = time_ms();
-      //setAllPixelColor(0, 0, 0);
-
+    if (ledPos_before != ledPos){
+      //printf("ledPos : %d\r\n", (uint16_t)ledPos);
+      setAllPixelColor(0, 0, 0);
+      HAL_Delay(10);
+      setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
+      ledPos_before = ledPos;
+      HAL_Delay(20);
       memset(buff, 0, sizeof(buff));
       sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
       HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
     }
+    HAL_Delay(5);
 
-
-    if ((time_ms() - led_last_time) > 50-1) { //500 milli second
-    //setPixelColor( (uint8_t)ledPos, 0, 250, 0 );
-      if (ledPos_before != ledPos){
-        //------printf("---------\r\n");
-        setAllPixelColor(0, 0, 0);
-        //if( ledPos > 100){
-        setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
-        //}
-        ledPos_before = ledPos;
-      }
-      led_last_time = time_ms();
-    }
-		 //setPixelColor( (uint8_t)ledPos, 0, 250, 0 );
   }
 
   /* USER CODE END 3 */
@@ -257,9 +233,23 @@ static void MX_NVIC_Init(void)
   /* USART1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
+  /* TIM1_UP_TIM10_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance ==TIM10) 
+  {
+    HAL_TIM_Base_Stop_IT(&htim10);
+    Read_DMP();
+    ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
+    mpu_last_time = time_ms();
+    HAL_TIM_Base_Start_IT(&htim10);
+  }
+}
 
 /* USER CODE END 4 */
 
