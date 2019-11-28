@@ -32,8 +32,9 @@
 /* USER CODE BEGIN Includes */
 #include "mdbt42q.h"
 #include "ws2812b.h"
-# include <stdio.h>
-# include <string.h>
+#include <stdio.h>
+#include <string.h>
+#include "ema_filter.h"
 
 #ifdef USE_DMP
 #include "mpu6050_dmp.h"
@@ -91,7 +92,6 @@ float ledPos = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
 	int i = 0;
 	int user_angle = 270;
   uint8_t buff[256];
@@ -137,7 +137,41 @@ int main(void)
   ble_gpio_init();
   initLEDMOSI();
   time_setup();
+
+  Cal_Filter = (MovingFilter_t *)calloc(3, sizeof(MovingFilter_t));
+  EMA_FILTER_Init(EMA_Alpha, Cal_Filter);
   DMP_Init();
+
+  printf("Calibration ready\r\n");
+  // Waiting the device status until the stable state
+  for(register int i=0; i<2000; i++) {
+	  Read_DMP();
+	  HAL_Delay(5);
+	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
+  }
+  printf("\r\nCalibration start\r\n");
+  // Calibration of the mpu6050
+  for(register int i=0; i<2000; i++)
+  {
+	  Read_DMP();
+	  DEMA_Filter( Roll, &Cal_Filter[0] );
+	  DEMA_Filter( Pitch, &Cal_Filter[1] );
+	  DEMA_Filter( Yaw, &Cal_Filter[2] );
+//	  vt100SetCursorPos( 3, 0);
+//	  vt100ClearLinetoEnd();
+//	  printf("\rRoll : %f\r\n", Roll);
+//	  printf("\rDEMA : %f\r\n", Cal_Filter[0].DEMA);
+	  HAL_Delay(5);
+	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
+  }
+  base_roll		= Cal_Filter[0].DEMA;
+  base_pitch	= Cal_Filter[1].DEMA;
+  base_yaw		= Cal_Filter[2].DEMA;
+  printf("\r\nCalibration is done.\r\n");
+  HAL_Delay(2000);
+  Cal_done = 1;
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,6 +179,7 @@ int main(void)
   uart_recv_int_enable();
   HAL_Delay(1000);
 
+  vt100ClearScreen();
   HAL_TIM_Base_Start_IT(&htim10);
 
   while (1)
@@ -164,7 +199,6 @@ int main(void)
       HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
     }
     HAL_Delay(5);
-
   }
 
   /* USER CODE END 3 */

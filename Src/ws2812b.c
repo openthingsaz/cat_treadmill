@@ -298,6 +298,7 @@ void Send_2812(void)
     while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
 
 
+
 #else
     HAL_SPI_Transmit( &hspi1, ws_buffer, LED_BUFFER_LENGTH, 300 );
 #endif

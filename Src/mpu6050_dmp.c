@@ -21,7 +21,11 @@
 #define q30  1073741824.0f // 2^30
 short gyro[3], accel[3], sensors;
 float Pitch,Roll,Yaw, Rangle=0.0f, Pangle=0.0f;
+
+float base_pitch=0.0f,base_roll=0.0f,base_yaw=0.0f;
 float dqw=1.0f,dqx=0.0f,dqy=0.0f,dqz=0.0f, sign=0.0f;
+uint8_t Cal_done = 0;
+
 
 static signed char gyro_orientation[9] = {-1, 0, 0,
 		0,-1, 0,
@@ -95,16 +99,18 @@ int16_t  MPU6050_FIFO[6][11];
 int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占승듸옙ADC占쏙옙占쌥몌옙占승듸옙 FIFO占쏙옙占썽，占쏙옙占쏙옙占싯뀐옙占쏙옙占쏙옙
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�듅�벝�삕ADC�뜝�룞�삕�뜝�뙠紐뚯삕�뜝�듅�벝�삕 FIFO�뜝�룞�삕�뜝�띂竊뚦뜝�룞�삕�뜝�룞�삕�뜝�떙�먯삕�뜝�룞�삕�뜝�룞�삕
  *******************************************************************************/
 
 void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 {
 	unsigned char i ;
 	int32_t sum=0;
-	for(i=1;i<10;i++){	//FIFO 占쏙옙占쏙옙
+	for(i=1;i<10;i++){	//FIFO �뜝�룞�삕�뜝�룞�삕
+
 		MPU6050_FIFO[0][i-1]=MPU6050_FIFO[0][i];
 		MPU6050_FIFO[1][i-1]=MPU6050_FIFO[1][i];
 		MPU6050_FIFO[2][i-1]=MPU6050_FIFO[2][i];
@@ -112,7 +118,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 		MPU6050_FIFO[4][i-1]=MPU6050_FIFO[4][i];
 		MPU6050_FIFO[5][i-1]=MPU6050_FIFO[5][i];
 	}
-	MPU6050_FIFO[0][9]=ax;//占쏙옙占승듸옙占쏙옙占쌥뤄옙占시듸옙 占쏙옙占쌥듸옙占쏙옙占쏙옙占�
+	MPU6050_FIFO[0][9]=ax;//�뜝�룞�삕�뜝�듅�벝�삕�뜝�룞�삕�뜝�뙠琉꾩삕�뜝�떆�벝�삕 �뜝�룞�삕�뜝�뙠�벝�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
 	MPU6050_FIFO[1][9]=ay;
 	MPU6050_FIFO[2][9]=az;
 	MPU6050_FIFO[3][9]=gx;
@@ -120,7 +126,9 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 	MPU6050_FIFO[5][9]=gz;
 
 	sum=0;
-	for(i=0;i<10;i++){	//占쏙옙품占쏙옙占쏙옙캤句占쏙옙占싫°쏙옙占쌍�
+
+	for(i=0;i<10;i++){	//�뜝�룞�삕�뭹�뜝�룞�삕�뜝�룞�삕罹ㅵ룯�뜝�룞�삕�뜝�떕째�룞�삕�뜝�뙇占�
+
 		sum+=MPU6050_FIFO[0][i];
 	}
 	MPU6050_FIFO[0][10]=sum/10;
@@ -156,9 +164,10 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 	MPU6050_FIFO[5][10]=sum/10;
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void MPU6050_setClockSource(uint8_t source)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占쏙옙  MPU6050 占쏙옙珂占쏙옙都
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setClockSource(uint8_t source)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕  MPU6050 �뜝�룞�삕�뢿�뜝�룞�삕�꺗
  * CLK_SEL | Clock Source
  * --------+--------------------------------------
  * 0       | Internal oscillator
@@ -187,27 +196,30 @@ void MPU6050_setFullScaleGyroRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void MPU6050_setFullScaleAccelRange(uint8_t range)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占쏙옙  MPU6050 占쏙옙占쌕똑셕듸옙占쏙옙占쏙옙占쏙옙占�
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setFullScaleAccelRange(uint8_t range)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕  MPU6050 �뜝�룞�삕�뜝�뙐�삊�뀞�벝�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
  *******************************************************************************/
 void MPU6050_setFullScaleAccelRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void MPU6050_setSleepEnabled(uint8_t enabled)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占쏙옙  MPU6050 占실뤄옙占쏙옙占싯�占쏙옙친駕
-				enabled =1   慷占쏙옙
-			    enabled =0   占쏙옙占쏙옙
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setSleepEnabled(uint8_t enabled)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕  MPU6050 �뜝�떎琉꾩삕�뜝�룞�삕�뜝�떙占썲뜝�룞�삕移쒒쭠
+				enabled =1   �끁�뜝�룞�삕
+			    enabled =0   �뜝�룞�삕�뜝�룞�삕
  *******************************************************************************/
 void MPU6050_setSleepEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		uint8_t MPU6050_getDeviceID(void)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙혤  MPU6050 WHO_AM_I 占쏙옙街	 占쏙옙占쏙옙占쏙옙 0x68
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		uint8_t MPU6050_getDeviceID(void)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�삤  MPU6050 WHO_AM_I �뜝�룞�삕烏�	 �뜝�룞�삕�뜝�룞�삕�뜝�룞�삕 0x68
+
  *******************************************************************************/
 uint8_t MPU6050_getDeviceID(void) {
 
@@ -215,9 +227,10 @@ uint8_t MPU6050_getDeviceID(void) {
 	return buffer[0];
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		uint8_t MPU6050_testConnection(void)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占폦PU6050 占실뤄옙占싼억옙占쏙옙占쏙옙
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		uint8_t MPU6050_testConnection(void)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룱PU6050 �뜝�떎琉꾩삕�뜝�떬�뼲�삕�뜝�룞�삕�뜝�룞�삕
  *******************************************************************************/
 uint8_t MPU6050_testConnection(void) {
 	if(MPU6050_getDeviceID() == 0x68)  //0b01101000;
@@ -225,43 +238,50 @@ uint8_t MPU6050_testConnection(void) {
 	else return 0;
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void MPU6050_setI2CMasterModeEnabled(uint8_t enabled)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占쏙옙 MPU6050 占실뤄옙槨AUX I2C占쌩듸옙占쏙옙占쏙옙
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setI2CMasterModeEnabled(uint8_t enabled)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕 MPU6050 �뜝�떎琉꾩삕礪쭭UX I2C�뜝�뙥�벝�삕�뜝�룞�삕�뜝�룞�삕
+
  *******************************************************************************/
 void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void MPU6050_setI2CBypassEnabled(uint8_t enabled)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙占쏙옙 MPU6050 占실뤄옙槨AUX I2C占쌩듸옙占쏙옙占쏙옙
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_setI2CBypassEnabled(uint8_t enabled)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕�뜝�룞�삕 MPU6050 �뜝�떎琉꾩삕礪쭭UX I2C�뜝�뙥�벝�삕�뜝�룞�삕�뜝�룞�삕
+
  *******************************************************************************/
 void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
 }
 
-/**************************茄占쌍븝옙占쏙옙********************************************
- *占쏙옙占쏙옙覩占쏙옙:		void MPU6050_initialize(void)
- *占쏙옙占쏙옙占쏙옙占쏙옙:	    占쏙옙迦占쏙옙 	MPU6050 占쌉쏙옙占쏙옙占쏙옙占쌓늬э옙占�
+
+/**************************�똾�뜝�뙇釉앹삕�뜝�룞�삕********************************************
+ *�뜝�룞�삕�뜝�룞�삕誤⒴뜝�룞�삕:		void MPU6050_initialize(void)
+ *�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕:	    �뜝�룞�삕瓦��뜝�룞�삕 	MPU6050 �뜝�뙃�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�뙎�뒳�띿삕�뜝占�
  *******************************************************************************/
 void MPU6050_initialize(void) {
-	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //占쏙옙占쏙옙珂占쏙옙
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙占� +-1000占쏙옙첼占쏙옙
-	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//占쏙옙占쌕똑띰옙占쏙옙占쏙옙占쏙옙占� +-2G
-	MPU6050_setSleepEnabled(0); //占쏙옙占쎈묏占쏙옙榴檄
-	MPU6050_setI2CMasterModeEnabled(0);	 //占쏙옙占쏙옙MPU6050 占쏙옙占쏙옙AUXI2C
-	MPU6050_setI2CBypassEnabled(0);	 //占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙I2C占쏙옙	MPU6050占쏙옙AUXI2C	殮繫占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙殮占쌈뤄옙占쏙옙HMC5883L
+	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //�뜝�룞�삕�뜝�룞�삕�뢿�뜝�룞�삕
+	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占� +-1000�뜝�룞�삕泥쇔뜝�룞�삕
+	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//�뜝�룞�삕�뜝�뙐�삊�씛�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占� +-2G
+	MPU6050_setSleepEnabled(0); //�뜝�룞�삕�뜝�럥臾뤷뜝�룞�삕礖닸챷
+	MPU6050_setI2CMasterModeEnabled(0);	 //�뜝�룞�삕�뜝�룞�삕MPU6050 �뜝�룞�삕�뜝�룞�삕AUXI2C
+	MPU6050_setI2CBypassEnabled(0);	 //�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕I2C�뜝�룞�삕	MPU6050�뜝�룞�삕AUXI2C	餘�濚ュ뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕餘��뜝�뙂琉꾩삕�뜝�룞�삕HMC5883L
 }
 
 
 
 
 /**************************************************************************
-占쏙옙占쏙옙占쏙옙占쌤ｏ옙MPU6050占쏙옙占쏙옙DMP占식놂옙迦占쏙옙
-占쏙옙梶占쏙옙占쏙옙占쏙옙占�
-占쏙옙占쏙옙  令占쏙옙占쏙옙
-占쏙옙    占쌩ｏ옙틱占쏙옙鬼占쏙옙裂占쏙옙
+
+�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�뙟節륁삕MPU6050�뜝�룞�삕�뜝�룞�삕DMP�뜝�떇�냲�삕瓦��뜝�룞�삕
+�뜝�룞�삕歟뜹뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
+�뜝�룞�삕�뜝�룞�삕  餓ㅵ뜝�룞�삕�뜝�룞�삕
+�뜝�룞�삕    �뜝�뙥節륁삕�떛�뜝�룞�삕遼쇔뜝�룞�삕獒귛뜝�룞�삕
+
  **************************************************************************/
 void DMP_Init(void)
 { 
@@ -285,8 +305,10 @@ void DMP_Init(void)
 		if(!dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation)))
 			printf("dmp_set_orientation complete ......\r\n");
 		if(!dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
-													 DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
-													 DMP_FEATURE_GYRO_CAL))
+
+				DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
+				DMP_FEATURE_GYRO_CAL))
+
 			printf("dmp_enable_feature complete ......\r\n");
 		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))
 			printf("dmp_set_fifo_rate complete ......\r\n");
@@ -307,10 +329,11 @@ float qToFloat(long number, unsigned char q)
 	return (number >> q) + ((number & mask) / (float) (2<<(q-1)));
 }
 /**************************************************************************
-占쏙옙占쏙옙占쏙옙占쌤ｏ옙占쏙옙혤MPU6050占쏙옙占쏙옙DMP占쏙옙占쏙옙檄占쏙옙口
-占쏙옙梶占쏙옙占쏙옙占쏙옙占�
-占쏙옙占쏙옙  令占쏙옙占쏙옙
-占쏙옙    占쌩ｏ옙틱占쏙옙鬼占쏙옙裂占쏙옙
+�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�뙟節륁삕�뜝�룞�삕�삤MPU6050�뜝�룞�삕�뜝�룞�삕DMP�뜝�룞�삕�뜝�룞�삕茹꾢뜝�룞�삕�룭
+�뜝�룞�삕歟뜹뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
+�뜝�룞�삕�뜝�룞�삕  餓ㅵ뜝�룞�삕�뜝�룞�삕
+�뜝�룞�삕    �뜝�뙥節륁삕�떛�뜝�룞�삕遼쇔뜝�룞�삕獒귛뜝�룞�삕
+
  **************************************************************************/
 //int8_t sign=3, sign_hold=0;//sign_back=3;
 void Read_DMP(void)
@@ -319,7 +342,8 @@ void Read_DMP(void)
 	unsigned char more;
 	long quat[4];
 	uint8_t degrees = 1;
-//	float gravity0, gravity1, gravity2, ypr0, ypr1, ypr2;
+	//	float gravity0, gravity1, gravity2, ypr0, ypr1, ypr2;
+
 	int8_t req;
 
 	req = dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
@@ -342,7 +366,8 @@ void Read_DMP(void)
 		//		else if(Roll > .0f) Rangle = fabs(-180.0f + (Roll-180.0f));
 		//		else Rangle = .0f;
 
-				//if(q2 < 0) {
+
+		//if(q2 < 0) {
 		//			if(Pitch < .0f) {
 		//				sign = Pitch + Pangle;
 		//				if(sign < .0f)
@@ -352,46 +377,54 @@ void Read_DMP(void)
 		//			}
 		//			else if(Pitch > .0f) Pangle = fabs(-90.0f + (Pitch-90.0f));
 		//			else Pangle = .0f;
-				//}
+		//}
 #else
-//	    float dqw = qToFloat(quat[0], 30);
-//	    float dqx = qToFloat(quat[1], 30);
-//	    float dqy = qToFloat(quat[2], 30);
-//	    float dqz = qToFloat(quat[3], 30);
+		//	    float dqw = qToFloat(quat[0], 30);
+		//	    float dqx = qToFloat(quat[1], 30);
+		//	    float dqy = qToFloat(quat[2], 30);
+		//	    float dqz = qToFloat(quat[3], 30);
 
-	    float ysqr = dqy * dqy;
-	    float t0 = -2.0f * (ysqr + dqz * dqz) + 1.0f;
-	    float t1 = +2.0f * (dqx * dqy - dqw * dqz);
-	    float t2 = -2.0f * (dqx * dqz + dqw * dqy);
-	    float t3 = +2.0f * (dqy * dqz - dqw * dqx);
-	    float t4 = -2.0f * (dqx * dqx + ysqr) + 1.0f;
+		float ysqr = dqy * dqy;
+		float t0 = -2.0f * (ysqr + dqz * dqz) + 1.0f;
+		float t1 = +2.0f * (dqx * dqy - dqw * dqz);
+		float t2 = -2.0f * (dqx * dqz + dqw * dqy);
+		float t3 = +2.0f * (dqy * dqz - dqw * dqx);
+		float t4 = -2.0f * (dqx * dqx + ysqr) + 1.0f;
 
 		// Keep t2 within range of asin (-1, 1)
-	    t2 = t2 > 1.0f ? 1.0f : t2;
-	    t2 = t2 < -1.0f ? -1.0f : t2;
+		t2 = t2 > 1.0f ? 1.0f : t2;
+		t2 = t2 < -1.0f ? -1.0f : t2;
 
-	    Pitch = asin(t2) * 2;
-	    Roll = atan2(t3, t4);
-	    Yaw = atan2(t1, t0);
+		Pitch = asin(t2) * 2;
+		Roll = atan2(t3, t4);
+		Yaw = atan2(t1, t0);
 
-	    if (degrees)
-	    {
-	    	Pitch *= (180.0 / PI);
-	    	Roll *= (180.0 / PI);
-	    	Yaw *= (180.0 / PI);
+		if(degrees)
+		{
+			Pitch *= (180.0 / PI);
+			Roll *= (180.0 / PI);
+			Yaw *= (180.0 / PI);
 
-	    	if (Pitch < 0) Pitch = 360.0 + Pitch;
-	    	if (Roll < 0) Roll = 360.0 + Roll;
-	    	if (Yaw < 0) Yaw = 360.0 + Yaw;
-	    }
+			if(Cal_done) {
+				Roll  -= base_roll;
+				Pitch -= base_pitch;
+				Yaw   -= base_yaw;
+
+
+				if (Pitch < 0) Pitch = 360.0 + Pitch;
+				if (Roll < 0) Roll = 360.0 + Roll;
+				if (Yaw < 0) Yaw = 360.0 + Yaw;
+			}
+		}
+
 #endif
 	}
 }
 /**************************************************************************
-占쏙옙占쏙옙占쏙옙占쌤ｏ옙占쏙옙혤MPU6050占쏙옙占쏙옙占승똑댐옙占쏙옙占쏙옙占쏙옙占쏙옙
-占쏙옙梶占쏙옙占쏙옙占쏙옙占�
-占쏙옙占쏙옙  令占쏙옙占쏙옙占쏙옙占승띰옙
-占쏙옙    占쌩ｏ옙틱占쏙옙鬼占쏙옙裂占쏙옙
+�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�뙟節륁삕�뜝�룞�삕�삤MPU6050�뜝�룞�삕�뜝�룞�삕�뜝�듅�삊�뙋�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�룞�삕
+�뜝�룞�삕歟뜹뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝占�
+�뜝�룞�삕�뜝�룞�삕  餓ㅵ뜝�룞�삕�뜝�룞�삕�뜝�룞�삕�뜝�듅�씛�삕
+�뜝�룞�삕    �뜝�뙥節륁삕�떛�뜝�룞�삕遼쇔뜝�룞�삕獒귛뜝�룞�삕
  **************************************************************************/
 int Read_Temperature(void)
 {	   
