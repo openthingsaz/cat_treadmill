@@ -23,8 +23,6 @@
 #define ON	1
 #define OFF	0
 
-#define START   3
-#define STOP    4
 
 #define HIGH	1
 #define LOW	0
