@@ -76,8 +76,7 @@ typedef struct
 {
   uint8_t addr;
   uint8_t cmd;
-  uint8_t data;
-  uint16_t crc;
+  uint32_t data;
 } BLE_Cmd_Data;
 
 void process(void);

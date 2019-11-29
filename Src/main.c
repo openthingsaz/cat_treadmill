@@ -139,7 +139,7 @@ int main(void)
   Cal_Filter = (MovingFilter_t *)calloc(3, sizeof(MovingFilter_t));
   EMA_FILTER_Init(EMA_Alpha, Cal_Filter);
   DMP_Init();
-
+/*
   printf("Calibration ready\r\n");
   // Waiting the device status until the stable state
   for(register int i=0; i<2000; i++) {
@@ -168,7 +168,11 @@ int main(void)
   printf("\r\nCalibration is done.\r\n");
   HAL_Delay(2000);
   Cal_done = 1;
+*/
 
+
+  memset(&SerialRx, 0, sizeof(SerialRx));
+  memset(&SerialTx, 0, sizeof(SerialTx));
 
   /* USER CODE END 2 */
 
@@ -185,6 +189,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    
     if (ledPos_before != ledPos){
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
@@ -193,7 +198,9 @@ int main(void)
       sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
       HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
     }
-    HAL_Delay(1);
+    
+    //HAL_Delay(1);
+    process();
   }
 
   /* USER CODE END 3 */
