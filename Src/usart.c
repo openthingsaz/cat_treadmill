@@ -260,30 +260,7 @@ uint8_t inx = 0;
 
 
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-	{
-    SerialRx.buf[SerialRx.tail] = rx2_data;
-    HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
-    
-		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
-		{
-			SerialRx.tail = 0;
-		}
-		else
-		{
-			SerialRx.tail++;
-		}
-	}
 
-  if(huart->Instance == USART1)
-	{
-    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
-    printf("%c\r\n", rx1_data);
-    	
-	}
-}
 
 void uart_recv_int_enable(void)
 {
@@ -344,6 +321,13 @@ unsigned short crc16_ccitt(const void *buf, int len)
 
 void cmd_process(uint8_t cmd)
 {
+  uint8_t buff[100];
+ // printf("cmd : %d\r\n", cmd);
+
+  memset(buff, 0, sizeof(buff));
+  sprintf(buff, "cmd : %02x\r\n", cmd);
+  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+
   switch (cmd) {
     case GET_STATUS :
       break;
@@ -395,6 +379,59 @@ void cmd_process(uint8_t cmd)
       printf("F등급입니다."); 
   }
 }
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  /*
+	if(huart->Instance == USART2)
+	{
+    SerialRx.buf[SerialRx.tail] = rx2_data;
+    HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
+    
+		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
+		{
+			SerialRx.tail = 0;
+		}
+		else
+		{
+			SerialRx.tail++;
+		}
+	}
+
+  if(huart->Instance == USART1)
+	{
+    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
+    printf("%c\r\n", rx1_data);
+    	
+	}
+*/
+  if(huart->Instance == USART1)
+	{
+    SerialRx.buf[SerialRx.tail] = rx1_data;
+    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
+    //printf("%02x", rx1_data);
+    //printf("%c\r\n", rx1_data);
+    
+
+		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
+		{
+			SerialRx.tail = 0;
+		}
+		else
+		{
+			SerialRx.tail++;
+		}
+	}
+}
+
+void DebugPrint(uint8_t ch){
+  uint8_t buff[256];
+  memset(buff, 0, sizeof(buff));
+  sprintf(buff, "%02x\r\n", ch);
+  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+
+}
 void process(void)
 {
   uint16_t head = 0;
@@ -402,17 +439,20 @@ void process(void)
   uint16_t rxLen = 0;
   uint16_t txLen = 0;
   uint16_t i = 0;
+  uint16_t crc = 0;
+  uint16_t crc2 = 0;
   uint32_t cmd = 0;
   bool recv_end = false;
   bool crc_chk = false;
   BLE_Cmd_Data ble_cmd;
-
+  uint8_t buff[256];
 
   head = SerialRx.head;
   tail = SerialRx.tail;
 
   if (head != tail) 
   {
+
     if (head <= tail)
     {
       rxLen = tail - head;
@@ -426,31 +466,54 @@ void process(void)
     {
       memset(rxBuff, 0, sizeof(rxBuff));
       memcpy(rxBuff, &SerialRx.buf[SerialRx.head], rxLen);
-
+      
       for (i=0; i<rxLen; i++) 
       {
-        //if (rxBuff[i] == STX)
-        if (rxBuff[i] == 'a')
+        if (rxBuff[i] == STX) {
+          //memset(buff, 0, sizeof(buff));
+          //sprintf(buff, "STX\r\n");
+          //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
           continue;
-
-        //else if (rxBuff[i] == ETX)
-        else if (rxBuff[i] == 'z')
+        }
+        else if(rxBuff[i] == ETX)
         {
+          //memset(buff, 0, sizeof(buff));
+          //sprintf(buff, "ETX\r\n");
+          //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
           recv_end = true;
-          
         }
         else 
         {
+          //memset(buff, 0, sizeof(buff));
+          //sprintf(buff, "rxBuff[i] : %02x\r\n", rxBuff[i]);
+          //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+
           packet[inx++] = rxBuff[i];
         }
       }
+
 
       if (recv_end == true) 
       {
         ble_cmd.addr = packet[0];
         ble_cmd.cmd = packet[1];
         memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
-        memcpy(&ble_cmd.crc, &packet[6], sizeof(ble_cmd.crc));
+        memcpy(&crc, &packet[6], sizeof(crc));
+
+        crc2 = crc16_ccitt((void*)packet, 8);
+        if (crc2 != 0) {
+          memset(buff, 0, sizeof(buff));
+          sprintf(buff, "crc : %04x, crc2 : %04x\r\n", crc, crc2);
+          HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+        }
+
+
+        if (crc2 == 0)
+          crc_chk = true;
+        else crc_chk = false;
+
+        memset(packet, 0, sizeof(packet));
+        inx = 0;
       }
       
       while(rxLen--)
@@ -474,7 +537,7 @@ void process(void)
       
 			//SerialTx.buf[txLen++] = 0xf0;
 			//SerialTx.buf[txLen++] = 0xf1;
-			HAL_UART_Transmit(&huart2, SerialTx.buf, txLen, 100);
+			//HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
     }
   }
 }
