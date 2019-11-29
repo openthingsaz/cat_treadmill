@@ -292,16 +292,9 @@ void generate_ws_buffer( uint8_t RData,uint8_t GData,uint8_t BData, int16_t led_
 }
 void Send_2812(void)
  {
-#if 1
     HAL_SPI_Transmit_DMA( &hspi1, ws_buffer, LED_BUFFER_LENGTH );
     // wait until finished
     while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
-
-
-
-#else
-    HAL_SPI_Transmit( &hspi1, ws_buffer, LED_BUFFER_LENGTH, 300 );
-#endif
  }
 
 void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
@@ -311,11 +304,13 @@ void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
     generate_ws_buffer( r, g, b, i );
   }
   Send_2812();
+  HAL_Delay(1);
 }
 void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
 {
   generate_ws_buffer( r, g, b, n );
   Send_2812();
+  HAL_Delay(1);
 }
 /**
  * initialize MOSI pin to LOW.  Without this, first time transmit for first LED might be wrong.
@@ -328,8 +323,6 @@ void initLEDMOSI(void)
 }
 
 void test_led_rgb(void) {
-  int j = 0;
-  int delay = 10;
   int8_t i;
 
 

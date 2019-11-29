@@ -92,8 +92,6 @@ float ledPos = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	int i = 0;
-	int user_angle = 270;
   uint8_t buff[256];
   /* USER CODE END 1 */
   
@@ -188,17 +186,14 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     if (ledPos_before != ledPos){
-      //printf("ledPos : %d\r\n", (uint16_t)ledPos);
       setAllPixelColor(0, 0, 0);
-      HAL_Delay(10);
       setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
       ledPos_before = ledPos;
-      HAL_Delay(20);
       memset(buff, 0, sizeof(buff));
       sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
       HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
     }
-    HAL_Delay(5);
+    HAL_Delay(1);
   }
 
   /* USER CODE END 3 */
