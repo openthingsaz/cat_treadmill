@@ -468,50 +468,40 @@ void process(void)
           packet[inx++] = rxBuff[i];
         }
       }
-
+  
       if (recv_end == true) 
       {
     	  memset(&ble_cmd, 0, sizeof(ble_cmd));
         ble_cmd.addr = packet[0];
         ble_cmd.cmd = packet[1];
         memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
-        memcpy(&crc, &packet[6], sizeof(crc));
 
-        crc2 = crc16_ccitt((void*)packet, 8);
-        if (crc2 == 0)
+        crc = crc16_ccitt((void*)packet, 8);
+        if (crc == 0)
           crc_chk = true;
         else {
-          
           crc_chk = false;
         }
-        //memset(buff, 0, sizeof(buff));
-        //sprintf(buff, "crc : %04x, crc2 : %04x\r\n", crc, crc2);
-        //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+
+        if (crc_chk == true) 
+        {
+          cmd_process(ble_cmd.cmd);
+          SerialTx.buf[txLen++] = ACK;
+          HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
+          HAL_UART_Transmit(&huart2, "ACK\r\n", strlen("ACK\r\n"), 100);
+        }
+        else {
+          //send NACK
+          SerialTx.buf[txLen++] = NCK;
+          HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
+          HAL_UART_Transmit(&huart2, "NCK\r\n", strlen("NCK\r\n"), 100);
+        }
+
         memset(packet, 0, sizeof(packet));
         inx = 0;
-      }
-      
-      while(rxLen--)
-      {
-        if (MAX_SERIAL_BUF <= SerialRx.head + 1)
-        {
-          SerialRx.head = 0;
-        }
-        else
-        {
-          SerialRx.head++; 
-        }
-      }
-
-      if (crc_chk == true) {
-        cmd_process(ble_cmd.cmd);
-        SerialTx.buf[txLen++] = ACK;
-        HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
-      }
-      else {
-        //send NACK
-        SerialTx.buf[txLen++] = NCK;
-        HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
+        SerialRx.head = 0;
+        SerialRx.tail = 0;
+        rxLen = 0;
       }
     }
   }

@@ -169,8 +169,6 @@ int main(void)
   HAL_Delay(2000);
   Cal_done = 1;
 
-  memset(&SerialRx, 0, sizeof(SerialRx));
-  memset(&SerialTx, 0, sizeof(SerialTx));
 
   /* USER CODE END 2 */
 
@@ -187,7 +185,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    
+
     if (ledPos_before != ledPos){
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
