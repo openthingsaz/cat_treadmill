@@ -400,6 +400,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
     SerialRx.buf[SerialRx.tail] = rx1_data;
     HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
+    //HAL_UART_Transmit(&huart2, "AAA\r\n", strlen("AAA\r\n"), 100);
 		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
 		{
 			SerialRx.tail = 0;
@@ -438,7 +439,6 @@ void process(void)
 
   if (head != tail) 
   {
-
     if (head <= tail)
     {
       rxLen = tail - head;
@@ -499,10 +499,20 @@ void process(void)
 
         memset(packet, 0, sizeof(packet));
         inx = 0;
-        SerialRx.head = 0;
-        SerialRx.tail = 0;
-        rxLen = 0;
+
       }
+      while(rxLen--)
+			{
+			    if (MAX_SERIAL_BUF <= SerialRx.head + 1)
+			    {
+		            SerialRx.head = 0;
+		        }
+		        else
+		        {
+		            SerialRx.head++; //시작 데이터 위치를 옮김.
+		        }
+		  }
+      //rxLen = 0;
     }
   }
 }
