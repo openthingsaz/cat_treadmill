@@ -141,6 +141,7 @@ int main(void)
   DMP_Init();
 
   printf("Calibration ready\r\n");
+  /*
   // Waiting the device status until the stable state
   for(register int i=0; i<2000; i++) {
 	  Read_DMP();
@@ -165,6 +166,9 @@ int main(void)
   base_roll		= Cal_Filter[0].DEMA;
   base_pitch	= Cal_Filter[1].DEMA;
   base_yaw		= Cal_Filter[2].DEMA;
+  */
+
+
   printf("\r\nCalibration is done.\r\n");
   HAL_Delay(2000);
   Cal_done = 1;
@@ -186,16 +190,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-    if (ledPos_before != ledPos){
+    if (ledPos_before != ledPos) {
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
       ledPos_before = ledPos;
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
     }
-    
-    HAL_Delay(1);
     process();
   }
 
