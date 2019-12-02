@@ -1,8 +1,8 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
 /**************************************************************************
-���ߣ�ƽ��С��֮��
-�ҵ��Ա�С�꣺http://shop114407458.taobao.com/
+占쏙옙占쌩ｏ옙틱占쏙옙鬼占쏙옙裂占쏙옙
+占쌀듸옙占쌉깍옙鬼占쎄：http://shop114407458.taobao.com/
  **************************************************************************/
 //#include "sys.h"
 #include "stdint.h"
@@ -370,22 +370,25 @@
 extern	short gyro[3], accel[3];
 extern int16_t Gx_offset,Gy_offset,Gz_offset;
 extern float Acc1G_Values;
-extern float Pitch,Roll,Yaw, Rangle, Pangle, ledPos;
+extern float Pitch,Roll,Roll_reverse,Yaw, Rangle, Pangle;
 
-extern float base_pitch,base_roll,base_yaw;
+extern float base_pitch,base_roll,base_yaw,base_roll_reverse;
 extern float dqw, dqx, dqy, dqz;
 extern uint8_t Cal_done;
+extern float ledPos;
+extern float targetLedPos;
+extern float targetAnglel;
 
 //extern float q0,q1,q2,q3;
-//���ⲿ���õ�API
-void MPU6050_initialize(void); //��ʼ��
-uint8_t MPU6050_testConnection(void); //���MPU6050�Ƿ����
-//��ȡADCֵ
+//占쏙옙占썩꼬占쏙옙占시듸옙API
+void MPU6050_initialize(void); //占쏙옙迦占쏙옙
+uint8_t MPU6050_testConnection(void); //占쏙옙占폦PU6050占실뤄옙占쏙옙占�
+//占쏙옙혤ADC令
 void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
 void MPU6050_getlastMotion6(int16_t* ax, int16_t* ay, 
 														int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
-uint8_t MPU6050_getDeviceID(void); //��ȡMPU6050��ID
-void MPU6050_InitGyro_Offset(void);//��ʼ��������ƫ��
+uint8_t MPU6050_getDeviceID(void); //占쏙옙혤MPU6050占쏙옙ID
+void MPU6050_InitGyro_Offset(void);//占쏙옙迦占쏙옙占쏙옙占쏙옙占쏙옙튤占쏙옙
 void DMP_Init(void);
 void Read_DMP(void);
 int Read_Temperature(void);

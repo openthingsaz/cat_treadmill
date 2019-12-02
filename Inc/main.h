@@ -61,12 +61,13 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 #define USE_I2C_DMA
 #define USE_DMP
-#define LED_TOTAL	216.0f
+#define LED_TOTAL	216
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 #define MPU6050_INT1_X_Pin GPIO_PIN_13
 #define MPU6050_INT1_X_GPIO_Port GPIOC
+#define MPU6050_INT1_X_EXTI_IRQn EXTI15_10_IRQn
 #define BLE_WAKEUP_Pin GPIO_PIN_0
 #define BLE_WAKEUP_GPIO_Port GPIOC
 #define BLE_UART2_PD_Pin GPIO_PIN_1

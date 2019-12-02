@@ -559,22 +559,43 @@ const struct gyro_reg_s reg = {
 //    .max_g          = 0.95f,
 //    .max_accel_var  = 0.14f
 //};
+
+//Æ©´×ÇÊ¿ä
 const struct test_s test={
-		32768/250,		 //gyro_sens
+		32768/2000,		 //gyro_sens
 		32768/16,		 //	accel_sens
 		0,				 //	reg_rate_div
-		1,				//	reg_lpf
+		2,				//	reg_lpf
 		0,				 //	reg_gyro_fsr
-		0x18,			//	reg_accel_fsr
-		50,				//	wait_ms
-		5,				//	packet_thresh
-		10.0f,			 //	min_dps
+		0x0,			//	reg_accel_fsr
+		1,				//	wait_ms //Æ©´×ÇÊ¿ä
+		5,				//	packet_thresh //Æ©´×ÇÊ¿ä
+		60.0f,			 //	min_dps
 		105.0f,			 //	max_dps
-		0.14f,			//	max_gyro_var
-		0.3f,		   //	min_g
-		0.95f,		   //	max_g
-		0.14f		   //	max_accel_var
+		0.5f,			//	max_gyro_var
+		0.225f,		   //	min_g
+		0.675f,		   //	max_g
+		0.5f		   //	max_accel_var
 };
+
+
+//const struct test_s test = {
+//    32768/250,
+//    32768/2,  //FSR = +-2G = 16384 LSB/G
+//    0,    /* 1kHz. */
+//    2,    /* 92Hz low pass filter*/
+//    0,    /* 250dps. */
+//    0x0,  /* Accel FSR setting = 2g. */
+//    200,   //200ms stabilization time
+//    200,    /* 200 samples */
+//    20.f,  //20 dps for Gyro Criteria C
+//    60.f, //Must exceed 60 dps threshold for Gyro Criteria B
+//    0.5f, //Must exceed +50% variation for Gyro Criteria A
+//    0.225f, //Accel must exceed Min 225 mg for Criteria B
+//    0.675f, //Accel cannot exceed Max 675 mg for Criteria B
+//    0.5f,  //Accel must be within 50% variation for Criteria A
+//};
+
 /*
 static struct gyro_state_s st = {
     .reg = &reg,

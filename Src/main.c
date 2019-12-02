@@ -35,7 +35,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "ema_filter.h"
-
+#include "dwt_stm32_delay.h"
+//#include "pid.h"
 #ifdef USE_DMP
 #include "mpu6050_dmp.h"
 #else
@@ -81,8 +82,9 @@ void power_en(void)
   HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, 	LED_3V3_PWR_nEN_Pin, 	GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
 
-float ledPos = 0;
-	float ledPos_before = 0;
+//float ledPos = 0;
+float ledPos_before = 0.0f;
+float pidControl = 0.0f;
 /* USER CODE END 0 */
 
 /**
@@ -130,43 +132,51 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  printf("Booting LittleCat Board!!!!221\r\n");
+  printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_gpio_init();
   initLEDMOSI();
   time_setup();
+  DWT_Delay_Init();
+//  pidData = (PidData_t *)calloc(1, sizeof(PidData_t));
+  //! Initialization of PID factors
+//  PID_Init(K_P * SCALING_FACTOR, K_I * SCALING_FACTOR , K_D * SCALING_FACTOR , pidData);
 
-  Cal_Filter = (MovingFilter_t *)calloc(3, sizeof(MovingFilter_t));
+
+  Cal_Filter = (MovingFilter_t *)calloc(4, sizeof(MovingFilter_t));
   EMA_FILTER_Init(EMA_Alpha, Cal_Filter);
+
   DMP_Init();
 
-  printf("Calibration ready\r\n");
+//  printf("Calibration ready\r\n");
   // Waiting the device status until the stable state
-  for(register int i=0; i<2000; i++) {
-	  Read_DMP();
-	  HAL_Delay(5);
-	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
-  }
-  printf("\r\nCalibration start\r\n");
+//  for(register int i=0; i<1000; i++) {
+//	  Read_DMP();
+//	  HAL_Delay(5);
+//	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
+//  }
+//  printf("\r\nCalibration start\r\n");
   // Calibration of the mpu6050
-  for(register int i=0; i<2000; i++)
-  {
-	  Read_DMP();
-	  DEMA_Filter( Roll, &Cal_Filter[0] );
-	  DEMA_Filter( Pitch, &Cal_Filter[1] );
-	  DEMA_Filter( Yaw, &Cal_Filter[2] );
-//	  vt100SetCursorPos( 3, 0);
-//	  vt100ClearLinetoEnd();
-//	  printf("\rRoll : %f\r\n", Roll);
-//	  printf("\rDEMA : %f\r\n", Cal_Filter[0].DEMA);
-	  HAL_Delay(5);
-	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
-  }
-  base_roll		= Cal_Filter[0].DEMA;
-  base_pitch	= Cal_Filter[1].DEMA;
-  base_yaw		= Cal_Filter[2].DEMA;
-  printf("\r\nCalibration is done.\r\n");
-  HAL_Delay(2000);
+//  for(register int i=0; i<2000; i++)
+//  {
+//	  Read_DMP();
+//	  DEMA_Filter( Roll, 		&Cal_Filter[0] );
+////	  DEMA_Filter( Pitch, 		&Cal_Filter[1] );
+////	  DEMA_Filter( Yaw,	 		&Cal_Filter[2] );
+////	  DEMA_Filter( Roll_reverse, &Cal_Filter[3] );
+////	  vt100SetCursorPos( 3, 0);
+////	  vt100ClearLinetoEnd();
+////	  printf("\rRoll : %f\r\n", Roll);
+////	  printf("\rDEMA : %f\r\n", Cal_Filter[0].DEMA);
+//	  HAL_Delay(5);
+//	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
+//  }
+//  base_roll			= Cal_Filter[0].DEMA;
+//  base_pitch		= Cal_Filter[1].DEMA;
+//  base_yaw			= Cal_Filter[2].DEMA;
+//  base_roll_reverse	= Cal_Filter[3].DEMA;
+//  printf("\r\nCalibration is done.\r\n");
+  //HAL_Delay(2000);
   Cal_done = 1;
 
 
@@ -180,23 +190,31 @@ int main(void)
   vt100ClearScreen();
   HAL_TIM_Base_Start_IT(&htim10);
 
+  targetAnglel -= base_roll;
+  if (targetAnglel < 0) targetAnglel = 360.0 + targetAnglel;
+  targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
+  ledPos =  (LED_TOTAL / 360.0f) * roundf(Roll);
+  ledPos = ledPos - targetLedPos;
+  if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
+
+  printf("\r\nCalibration is done.\r\n");
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if (ledPos_before != ledPos) {
 
-    if (ledPos_before != ledPos){
-      setAllPixelColor(0, 0, 0);
-      setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
-      ledPos_before = ledPos;
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-    }
-    
-    HAL_Delay(1);
-    process();
+		  setAllPixelColor(0, 0, 0);
+//		  setPixelColor( (uint16_t)DEMA_Filter( ledPos, &Cal_Filter[0] ), 0, 50, 0 );
+		  setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
+		  ledPos_before = ledPos;
+//		  memset(buff, 0, sizeof(buff));
+//		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+//		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+//		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+	  }
+	  DWT_Delay_us(1);
   }
 
   /* USER CODE END 3 */
@@ -268,18 +286,40 @@ static void MX_NVIC_Init(void)
   /* TIM1_UP_TIM10_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+  /* SPI1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(SPI1_IRQn);
+  /* EXTI9_5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+  /* DMA2_Stream3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim->Instance ==TIM10) 
+/*
+  if (htim->Instance ==TIM10)
   {
     HAL_TIM_Base_Stop_IT(&htim10);
     Read_DMP();
-    ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
-    mpu_last_time = time_ms();
+    //mpu_last_time = time_ms();
     HAL_TIM_Base_Start_IT(&htim10);
+  }
+*/
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == MPU6050_INT1_X_Pin)
+  {
+    // To do
+	  if(Cal_done) {
+		  Read_DMP();
+	  }
   }
 }
 

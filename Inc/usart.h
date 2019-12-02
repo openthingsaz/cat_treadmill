@@ -65,18 +65,19 @@ void MX_USART6_UART_Init(void);
 typedef struct
 {
 	uint8_t  buf[MAX_SERIAL_BUF];
-	uint16_t head; //ì²˜ë¦¬í•˜ë©´ head ì¦ê°€.
-	uint16_t tail; //ìˆ˜ì‹ ë˜ë©´ tail ì¦ê°€.
+	uint16_t head; //ì²˜ë¦¬?•˜ë©? head ì¦ê?.
+	uint16_t tail; //?ˆ˜?‹ ?˜ë©? tail ì¦ê?.
 } Buffer_Serial;
 
-extern Buffer_Serial SerialTx; //ì†¡ì‹ ì€ head,tail ì‚¬ìš©ì•ˆí•˜ê³  bufë§Œ ì‚¬ìš©.
-extern Buffer_Serial SerialRx; //ìˆ˜ì‹ ì€ ë§ë²„í¼ ì‚¬ìš©
+extern Buffer_Serial SerialTx; //?†¡?‹ ?? head,tail ?‚¬?š©?•ˆ?•˜ê³? bufë§? ?‚¬?š©.
+extern Buffer_Serial SerialRx; //?ˆ˜?‹ ?? ë§ë²„?¼ ?‚¬?š©
 
 typedef struct
 {
   uint8_t addr;
   uint8_t cmd;
-  uint32_t data;
+  uint8_t data;
+  uint16_t crc;
 } BLE_Cmd_Data;
 
 void process(void);

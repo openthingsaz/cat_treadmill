@@ -294,7 +294,8 @@ void Send_2812(void)
  {
     HAL_SPI_Transmit_DMA( &hspi1, ws_buffer, LED_BUFFER_LENGTH );
     // wait until finished
-    while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
+    //while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
+    while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY) != RESET);
  }
 
 void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
