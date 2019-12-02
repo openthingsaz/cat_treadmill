@@ -392,7 +392,7 @@ void cmd_process(uint8_t cmd)
 
 
     default :
-      printf("F?“±ê¸‰ìž…?‹ˆ?‹¤."); 
+      printf("F?ï¿½ï¿½ê¸‰ìž…?ï¿½ï¿½?ï¿½ï¿½."); 
   }
 }
 void process(void)

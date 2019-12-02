@@ -67,7 +67,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define MPU6050_INT1_X_Pin GPIO_PIN_13
 #define MPU6050_INT1_X_GPIO_Port GPIOC
-#define MPU6050_INT1_X_EXTI_IRQn EXTI15_10_IRQn
 #define BLE_WAKEUP_Pin GPIO_PIN_0
 #define BLE_WAKEUP_GPIO_Port GPIOC
 #define BLE_UART2_PD_Pin GPIO_PIN_1

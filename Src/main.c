@@ -86,7 +86,7 @@ void power_en(void)
 float ledPos_before = 0.0f;
 float pidControl = 0.0f;
 /* USER CODE END 0 */
-
+uint8_t i2c_rd_buff[512];
 /**
   * @brief  The application entry point.
   * @retval int
@@ -213,8 +213,25 @@ int main(void)
 //		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
 //		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
 //		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+
+      
 	  }
 	  DWT_Delay_us(1);
+    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
+    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {
+      printf("i2c_rd_buff[0] : %02x\r\n", i2c_rd_buff[0]);
+      printf("i2c_rd_buff[1] : %02x\r\n", i2c_rd_buff[1]);
+      printf("i2c_rd_buff[2] : %02x\r\n", i2c_rd_buff[2]);
+      printf("i2c_rd_buff[3] : %02x\r\n", i2c_rd_buff[3]);
+      printf("i2c_rd_buff[4] : %02x\r\n", i2c_rd_buff[4]);
+      printf("i2c_rd_buff[5] : %02x\r\n", i2c_rd_buff[5]);
+      printf("i2c_rd_buff[6] : %02x\r\n", i2c_rd_buff[6]);
+      printf("i2c_rd_buff[7] : %02x\r\n", i2c_rd_buff[7]);
+    }
+    else{
+      printf("I2C ERROR\r\n");
+    }
+    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
   }
 
   /* USER CODE END 3 */
@@ -286,15 +303,12 @@ static void MX_NVIC_Init(void)
   /* TIM1_UP_TIM10_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
-  /* SPI1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(SPI1_IRQn);
-  /* EXTI9_5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-  /* DMA2_Stream3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+  /* I2C1_EV_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(I2C1_EV_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+  /* I2C1_ER_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(I2C1_ER_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
@@ -314,6 +328,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+/*  
   if(GPIO_Pin == MPU6050_INT1_X_Pin)
   {
     // To do
@@ -321,7 +336,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		  Read_DMP();
 	  }
   }
+*/  
 }
+
+
+void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+	printf("I2C Interrupt\r\n");
+}
+
+
 
 /* USER CODE END 4 */
 

@@ -65,12 +65,12 @@ void MX_USART6_UART_Init(void);
 typedef struct
 {
 	uint8_t  buf[MAX_SERIAL_BUF];
-	uint16_t head; //ì²˜ë¦¬?•˜ë©? head ì¦ê?.
-	uint16_t tail; //?ˆ˜?‹ ?˜ë©? tail ì¦ê?.
+	uint16_t head; //ì²˜ë¦¬?ï¿½ï¿½ï¿½? head ì¦ï¿½?.
+	uint16_t tail; //?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ï¿½? tail ì¦ï¿½?.
 } Buffer_Serial;
 
-extern Buffer_Serial SerialTx; //?†¡?‹ ?? head,tail ?‚¬?š©?•ˆ?•˜ê³? bufë§? ?‚¬?š©.
-extern Buffer_Serial SerialRx; //?ˆ˜?‹ ?? ë§ë²„?¼ ?‚¬?š©
+extern Buffer_Serial SerialTx; //?ï¿½ï¿½?ï¿½ï¿½?? head,tail ?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ï¿½? bufï¿½? ?ï¿½ï¿½?ï¿½ï¿½.
+extern Buffer_Serial SerialRx; //?ï¿½ï¿½?ï¿½ï¿½?? ë§ë²„?ï¿½ï¿½ ?ï¿½ï¿½?ï¿½ï¿½
 
 typedef struct
 {
