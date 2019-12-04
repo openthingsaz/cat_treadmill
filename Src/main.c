@@ -188,10 +188,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if (led_control_mode == 0)
+    if (led_control_mode == 0) // Gyro Control
       set_led_update(ledPos);
     else {
-      set_led_update(ledPosUser);
+      set_led_update(ledPosUser); // User App Control
     }
 
     memset(buff, 0, sizeof(buff));
@@ -272,6 +272,9 @@ static void MX_NVIC_Init(void)
   /* TIM1_UP_TIM10_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+  /* TIM1_TRG_COM_TIM11_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(TIM1_TRG_COM_TIM11_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
