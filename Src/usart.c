@@ -19,6 +19,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
+#include "ble_cmd.h"
+#include "ws2812b.h"
 
 /* USER CODE BEGIN 0 */
 #include <stdbool.h>
@@ -315,26 +317,42 @@ unsigned short crc16_ccitt(const void *buf, int len)
 #define ACK 0x06
 #define NCK 0x15
 
-void cmd_process(uint8_t cmd)
+void cmd_process(uint8_t cmd, uint32_t data)
 {
-  uint8_t buff[100];
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t buff[256];
+
+  HAL_UART_Transmit(&huart2, (uint8_t *)"ACK2\r\n", strlen("ACK2\r\n"), 100);
+
   switch (cmd) {
     case GET_STATUS :
       break;
 
     case SET_WAKEUP :
+      set_wakeup();
       break;
 
     case SET_SLEEP :
+      set_sleep();
       break;
 
     case GET_DEGREE :
       break;
     
     case SET_LED_POS :
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "data : %d\r\n", data);
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+      set_led_pos((uint8_t)data);
       break;
 
     case SET_LED_COLOR :
+      red = (data >> 16) & 0xff;
+      green = (data >> 8) & 0xff;
+      blue = (data >> 0) & 0xff;
+      set_led_col(red, green, blue);
       break;
     
     case SET_RAND_LED_MODE :
@@ -362,6 +380,13 @@ void cmd_process(uint8_t cmd)
       break;
 
     case SET_TIME_SYNC :
+      break;
+
+    case SET_LED_CONT_MODE :
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "data : %d\r\n", data);
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+      led_control_mode = (uint8_t)data;
       break;
 
 
@@ -415,8 +440,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void DebugPrint(uint8_t ch){
   uint8_t buff[256];
   memset(buff, 0, sizeof(buff));
-  sprintf(buff, "%02x\r\n", ch);
-  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+
+
 
 }
 void process(void)
@@ -427,12 +452,11 @@ void process(void)
   uint16_t txLen = 0;
   uint16_t i = 0;
   uint16_t crc = 0;
-  uint16_t crc2 = 0;
-  uint32_t cmd = 0;
+
+
   bool recv_end = false;
-  bool crc_chk = false;
+
   BLE_Cmd_Data ble_cmd;
-  uint8_t buff[256];
 
   head = SerialRx.head;
   tail = SerialRx.tail;
@@ -455,11 +479,11 @@ void process(void)
       
       for (i=0; i<rxLen; i++) 
       {
-        if (rxBuff[i] == STX) 
+        if (rxBuff[i] == STX && inx == 0) 
         {
           continue;
         }
-        else if(rxBuff[i] == ETX)
+        else if(rxBuff[i] == ETX && inx == 8)
         {
           recv_end = true;
         }
@@ -476,16 +500,10 @@ void process(void)
         ble_cmd.cmd = packet[1];
         memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
 
-        crc = crc16_ccitt((void*)packet, 8);
-        if (crc == 0)
-          crc_chk = true;
-        else {
-          crc_chk = false;
-        }
-
-        if (crc_chk == true) 
+        crc = crc16_ccitt((void*)&packet[0], 8);
+        if (crc == 0) // Crc OK
         {
-          cmd_process(ble_cmd.cmd);
+          cmd_process(ble_cmd.cmd, ble_cmd.data);
           SerialTx.buf[txLen++] = ACK;
           HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
           HAL_UART_Transmit(&huart2, "ACK\r\n", strlen("ACK\r\n"), 100);
@@ -494,9 +512,9 @@ void process(void)
           //send NACK
           SerialTx.buf[txLen++] = NCK;
           HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
-          HAL_UART_Transmit(&huart2, "NCK\r\n", strlen("NCK\r\n"), 100);
+          HAL_UART_Transmit(&huart2, (uint8_t *)"NCK\r\n", strlen("NCK\r\n"), 100);
         }
-
+      
         memset(packet, 0, sizeof(packet));
         inx = 0;
 
@@ -512,7 +530,6 @@ void process(void)
 		            SerialRx.head++; //시작 데이터 위치를 옮김.
 		        }
 		  }
-      //rxLen = 0;
     }
   }
 }

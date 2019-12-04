@@ -50,6 +50,8 @@ extern UART_HandleTypeDef huart6;
 #define START 0x13
 #define STOP  0x14
 #define SET_TIME_SYNC 0x15
+#define SET_LED_CONT_MODE 0x20
+
 
 /* USER CODE END Private defines */
 

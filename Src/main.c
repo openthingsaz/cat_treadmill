@@ -32,6 +32,7 @@
 /* USER CODE BEGIN Includes */
 #include "mdbt42q.h"
 #include "ws2812b.h"
+#include "power.h"
 #include <stdio.h>
 #include <string.h>
 #include "ema_filter.h"
@@ -73,16 +74,13 @@ static void MX_NVIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void power_en(void)
-{
-  // POWER Controler
-  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
-  HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, 			LED_LMIT_EN_Pin, 			GPIO_PIN_SET); // LED_LMIT_EN, Hight Enable, Low Disable
-  HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, 	LED_3V3_PWR_nEN_Pin, 	GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
-}
 
-float ledPos = 0;
-	float ledPos_before = 0;
+
+uint8_t ledPos = 0;
+uint8_t ledPosUser = 0;
+uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Select
+
+
 /* USER CODE END 0 */
 
 /**
@@ -92,7 +90,7 @@ float ledPos = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t buff[256];
+
   /* USER CODE END 1 */
   
 
@@ -141,16 +139,16 @@ int main(void)
   DMP_Init();
 
   printf("Calibration ready\r\n");
-  /*
+
   // Waiting the device status until the stable state
-  for(register int i=0; i<2000; i++) {
+  for(register int i=0; i<1; i++) {
 	  Read_DMP();
 	  HAL_Delay(5);
 	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
   }
   printf("\r\nCalibration start\r\n");
   // Calibration of the mpu6050
-  for(register int i=0; i<2000; i++)
+  for(register int i=0; i<1; i++)
   {
 	  Read_DMP();
 	  DEMA_Filter( Roll, &Cal_Filter[0] );
@@ -166,7 +164,7 @@ int main(void)
   base_roll		= Cal_Filter[0].DEMA;
   base_pitch	= Cal_Filter[1].DEMA;
   base_yaw		= Cal_Filter[2].DEMA;
-  */
+
 
 
   printf("\r\nCalibration is done.\r\n");
@@ -183,19 +181,26 @@ int main(void)
 
   vt100ClearScreen();
   HAL_TIM_Base_Start_IT(&htim10);
+  uint8_t buff[256];
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-    if (ledPos_before != ledPos) {
-      setAllPixelColor(0, 0, 0);
-      setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
-      ledPos_before = ledPos;
+    if (led_control_mode == 0)
+      set_led_update(ledPos);
+    else {
+      set_led_update(ledPosUser);
     }
+
+    memset(buff, 0, sizeof(buff));
+    sprintf(buff, "ledPos : %d, led_control_mode : %d\r\n", (uint16_t)ledPos, led_control_mode);
+    HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+
+
     process();
+
   }
 
   /* USER CODE END 3 */
@@ -276,7 +281,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     HAL_TIM_Base_Stop_IT(&htim10);
     Read_DMP();
-    ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
+    ledPos = (uint8_t)roundf((LED_TOTAL / 360.0f) * Roll);
     mpu_last_time = time_ms();
     HAL_TIM_Base_Start_IT(&htim10);
   }

@@ -322,6 +322,35 @@ void initLEDMOSI(void)
   HAL_SPI_Transmit(&hspi1, buffer0, 1, 100 );
 }
 
+uint8_t ledPos_before = 0;
+uint8_t red = 0;
+uint8_t green = 50;
+uint8_t blue = 0;
+void set_led_update(uint8_t pos)
+{
+  if (ledPos_before != pos) {
+      setAllPixelColor(0, 0, 0);
+      setPixelColor( (uint16_t)pos, red, green, blue);
+      //printf("ledpos : %d\r\n", ledPos);
+      ledPos_before = pos;
+    }
+}
+
+
+void set_led_pos(uint8_t pos) 
+{
+  ledPosUser = pos;
+}
+
+void set_led_col(uint8_t r, uint8_t g, uint8_t b) 
+{
+  red = r;
+  green = g;
+  blue = b;
+  setPixelColor(ledPos, red, green, blue);
+}
+
+
 void test_led_rgb(void) {
   int8_t i;
 

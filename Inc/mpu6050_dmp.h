@@ -370,7 +370,8 @@
 extern	short gyro[3], accel[3];
 extern int16_t Gx_offset,Gy_offset,Gz_offset;
 extern float Acc1G_Values;
-extern float Pitch,Roll,Yaw, Rangle, Pangle, ledPos;
+extern float Pitch,Roll,Yaw, Rangle, Pangle;
+extern uint8_t ledPos;
 
 extern float base_pitch,base_roll,base_yaw;
 extern float dqw, dqx, dqy, dqz;

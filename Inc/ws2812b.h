@@ -33,8 +33,13 @@ void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b);
 void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b);
 void initLEDMOSI(void);
 void test_led_rgb(void);
+void set_led_update(uint8_t ledPos);
+void set_led_pos(uint8_t pos);
+void set_led_col(uint8_t r, uint8_t g, uint8_t b);
 
-
+extern uint8_t red;
+extern uint8_t green;
+extern uint8_t blue;
 
 
 #ifdef __cplusplus
