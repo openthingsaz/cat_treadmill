@@ -59,8 +59,8 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-#define USE_I2C_DMA
-#define USE_DMP
+//#define USE_I2C_DMA
+//#define USE_DMP
 #define LED_TOTAL	216
 /* USER CODE END EFP */
 

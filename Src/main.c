@@ -94,7 +94,9 @@ uint8_t i2c_rd_buff[512];
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t buff[256];
+	float ledPos = 0;
+	float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
+	volatile float last_x_angle, last_y_angle, last_z_angle;
   /* USER CODE END 1 */
   
 
@@ -138,6 +140,7 @@ int main(void)
   initLEDMOSI();
   time_setup();
   DWT_Delay_Init();
+#ifdef USE_DMP
 //  pidData = (PidData_t *)calloc(1, sizeof(PidData_t));
   //! Initialization of PID factors
 //  PID_Init(K_P * SCALING_FACTOR, K_I * SCALING_FACTOR , K_D * SCALING_FACTOR , pidData);
@@ -178,8 +181,37 @@ int main(void)
 //  printf("\r\nCalibration is done.\r\n");
   //HAL_Delay(2000);
   Cal_done = 1;
+  targetAnglel -= base_roll;
+  if (targetAnglel < 0) targetAnglel = 360.0 + targetAnglel;
+  targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
+  ledPos =  (LED_TOTAL / 360.0f) * roundf(Roll);
+  ledPos = ledPos - targetLedPos;
+  if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
 
+  printf("\r\nCalibration is done.\r\n");
+#else
+  vt100SetCursorPos( 0, 0);
+  MPU6050_SelfTest(SelfTest);
+  printf("x-axis self test: acceleration trim within : %7.2f%% of factory value \n\r", SelfTest[0]);
+  printf("y-axis self test: acceleration trim within : %7.2f%% of factory value \n\r", SelfTest[1]);
+  printf("z-axis self test: acceleration trim within : %7.2f%% of factory value \n\r", SelfTest[2]);
+  printf("x-axis self test: gyration trim within     : %7.2f%% of factory value \n\r", SelfTest[3]);
+  printf("y-axis self test: gyration trim within     : %7.2f%% of factory value \n\r", SelfTest[4]);
+  printf("z-axis self test: gyration trim within     : %7.2f%% of factory value \n\r", SelfTest[5]);
+  HAL_Delay(1);
 
+  if(SelfTest[0] < 1.0f && SelfTest[1] < 1.0f && SelfTest[2] < 1.0f && SelfTest[3] < 1.0f && SelfTest[4] < 1.0f && SelfTest[5] < 1.0f)
+  {
+  	MPU6050_Reset();
+  	MPU6050_Calibration(gyroBias, accelBias);
+  	vt100SetCursorPos( 8, 0);
+  	printf("MPU6050 bias\r\n");
+  	printf("\r ax : %7.2f o/s\t  ay : %7.2f o/s\t  az : %7.2f o/s\r\n",(accelBias[0]), (accelBias[1]), (accelBias[2]));
+  	printf("\r gx : %7.2f   g\t  gy : %7.2f   g\t  gz : %7.2f   g\r\n",(gyroBias[0]), (gyroBias[1]), (gyroBias[2]));
+  	MPU6050_Init(0x03); //42hz
+  }
+  else
+  	printf("\rMPU6050 Init failed!\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -189,49 +221,121 @@ int main(void)
 
   vt100ClearScreen();
   HAL_TIM_Base_Start_IT(&htim10);
+#endif
 
-  targetAnglel -= base_roll;
-  if (targetAnglel < 0) targetAnglel = 360.0 + targetAnglel;
-  targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
-  ledPos =  (LED_TOTAL / 360.0f) * roundf(Roll);
-  ledPos = ledPos - targetLedPos;
-  if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
-
-  printf("\r\nCalibration is done.\r\n");
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if (ledPos_before != ledPos) {
+#ifndef USE_DMP
+  	if( MPU6050_ReadOneByte(MPU6050_RA_INT_STATUS) & 0x01) {  // check if data ready interrupt
 
-		  setAllPixelColor(0, 0, 0);
-//		  setPixelColor( (uint16_t)DEMA_Filter( ledPos, &Cal_Filter[0] ), 0, 50, 0 );
-		  setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
-		  ledPos_before = ledPos;
-//		  memset(buff, 0, sizeof(buff));
-//		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-//		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-//		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+  		MPU6050_ReadAccelData(&accelCount[0]);  // Read the x/y/z adc values
+  		MPU6050_GetAres();
 
-      
-	  }
-	  DWT_Delay_us(1);
-    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
-    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {
-      printf("i2c_rd_buff[0] : %02x\r\n", i2c_rd_buff[0]);
-      printf("i2c_rd_buff[1] : %02x\r\n", i2c_rd_buff[1]);
-      printf("i2c_rd_buff[2] : %02x\r\n", i2c_rd_buff[2]);
-      printf("i2c_rd_buff[3] : %02x\r\n", i2c_rd_buff[3]);
-      printf("i2c_rd_buff[4] : %02x\r\n", i2c_rd_buff[4]);
-      printf("i2c_rd_buff[5] : %02x\r\n", i2c_rd_buff[5]);
-      printf("i2c_rd_buff[6] : %02x\r\n", i2c_rd_buff[6]);
-      printf("i2c_rd_buff[7] : %02x\r\n", i2c_rd_buff[7]);
-    }
-    else{
-      printf("I2C ERROR\r\n");
-    }
-    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
+  		// Now we'll calculate the accleration value into actual g's
+  		ax = (float)accelCount[0]*aRes - accelBias[0];  // get actual g value, this depends on scale being set
+  		ay = (float)accelCount[1]*aRes - accelBias[1];
+  		az = (float)accelCount[2]*aRes - accelBias[2];
+
+  		MPU6050_ReadGyroData(&gyroCount[0]);  // Read the x/y/z adc values
+  		MPU6050_GetGres();
+
+  		// Calculate the gyro value into actual degrees per second
+  		gx = (float)gyroCount[0]*gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
+  		gy = (float)gyroCount[1]*gRes - gyroBias[1];
+  		gz = (float)gyroCount[2]*gRes - gyroBias[2];
+
+  		tempCount = MPU6050_ReadTempData();  // Read the x/y/z adc values
+  		temperature = (tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
+  	}
+
+  	Now = time_ms();
+  	deltat = (float)((Now - lastUpdate) / 1000000.0f); // set integration time by time elapsed since last filter update
+  	lastUpdate  = time_ms();
+
+
+  	//    x_acc =  atan2(ay/sqrt(pow(ax,2) + pow(az,2)))*57.29577951;
+  	//    y_acc = -atan2(-ax/sqrt(pow(ay,2) + pow(az,2)))*57.29577951;
+  	x_acc =  atan2(ay, sqrt(pow(ax,2) + pow(az,2)));//*57.29577951;
+  	y_acc =  atan2((-1)*ax, az);//*57.29577951;
+  	z_acc = 0;
+
+  	x_gyr = (gx)*deltat + last_x_angle;
+  	y_gyr = (gy)*deltat + last_y_angle;
+  	z_gyr = (gz)*deltat + last_z_angle;
+
+  	float alpha = 0.96;
+  	x_fil = alpha*x_gyr + (1.0 - alpha)*x_acc;
+  	y_fil = alpha*y_gyr + (1.0 - alpha)*y_acc;
+  	z_fil = z_gyr;  //Accelerometer doesn't give z-angle
+
+
+  	last_x_angle = x_fil;
+  	last_y_angle = y_fil;
+  	last_z_angle = z_fil;
+
+  	deltat = time_ms() - count;
+  	if (deltat > 500) { // update LCD once per half-second independent of read rate
+  		LED_GREEN_TOGGLE;
+
+  		ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
+
+  		x_fil *= 180.0f / PI;
+  		y_fil *= 180.0f / PI;
+  		z_fil *= 180.0f / PI;
+
+
+  		if (x_fil < 0) x_fil = 360.0 + x_fil;
+  		if (y_fil < 0) y_fil = 360.0 + y_fil;
+  		if (z_fil < 0) z_fil = 360.0 + z_fil;
+
+  		vt100SetCursorPos( 20, 0);
+  		printf("\r x_acc \t\t: %7.2f degree\n\r", x_acc);
+  		printf("\r y_acc \t\t: %7.2f degree\n\r", y_acc);
+  		printf("\r y_acc \t\t: %7.2f degree\n\r", z_acc);
+
+  		printf("\r x_gyro \t: %7.2f degree\n\r", x_gyr);
+  		printf("\r y_gyro \t: %7.2f degree\n\r", y_gyr);
+  		printf("\r y_gyro \t: %7.2f degree\n\r", z_gyr);
+
+  		printf("\r x_fil \t\t: %7.2f degree\n\r", x_fil);
+  		printf("\r y_fil \t\t: %7.2f degree\n\r", y_fil);
+  		printf("\r z_fil \t\t: %7.2f degree\n\r", z_fil);
+
+  		count = time_ms();
+  	}
+#endif
+//	  if (ledPos_before != ledPos) {
+//
+//		  setAllPixelColor(0, 0, 0);
+////		  setPixelColor( (uint16_t)DEMA_Filter( ledPos, &Cal_Filter[0] ), 0, 50, 0 );
+//		  setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
+//		  ledPos_before = ledPos;
+////		  memset(buff, 0, sizeof(buff));
+////		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+////		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+////		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+//
+//
+//	  }
+//	  DWT_Delay_us(1);
+//    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
+//    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {
+//      printf("i2c_rd_buff[0] : %02x\r\n", i2c_rd_buff[0]);
+//      printf("i2c_rd_buff[1] : %02x\r\n", i2c_rd_buff[1]);
+//      printf("i2c_rd_buff[2] : %02x\r\n", i2c_rd_buff[2]);
+//      printf("i2c_rd_buff[3] : %02x\r\n", i2c_rd_buff[3]);
+//      printf("i2c_rd_buff[4] : %02x\r\n", i2c_rd_buff[4]);
+//      printf("i2c_rd_buff[5] : %02x\r\n", i2c_rd_buff[5]);
+//      printf("i2c_rd_buff[6] : %02x\r\n", i2c_rd_buff[6]);
+//      printf("i2c_rd_buff[7] : %02x\r\n", i2c_rd_buff[7]);
+//    }
+//    else{
+//      printf("I2C ERROR\r\n");
+//    }
+//    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
   }
 
   /* USER CODE END 3 */
