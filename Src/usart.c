@@ -22,6 +22,7 @@
 #include "ble_cmd.h"
 #include "ws2812b.h"
 #include "power.h"
+#include "tim.h"
 
 /* USER CODE BEGIN 0 */
 #include <stdbool.h>

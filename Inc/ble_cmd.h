@@ -9,8 +9,8 @@
 
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __power_H
-#define __power_H
+#ifndef __BLE_CMD_H
+#define __BLE_CMD_H
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -19,8 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdbool.h>
-#define STAT_SLEEP 0x01
-#define STAT_RUNNING 0x02
 
 #define LED_NORMAL 0x01
 #define LED_RANDOM 0x02
@@ -42,4 +40,4 @@ extern bool led_rand_mode;
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ power_H */
+#endif /*__ BLE_CMD_H */

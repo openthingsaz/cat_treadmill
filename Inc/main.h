@@ -47,6 +47,7 @@ extern uint8_t ledPosUser;
 extern uint8_t led_control_mode;
 extern uint8_t auto_time_off_mode;
 extern uint32_t ntime_auto_off_mode;
+extern uint8_t running_mode;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -143,8 +144,10 @@ void Error_Handler(void);
 #define MPU6050_SCL1_GPIO_Port GPIOB
 #define MPU6050_SDA1_Pin GPIO_PIN_9
 #define MPU6050_SDA1_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
 
+/* USER CODE BEGIN Private defines */
+#define STAT_SLEEP 0x01
+#define STAT_RUNNING 0x02
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

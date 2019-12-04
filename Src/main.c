@@ -27,6 +27,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "ble_cmd.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -82,6 +83,7 @@ uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Selec
 uint8_t auto_time_off_mode = 0;
 uint32_t ntime_auto_off_mode = 0;
 uint32_t time_cnt = 0;
+uint8_t running_mode = 0;
 /* USER CODE END 0 */
 
 /**
@@ -183,7 +185,7 @@ int main(void)
   vt100ClearScreen();
   HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_Base_Start_IT(&htim11);
-  uint8_t buff[256];
+  //uint8_t buff[256];
 
   while (1)
   {
@@ -299,7 +301,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       if (time_cnt >= ntime_auto_off_mode) {
         time_cnt = 0;
         time_off = 1;
-        power_dis();
+        set_sleep();
+        
       }
     }
     else {

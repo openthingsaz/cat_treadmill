@@ -10,9 +10,10 @@
 #include "ble_cmd.h"
 #include "ws2812b.h"
 #include "power.h"
+#include "tim.h"
 #include <stdbool.h>
 
-uint8_t running_mode = 0;
+
 uint32_t run_time = 0;
 bool led_rand_mode = false;
 
@@ -24,11 +25,15 @@ uint8_t get_status(void)
 void set_wakeup(void) 
 {
   power_en();
+  HAL_TIM_Base_Start_IT(&htim11); // start the automatic On / Off timer.
+  running_mode = STAT_RUNNING;
 }
 
 void set_sleep(void) 
 {
   power_dis();
+  HAL_TIM_Base_Stop_IT(&htim11); // start the automatic On / Off timer.
+  running_mode = STAT_SLEEP;
 }
 
 uint16_t get_degree(void)
