@@ -45,6 +45,8 @@ extern "C" {
 extern uint8_t ledPos;
 extern uint8_t ledPosUser;
 extern uint8_t led_control_mode;
+extern uint8_t auto_time_off_mode;
+extern uint32_t ntime_auto_off_mode;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

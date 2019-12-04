@@ -21,6 +21,7 @@
 #include "usart.h"
 #include "ble_cmd.h"
 #include "ws2812b.h"
+#include "power.h"
 
 /* USER CODE BEGIN 0 */
 #include <stdbool.h>
@@ -359,9 +360,17 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
 
     case SET_AUTO_TIME_OFF_MODE :
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "data : %d\r\n", data);
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+      set_auto_time_off_mode((uint8_t)data);
       break;
 
     case SET_N_TIME_AUTO_OFF :
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "data : %d\r\n", data);
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+      set_n_time_auto_off(data);
       break;
     
     case GET_N_TIME_AUTO_OFF :
@@ -383,9 +392,6 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
 
     case SET_LED_CONT_MODE :
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "data : %d\r\n", data);
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
       led_control_mode = (uint8_t)data;
       break;
 

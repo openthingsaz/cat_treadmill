@@ -79,8 +79,9 @@ static void MX_NVIC_Init(void);
 uint8_t ledPos = 0;
 uint8_t ledPosUser = 0;
 uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Select
-
-
+uint8_t auto_time_off_mode = 0;
+uint32_t ntime_auto_off_mode = 0;
+uint32_t time_cnt = 0;
 /* USER CODE END 0 */
 
 /**
@@ -181,6 +182,7 @@ int main(void)
 
   vt100ClearScreen();
   HAL_TIM_Base_Start_IT(&htim10);
+  HAL_TIM_Base_Start_IT(&htim11);
   uint8_t buff[256];
 
   while (1)
@@ -194,9 +196,9 @@ int main(void)
       set_led_update(ledPosUser); // User App Control
     }
 
-    memset(buff, 0, sizeof(buff));
-    sprintf(buff, "ledPos : %d, led_control_mode : %d\r\n", (uint16_t)ledPos, led_control_mode);
-    HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+    //memset(buff, 0, sizeof(buff));
+    //sprintf(buff, "ledPos : %d, led_control_mode : %d\r\n", (uint16_t)ledPos, led_control_mode);
+    //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
 
 
     process();
@@ -280,6 +282,7 @@ static void MX_NVIC_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+  uint8_t time_off = 0;
   if (htim->Instance ==TIM10) 
   {
     HAL_TIM_Base_Stop_IT(&htim10);
@@ -287,6 +290,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     ledPos = (uint8_t)roundf((LED_TOTAL / 360.0f) * Roll);
     mpu_last_time = time_ms();
     HAL_TIM_Base_Start_IT(&htim10);
+  }
+  else if (htim->Instance == TIM11) 
+  {
+    HAL_TIM_Base_Stop_IT(&htim11);
+    if (auto_time_off_mode == 1) {
+      ++time_cnt;
+      if (time_cnt >= ntime_auto_off_mode) {
+        time_cnt = 0;
+        time_off = 1;
+        power_dis();
+      }
+    }
+    else {
+      time_cnt = 0;
+    }
+    if (time_off != 1)
+      HAL_TIM_Base_Start_IT(&htim11);
   }
 }
 

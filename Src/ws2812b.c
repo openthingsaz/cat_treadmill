@@ -8,7 +8,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "ws2812b.h"
-
+#include "tim.h"
+#include "power.h"
 const uint8_t leddata[256*4] = { // size = 256 * 3
   0X44 , 0X44 , 0X44 , 0X44 , // 0
   0X44 , 0X44 , 0X44 , 0X47 , // 1
@@ -333,6 +334,8 @@ void set_led_update(uint8_t pos)
       setPixelColor( (uint16_t)pos, red, green, blue);
       //printf("ledpos : %d\r\n", ledPos);
       ledPos_before = pos;
+      HAL_TIM_Base_Start_IT(&htim11); // if If there is motion, start the automatic On / Off timer.
+      power_en();
     }
 }
 

@@ -22,6 +22,7 @@
 
 void power_en(void);
 void power_dis(void);
+void set_auto_time_off_mode(uint8_t mode);
 uint8_t get_bat_val(void);
 extern uint8_t bat_val;
 
