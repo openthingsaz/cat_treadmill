@@ -20,6 +20,7 @@
 // Variable definitions
 float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
 volatile float last_x_angle, last_y_angle, last_z_angle;
+float ledPos = 0;
 
 int16_t accelCount[3];  // Stores the 16-bit signed accelerometer sensor output
 float ax, ay, az;       // Stores the real accel value in g's

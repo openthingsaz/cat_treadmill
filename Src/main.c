@@ -445,9 +445,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   if(GPIO_Pin == MPU6050_INT1_X_Pin)
   {
     // To do
+#ifdef USE_DMP
 	  if(Cal_done) {
 		  Read_DMP();
 	  }
+#endif
   }
 }
 
