@@ -302,7 +302,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         time_cnt = 0;
         time_off = 1;
         set_sleep();
-        
       }
     }
     else {

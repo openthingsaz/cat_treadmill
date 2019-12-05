@@ -52,6 +52,10 @@ extern UART_HandleTypeDef huart6;
 #define SET_TIME_SYNC 0x15
 #define SET_LED_CONT_MODE 0x20
 
+#define STX 0x02
+#define ETX 0x03
+#define ACK 0x06
+#define NCK 0x15
 
 /* USER CODE END Private defines */
 
@@ -84,7 +88,7 @@ typedef struct
 void process(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void uart_recv_int_enable(void);
-
+uint16_t crc16_ccitt(const void *buf, int len);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -26,7 +26,7 @@
 uint8_t get_status(void);
 void set_wakeup(void);
 void set_sleep(void);
-uint16_t get_degree(void);
+void get_degree(void);
 uint8_t get_battery(void);
 bool set_rand_led_mode(uint8_t mode);
 uint32_t get_run_time(void);
