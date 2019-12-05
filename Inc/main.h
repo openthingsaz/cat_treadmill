@@ -144,7 +144,6 @@ void Error_Handler(void);
 #define MPU6050_SCL1_GPIO_Port GPIOB
 #define MPU6050_SDA1_Pin GPIO_PIN_9
 #define MPU6050_SDA1_GPIO_Port GPIOB
-
 /* USER CODE BEGIN Private defines */
 #define STAT_SLEEP 0x01
 #define STAT_RUNNING 0x02

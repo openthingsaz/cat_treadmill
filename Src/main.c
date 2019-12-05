@@ -135,7 +135,7 @@ int main(void)
   ble_gpio_init();
   initLEDMOSI();
   time_setup();
-
+  
   Cal_Filter = (MovingFilter_t *)calloc(3, sizeof(MovingFilter_t));
   EMA_FILTER_Init(EMA_Alpha, Cal_Filter);
   DMP_Init();
@@ -196,7 +196,7 @@ int main(void)
     else {
       set_led_update(ledPosUser); // User App Control
     }
-
+  
     //memset(buff, 0, sizeof(buff));
     //sprintf(buff, "ledPos : %d, led_control_mode : %d\r\n", (uint16_t)ledPos, led_control_mode);
     //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);

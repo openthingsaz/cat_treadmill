@@ -321,7 +321,7 @@ void cmd_process(uint8_t cmd, uint32_t data)
   uint8_t blue;
   uint8_t buff[256];
 
-  HAL_UART_Transmit(&huart2, (uint8_t *)"ACK2\r\n", strlen("ACK2\r\n"), 100);
+  //HAL_UART_Transmit(&huart2, (uint8_t *)"ACK2\r\n", strlen("ACK2\r\n"), 100);
 
   switch (cmd) {
     case GET_STATUS :
@@ -416,14 +416,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			SerialRx.tail++;
 		}
 	}
+  */
 
-  if(huart->Instance == USART1)
+ /*
+ if(huart->Instance == USART1)
 	{
     HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
     printf("%c\r\n", rx1_data);
+    //HAL_UART_Transmit(&huart1, "%c, 1);
     	
 	}
-*/
+   */
   if(huart->Instance == USART1)
 	{
     SerialRx.buf[SerialRx.tail] = rx1_data;
@@ -495,7 +498,7 @@ void process(void)
           packet[inx++] = rxBuff[i];
         }
       }
-  
+
       if (recv_end == true) 
       {
     	  memset(&ble_cmd, 0, sizeof(ble_cmd));
@@ -507,15 +510,15 @@ void process(void)
         if (crc == 0) // Crc OK
         {
           cmd_process(ble_cmd.cmd, ble_cmd.data);
-          SerialTx.buf[txLen++] = ACK;
-          HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
-          HAL_UART_Transmit(&huart2, "ACK\r\n", strlen("ACK\r\n"), 100);
+          SerialTx.buf[0] = ACK;
+          HAL_UART_Transmit(&huart1, SerialTx.buf, 1, 1);
+          //HAL_UART_Transmit(&huart2, "ACK\r\n", strlen("ACK\r\n"), 100);
         }
         else {
           //send NACK
-          SerialTx.buf[txLen++] = NCK;
-          HAL_UART_Transmit(&huart1, SerialTx.buf, txLen, 100);
-          HAL_UART_Transmit(&huart2, (uint8_t *)"NCK\r\n", strlen("NCK\r\n"), 100);
+          SerialTx.buf[0] = NCK;
+          HAL_UART_Transmit(&huart1, SerialTx.buf, 1, 1);
+          //HAL_UART_Transmit(&huart2, (uint8_t *)"NCK\r\n", strlen("NCK\r\n"), 100);
         }
       
         memset(packet, 0, sizeof(packet));
