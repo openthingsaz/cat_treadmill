@@ -25,8 +25,8 @@
 #define __MPU6050_H
 
 
-#define MPU6050_I2C_PORT		hi2c1
-//#define MPU6050_I2C_PORT		hi2c2
+//#define MPU6050_I2C_PORT		hi2c1
+#define MPU6050_I2C_PORT		hi2c3
 
 #define MPU6050_DEVICE_ADDR         0xD0
 
@@ -405,6 +405,9 @@ enum Gscale {
   GFS_1000DPS,
   GFS_2000DPS
 };
+
+extern float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
+extern volatile float last_x_angle, last_y_angle, last_z_angle;
 
 // Specify sensor full scale
 extern int Gscale;

@@ -86,7 +86,7 @@ void power_en(void)
 float ledPos_before = 0.0f;
 float pidControl = 0.0f;
 /* USER CODE END 0 */
-uint8_t i2c_rd_buff[512];
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -94,9 +94,8 @@ uint8_t i2c_rd_buff[512];
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	float ledPos = 0;
-	float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
-	volatile float last_x_angle, last_y_angle, last_z_angle;
+	//float ledPos = 0;
+
   /* USER CODE END 1 */
   
 
@@ -130,10 +129,12 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_TIM3_Init();
+  MX_I2C3_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  vt100SetCursorPos( 0, 0);
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_gpio_init();
@@ -190,7 +191,6 @@ int main(void)
 
   printf("\r\nCalibration is done.\r\n");
 #else
-  vt100SetCursorPos( 0, 0);
   MPU6050_SelfTest(SelfTest);
   printf("x-axis self test: acceleration trim within : %7.2f%% of factory value \n\r", SelfTest[0]);
   printf("y-axis self test: acceleration trim within : %7.2f%% of factory value \n\r", SelfTest[1]);
@@ -220,7 +220,7 @@ int main(void)
   HAL_Delay(1000);
 
   vt100ClearScreen();
-  HAL_TIM_Base_Start_IT(&htim10);
+//  HAL_TIM_Base_Start_IT(&htim10);
 #endif
 
   while (1)
@@ -237,7 +237,7 @@ int main(void)
   		// Now we'll calculate the accleration value into actual g's
   		ax = (float)accelCount[0]*aRes - accelBias[0];  // get actual g value, this depends on scale being set
   		ay = (float)accelCount[1]*aRes - accelBias[1];
-  		az = (float)accelCount[2]*aRes - accelBias[2];
+//  		az = (float)accelCount[2]*aRes - accelBias[2];
 
   		MPU6050_ReadGyroData(&gyroCount[0]);  // Read the x/y/z adc values
   		MPU6050_GetGres();
@@ -245,10 +245,10 @@ int main(void)
   		// Calculate the gyro value into actual degrees per second
   		gx = (float)gyroCount[0]*gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
   		gy = (float)gyroCount[1]*gRes - gyroBias[1];
-  		gz = (float)gyroCount[2]*gRes - gyroBias[2];
+//  		gz = (float)gyroCount[2]*gRes - gyroBias[2];
 
-  		tempCount = MPU6050_ReadTempData();  // Read the x/y/z adc values
-  		temperature = (tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
+//  		tempCount = MPU6050_ReadTempData();  // Read the x/y/z adc values
+//  		temperature = (tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
   	}
 
   	Now = time_ms();
@@ -264,63 +264,71 @@ int main(void)
 
   	x_gyr = (gx)*deltat + last_x_angle;
   	y_gyr = (gy)*deltat + last_y_angle;
-  	z_gyr = (gz)*deltat + last_z_angle;
+  	//z_gyr = (gz)*deltat + last_z_angle;
 
   	float alpha = 0.96;
   	x_fil = alpha*x_gyr + (1.0 - alpha)*x_acc;
   	y_fil = alpha*y_gyr + (1.0 - alpha)*y_acc;
-  	z_fil = z_gyr;  //Accelerometer doesn't give z-angle
+  	//z_fil = z_gyr;  //Accelerometer doesn't give z-angle
 
 
   	last_x_angle = x_fil;
   	last_y_angle = y_fil;
-  	last_z_angle = z_fil;
+  	//last_z_angle = z_fil;
 
   	deltat = time_ms() - count;
   	if (deltat > 500) { // update LCD once per half-second independent of read rate
-  		LED_GREEN_TOGGLE;
+//  		LED_GREEN_TOGGLE;
 
   		ledPos = roundf((LED_TOTAL / 360.0f) * Roll);
 
   		x_fil *= 180.0f / PI;
   		y_fil *= 180.0f / PI;
-  		z_fil *= 180.0f / PI;
+  		//z_fil *= 180.0f / PI;
 
 
   		if (x_fil < 0) x_fil = 360.0 + x_fil;
   		if (y_fil < 0) y_fil = 360.0 + y_fil;
-  		if (z_fil < 0) z_fil = 360.0 + z_fil;
+  		//if (z_fil < 0) z_fil = 360.0 + z_fil;
 
   		vt100SetCursorPos( 20, 0);
+
+		printf("\r x_acc \t\t: %d degree\n\r", accelCount[0]);
+  		printf("\r x_acc \t\t: %d dgree\n\r", accelCount[1]);
+  		printf("\r x_acc \t\t: %d degree\n\r", gyroCount[0]);
+  		printf("\r x_acc \t\t: %d degree\n\r", gyroCount[1]);
+
+
   		printf("\r x_acc \t\t: %7.2f degree\n\r", x_acc);
-  		printf("\r y_acc \t\t: %7.2f degree\n\r", y_acc);
-  		printf("\r y_acc \t\t: %7.2f degree\n\r", z_acc);
+  		printf("\r y_acc \t\t: %7.2f degree\n\n\r", y_acc);
+//  		printf("\r z_acc \t\t: %7.2f degree\n\r", z_acc);
 
   		printf("\r x_gyro \t: %7.2f degree\n\r", x_gyr);
-  		printf("\r y_gyro \t: %7.2f degree\n\r", y_gyr);
-  		printf("\r y_gyro \t: %7.2f degree\n\r", z_gyr);
+  		printf("\r y_gyro \t: %7.2f degree\n\\nr", y_gyr);
+//  		printf("\r z_gyro \t: %7.2f degree\n\r", z_gyr);
 
   		printf("\r x_fil \t\t: %7.2f degree\n\r", x_fil);
-  		printf("\r y_fil \t\t: %7.2f degree\n\r", y_fil);
-  		printf("\r z_fil \t\t: %7.2f degree\n\r", z_fil);
+  		printf("\r y_fil \t\t: %7.2f degree\n\n\r", y_fil);
+//  		printf("\r z_fil \t\t: %7.2f degree\n\r", z_fil);
 
   		count = time_ms();
   	}
+#else
+	  if (ledPos_before != ledPos) {
+
+		  setAllPixelColor(0, 0, 0);
+//		  setPixelColor( (uint16_t)DEMA_Filter( ledPos, &Cal_Filter[0] ), 0, 50, 0 );
+		  setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
+		  ledPos_before = ledPos;
+//		  memset(buff, 0, sizeof(buff));
+//		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+//		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+
+
+	  }
+	  DWT_Delay_us(1);
 #endif
-//	  if (ledPos_before != ledPos) {
-//
-//		  setAllPixelColor(0, 0, 0);
-////		  setPixelColor( (uint16_t)DEMA_Filter( ledPos, &Cal_Filter[0] ), 0, 50, 0 );
-//		  setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
-//		  ledPos_before = ledPos;
-////		  memset(buff, 0, sizeof(buff));
-////		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-////		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-////		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-//
-//
-//	  }
-//	  DWT_Delay_us(1);
 //    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
 //    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {
 //      printf("i2c_rd_buff[0] : %02x\r\n", i2c_rd_buff[0]);
@@ -357,12 +365,11 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 84;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
@@ -390,6 +397,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  /** Enables the Clock Security System 
+  */
+  HAL_RCC_EnableCSS();
 }
 
 /**
@@ -417,8 +427,8 @@ static void MX_NVIC_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+//{
 /*
   if (htim->Instance ==TIM10)
   {
@@ -428,11 +438,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_TIM_Base_Start_IT(&htim10);
   }
 */
-}
+//}
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-/*  
   if(GPIO_Pin == MPU6050_INT1_X_Pin)
   {
     // To do
@@ -440,7 +449,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		  Read_DMP();
 	  }
   }
-*/  
 }
 
 
@@ -452,6 +460,27 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 
 
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM5 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM5) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
