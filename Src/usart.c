@@ -261,6 +261,7 @@ uint8_t rx2_data;
 uint8_t rxBuff[MAX_SERIAL_BUF];
 uint8_t packet[PACKET_SIZE];
 uint8_t inx = 0;
+uint8_t recv_step  = 0;
 
 void uart_recv_int_enable(void)
 {
@@ -325,6 +326,9 @@ void cmd_process(uint8_t cmd, uint32_t data)
 
   switch (cmd) {
     case GET_STATUS :
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "data : %d\r\n", get_status());
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
       break;
 
     case SET_WAKEUP :
@@ -336,6 +340,9 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
 
     case GET_DEGREE :
+      memset(buff, 0, sizeof(buff));
+      sprintf(buff, "GET_DEGREE\r\n");
+      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
       get_degree();
       break;
     
@@ -371,6 +378,7 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
     
     case GET_N_TIME_AUTO_OFF :
+
       break;
 
     case GET_BAT :
@@ -401,37 +409,17 @@ void cmd_process(uint8_t cmd, uint32_t data)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  /*
-	if(huart->Instance == USART2)
+
+  if(huart->Instance == USART1)
+  {
+    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
+    printf("%c\r\n", rx1_data);	
+  }
+ 
+  if(huart->Instance == USART2)
 	{
     SerialRx.buf[SerialRx.tail] = rx2_data;
     HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
-    
-		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
-		{
-			SerialRx.tail = 0;
-		}
-		else
-		{
-			SerialRx.tail++;
-		}
-	}
-  */
-
- /*
- if(huart->Instance == USART1)
-	{
-    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
-    printf("%c\r\n", rx1_data);
-    //HAL_UART_Transmit(&huart1, "%c, 1);
-    	
-	}
-   */
-  if(huart->Instance == USART1)
-	{
-    SerialRx.buf[SerialRx.tail] = rx1_data;
-    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
-    //HAL_UART_Transmit(&huart2, "AAA\r\n", strlen("AAA\r\n"), 100);
 		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
 		{
 			SerialRx.tail = 0;
@@ -446,9 +434,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void DebugPrint(uint8_t ch){
   uint8_t buff[256];
   memset(buff, 0, sizeof(buff));
-
-
-
 }
 void process(void)
 {
@@ -458,15 +443,11 @@ void process(void)
   uint16_t txLen = 0;
   uint16_t i = 0;
   uint16_t crc = 0;
-
-
   bool recv_end = false;
-
   BLE_Cmd_Data ble_cmd;
 
   head = SerialRx.head;
   tail = SerialRx.tail;
-
   if (head != tail) 
   {
     if (head <= tail)
@@ -477,67 +458,72 @@ void process(void)
     {
       rxLen = tail + MAX_SERIAL_BUF - head;
     }
-
     if (rxLen)
     {
       memset(rxBuff, 0, sizeof(rxBuff));
       memcpy(rxBuff, &SerialRx.buf[SerialRx.head], rxLen);
-      
       for (i=0; i<rxLen; i++) 
       {
-        if (rxBuff[i] == STX && inx == 0) 
-        {
-          continue;
+        if (recv_step == 0) {
+          if (inx == 0 && rxBuff[i] == STX) {
+            recv_step = 1;
+            continue;
+          }
         }
-        else if(rxBuff[i] == ETX && inx == 8)
-        {
-          recv_end = true;
-        }
-        else 
-        {
+        else if (recv_step == 1) {
           packet[inx++] = rxBuff[i];
+          if (inx >= 8)
+            recv_step = 2;
+        }
+        else if (recv_step == 2) {
+          if(rxBuff[i] == ETX && inx == 8)
+          {
+            recv_end = true;
+          }
+          recv_step = 0;
+          inx = 0;
+        }
+        printf("R : %02x\r\n", rxBuff[i]);
+      }
+
+      while(rxLen--)
+      {
+        if (MAX_SERIAL_BUF <= SerialRx.head + 1)
+        {
+          SerialRx.head = 0;
+        }
+        else
+        {
+          SerialRx.head++; //시작 데이터 위치를 옮김.
         }
       }
 
       if (recv_end == true) 
       {
+        printf("recv_end : %d\r\n", recv_end);
     	  memset(&ble_cmd, 0, sizeof(ble_cmd));
         ble_cmd.addr = packet[0];
         ble_cmd.cmd = packet[1];
         memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
-
         crc = crc16_ccitt((void*)&packet[0], 8);
         if (crc == 0) // Crc OK
         {
-          cmd_process(ble_cmd.cmd, ble_cmd.data);
+          //cmd_process(ble_cmd.cmd, ble_cmd.data);
           SerialTx.buf[0] = ACK;
-          HAL_UART_Transmit(&huart1, SerialTx.buf, 1, 1);
-          //HAL_UART_Transmit(&huart2, "ACK\r\n", strlen("ACK\r\n"), 100);
+          HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
         }
         else {
           //send NACK
           SerialTx.buf[0] = NCK;
-          HAL_UART_Transmit(&huart1, SerialTx.buf, 1, 1);
-          //HAL_UART_Transmit(&huart2, (uint8_t *)"NCK\r\n", strlen("NCK\r\n"), 100);
+          HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
+          printf("NACK\r\n");
         }
-      
         memset(packet, 0, sizeof(packet));
         inx = 0;
-
       }
-      while(rxLen--)
-			{
-			    if (MAX_SERIAL_BUF <= SerialRx.head + 1)
-			    {
-		            SerialRx.head = 0;
-		        }
-		        else
-		        {
-		            SerialRx.head++; //시작 데이터 위치를 옮김.
-		        }
-		  }
     }
   }
+  HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
 }
 
 /* USER CODE END 1 */
