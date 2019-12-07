@@ -30,9 +30,17 @@ void power_dis(void)
   HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, LED_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
 
-uint8_t get_bat_val(void) 
+
+
+void led_power_off(void)
 {
-  return bat_val;
+  HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, LED_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
+
+void led_power_on(void)
+{
+  HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, LED_3V3_PWR_nEN_Pin, GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
+}
+
 
 
