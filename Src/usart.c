@@ -383,12 +383,6 @@ void cmd_process(uint8_t cmd, uint32_t data)
 
     case GET_RUN_TIME :
       break;
-    
-    case START :
-      break;
-    
-    case STOP :
-      break;
 
     case SET_TIME_SYNC :
       break;
