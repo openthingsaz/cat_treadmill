@@ -37,22 +37,10 @@ void set_sleep(void)
   running_mode = STAT_SLEEP;
 }
 
-void get_degree(void)
+uint16_t get_degree(void)
 {
-  uint8_t buf[10];
   uint16_t degree = (uint16_t)Roll;
-  uint16_t crc = 0;
-
-  memset(&buf, 0, sizeof(buf));
-  buf[0] = STX;
-  buf[1] = 0x01;
-  buf[2] = GET_DEGREE;
-  memcpy(&buf[3], &degree, sizeof(degree));
-  crc = crc16_ccitt((void*)&buf[0], 8);
-  buf[7] = (crc & 0xFF00) >> 8;
-  buf[8] = (crc & 0x00FF);
-  buf[9] = ETX;
-  HAL_UART_Transmit(&huart1, buf, sizeof(buf), 100);
+  return degree;  
 }
 
 uint8_t get_battery(void)
