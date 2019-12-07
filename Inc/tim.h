@@ -36,7 +36,7 @@ extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
 
 /* USER CODE BEGIN Private defines */
-
+extern uint32_t timestamp;
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
