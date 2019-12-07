@@ -49,6 +49,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /* USER CODE BEGIN Prototypes */
 void set_auto_time_off_mode(uint8_t mode);
 void set_n_time_auto_off(uint32_t data);
+uint32_t get_n_time_auto_off(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

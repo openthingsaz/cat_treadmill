@@ -319,6 +319,11 @@ void set_n_time_auto_off(uint32_t data)
   ntime_auto_off_mode = data;
 }
 
+uint32_t get_n_time_auto_off(void)
+{
+  uint32_t data = ntime_auto_off_mode;
+  return data;
+}
 
 /* USER CODE END 1 */
 
