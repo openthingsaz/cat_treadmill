@@ -27,7 +27,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
+#include "max17043.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "mdbt42q.h"
@@ -92,7 +92,7 @@ uint8_t running_mode = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  uint8_t buff[100];
   /* USER CODE END 1 */
   
 
@@ -182,9 +182,13 @@ int main(void)
   HAL_Delay(1000);
 
   vt100ClearScreen();
-  HAL_TIM_Base_Start_IT(&htim10);
+  //HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_Base_Start_IT(&htim11);
   //uint8_t buff[256];
+
+  max17043_init();
+
+  
 
   while (1)
   {
@@ -201,6 +205,9 @@ int main(void)
     //sprintf(buff, "ledPos : %d, led_control_mode : %d\r\n", (uint16_t)ledPos, led_control_mode);
     //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
 
+    int cellVoltage = MAX17043_getVCell();
+    printf("V: %d\r\n", cellVoltage);
+    HAL_Delay(500);
 
     process();
 
