@@ -525,8 +525,6 @@ void Read_DMP(void)
 //				if (Yaw < 0) Yaw = 360.0 + Yaw;
 //				if (Roll_reverse < 0) Roll_reverse = 360.0 + Roll_reverse;
 
-
-
 				ledPos =  (LED_TOTAL / 360.0f) * roundf(Roll);//Roll);
 				ledPos = ledPos - targetLedPos;
 				if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
