@@ -408,7 +408,6 @@ enum Gscale {
 
 extern float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
 extern volatile float last_x_angle, last_y_angle, last_z_angle;
-extern float ledPos;
 
 // Specify sensor full scale
 extern int Gscale;
@@ -431,7 +430,7 @@ extern float gyroBias[3];
 extern float accelBias[3]; // Bias corrections for gyro and accelerometer
 extern float SelfTest[6];
 
-
+//extern float ledPos;
 
 uint8_t MPU6050_ReadOneByte(uint8_t RegAddr);
 void MPU6050_WriteOneByte(uint8_t RegAddr, uint8_t Data);

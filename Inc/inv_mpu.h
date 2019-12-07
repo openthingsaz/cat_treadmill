@@ -91,6 +91,9 @@ int mpu_configure_fifo(unsigned char sensors);
 int mpu_get_power_state(unsigned char *power_on);
 int mpu_set_sensors(unsigned char sensors);
 
+int mpu_read_accel_bias(long *accel_bias);
+int mpu_set_gyro_bias_reg(long *gyro_bias);
+int mpu_set_accel_bias_reg(const long *accel_bias);
 int mpu_set_accel_bias(const long *accel_bias);
 
 /* Data getter/setter APIs */

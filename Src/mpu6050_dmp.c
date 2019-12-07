@@ -7,16 +7,36 @@
 #include "ema_filter.h"
 #include <stdio.h>
 
+/* Private typedef -----------------------------------------------------------*/
+/* Data read from MPL. */
 #define PRINT_ACCEL     (0x01)
 #define PRINT_GYRO      (0x02)
 #define PRINT_QUAT      (0x04)
+#define PRINT_COMPASS   (0x08)
+#define PRINT_EULER     (0x10)
+#define PRINT_ROT_MAT   (0x20)
+#define PRINT_HEADING   (0x40)
+#define PRINT_PEDO      (0x80)
+#define PRINT_LINEAR_ACCEL (0x100)
+#define PRINT_GRAVITY_VECTOR (0x200)
+
+volatile uint32_t hal_timestamp = 0;
 #define ACCEL_ON        (0x01)
 #define GYRO_ON         (0x02)
+#define COMPASS_ON      (0x04)
+
 #define MOTION          (0)
 #define NO_MOTION       (1)
+
+/* Starting sampling rate. */
 #define DEFAULT_MPU_HZ  (200)
+
 #define FLASH_SIZE      (512)
 #define FLASH_MEM_START ((void*)0x1800)
+
+#define PEDO_READ_MS    (1000)
+#define TEMP_READ_MS    (500)
+#define COMPASS_READ_MS (100)
 
 #define RAD_TO_DEG 57.295779513082320876798154814105
 
@@ -31,10 +51,16 @@ float targetLedPos = 0;
 float targetAnglel = 120.0f;
 uint8_t Cal_done = 0;
 
-
-static signed char gyro_orientation[9] = {-1, 0, 0,
-		0,-1, 0,
-		0, 0, 1};
+static signed char gyro_orientation[9] =
+//	  {-1, 0, 0,
+//		0,-1, 0,
+//		0, 0, 1};
+//		{  0, 1, 0,
+//		 -1, 0, 0,
+//		  0, 0, 1  };
+{  0, -1, 0,
+  1, 0, 0,
+  0, 0, 1  };
 
 static  unsigned short inv_row_2_scale(const signed char *row)
 {
@@ -70,51 +96,86 @@ static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx)
 	return scalar;
 }
 
-static void run_self_test(void)
+void run_self_test(void)
 {
 	int result;
 	long gyro[3], accel[3];
 
-	result = mpu_run_self_test(gyro, accel);
-	if (result == 0x7) {
-		/* Test passed. We can trust the gyro data here, so let's push it down
-		 * to the DMP.
-		 */
-		float sens;
-		unsigned short accel_sens;
-		mpu_get_gyro_sens(&sens);
-		gyro[0] = (long)(gyro[0] * sens);
-		gyro[1] = (long)(gyro[1] * sens);
-		gyro[2] = (long)(gyro[2] * sens);
-		dmp_set_gyro_bias(gyro);
-		mpu_get_accel_sens(&accel_sens);
-		accel[0] *= accel_sens;
-		accel[1] *= accel_sens;
-		accel[2] *= accel_sens;
-		dmp_set_accel_bias(accel);
-		printf("setting bias succesfully ......\r\n");
-	}
+//	result = mpu_run_self_test(gyro, accel);
+//	if (result == 0x7) {
+//		/* Test passed. We can trust the gyro data here, so let's push it down
+//		 * to the DMP.
+//		 */
+//		float sens;
+//		unsigned short accel_sens;
+//		mpu_get_gyro_sens(&sens);
+//		gyro[0] = (long)(gyro[0] * sens);
+//		gyro[1] = (long)(gyro[1] * sens);
+//		gyro[2] = (long)(gyro[2] * sens);
+//
+//		printf("\rgyro : %7.4f, %7.4f, %7.4f\n",
+//				gyro[0]/1.0f,
+//				gyro[1]/1.0f,
+//				gyro[2]/1.0f);
+//
+//		dmp_set_gyro_bias(gyro);
+//		mpu_get_accel_sens(&accel_sens);
+//		accel[0] *= accel_sens;
+//		accel[1] *= accel_sens;
+//		accel[2] *= accel_sens;
+//
+//		printf("\raccel:   %7.4f, %7.4f, %7.4f\n",
+//				accel[0]/1.0f,
+//				accel[1]/1.0f,
+//				accel[2]/1.0f);
+//
+//		dmp_set_accel_bias(accel);
+//		printf("setting bias succesfully ......\r\n");
+//	}
+
+	gyro[0] = (long)-7523532;
+	gyro[1] = (long)1612185;
+	gyro[2] = (long)-335872;
+	dmp_set_gyro_bias(gyro);
+
+	accel[0] = (long)88342528;
+	accel[1] = (long)-34340864;
+	accel[2] = (long)-72613888;
+	dmp_set_accel_bias(accel);
+
+	accel[0] = 0.0412f;
+	accel[1] = -0.0213f;
+	accel[2] = -0.0020f;
+
+	gyro[0] = -53.8675f;
+	gyro[1] = -13.7650f;
+	gyro[2] = -10.1487f;
+
+    for(int i = 0; i<3; i++) {
+    	gyro[i] = (long)(gyro[i] * 16.384f); //convert to +-2000dps
+    	accel[i] *= 16384.0f;//2048.f; //convert to +-16G
+    	accel[i] = accel[i] >> 16;
+    	gyro[i] = (long)(gyro[i] >> 16);
+    }
+
+    mpu_set_gyro_bias_reg(gyro);
+    mpu_set_accel_bias_reg(accel);
+    printf("setting bias succesfully ......\r\n");
 }
 
-
-
 uint8_t buffer[14];
-
 int16_t  MPU6050_FIFO[6][11];
 int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
-
-
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뱟占쎈쿈占쎌굲ADC占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솧筌뤿슣�굲占쎈쐻占쎈뱟占쎈쿈占쎌굲 FIFO占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈쓡塋딅슗�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뼑占쎈Ŋ�굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
- *******************************************************************************/
-
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_newValues ​​(int16_t ax, int16_t ay, int16_t az, int16_t gx, int16_t gy, int16_t gz)
+* 기능 : 필터링을 위해 새로운 ADC 데이터를 FIFO 배열로 업데이트
+*********************************************************************************/
 void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 {
 	unsigned char i ;
 	int32_t sum=0;
-	for(i=1;i<10;i++){	//FIFO 占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
+	for(i=1;i<10;i++){	//FIFO
 
 		MPU6050_FIFO[0][i-1]=MPU6050_FIFO[0][i];
 		MPU6050_FIFO[1][i-1]=MPU6050_FIFO[1][i];
@@ -123,7 +184,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 		MPU6050_FIFO[4][i-1]=MPU6050_FIFO[4][i];
 		MPU6050_FIFO[5][i-1]=MPU6050_FIFO[5][i];
 	}
-	MPU6050_FIFO[0][9]=ax;//占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뱟占쎈쿈占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솧筌뚭쑴�굲占쎈쐻占쎈뻻占쎈쿈占쎌굲 占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솧占쎈쿈占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占�
+	MPU6050_FIFO[0][9]=ax;//// 데이터 끝에 새 데이터를 배치
 	MPU6050_FIFO[1][9]=ay;
 	MPU6050_FIFO[2][9]=az;
 	MPU6050_FIFO[3][9]=gx;
@@ -132,7 +193,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 
 	sum=0;
 
-	for(i=0;i<10;i++){	//占쎈쐻占쎈짗占쎌굲占쎈�뱄옙�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲筌╉뀿猷�占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뼍吏몌옙猷욑옙�굲占쎈쐻占쎈솂�뜝占�
+	for(i=0;i<10;i++){	//현재 배열의 합을 찾아 평균을 구함.
 
 		sum+=MPU6050_FIFO[0][i];
 	}
@@ -170,9 +231,9 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void MPU6050_setClockSource(uint8_t source)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲  MPU6050 占쎈쐻占쎈짗占쎌굲占쎈♧占쎈쐻占쎈짗占쎌굲占쎄틭
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setClockSource (uint8_t source)
+* 기능 : MPU6050의 클럭 소스 설정
  * CLK_SEL | Clock Source
  * --------+--------------------------------------
  * 0       | Internal oscillator
@@ -202,30 +263,29 @@ void MPU6050_setFullScaleGyroRange(uint8_t range) {
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void MPU6050_setFullScaleAccelRange(uint8_t range)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲  MPU6050 占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솏占쎌굤占쎈�욑옙踰앾옙�굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占�
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setFullScaleAccelRange (uint8_t range)
+* 기능 : MPU6050 가속도계의 최대 범위 설정
+*********************************************************************************/
 void MPU6050_setFullScaleAccelRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void MPU6050_setSleepEnabled(uint8_t enabled)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲  MPU6050 占쎈쐻占쎈뼄筌뚭쑴�굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뼑�뜝�뜴�쐻占쎈짗占쎌굲燁살뮃彛�
-				enabled =1   占쎈걖占쎈쐻占쎈짗占쎌굲
-			    enabled =0   占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 프로토 타입 : void MPU6050_setSleepEnabled (uint8_t enabled)
+* 기능 : MPU6050의 슬립 모드 진입 여부 설정
+				enabled  = 1 슬립
+			    disabled = 0
+*********************************************************************************/
 void MPU6050_setSleepEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
 }
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		uint8_t MPU6050_getDeviceID(void)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎌궎  MPU6050 WHO_AM_I 占쎈쐻占쎈짗占쎌굲�깗占�	 占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲 0x68
-
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 프로토 타입 : uint8_t MPU6050_getDeviceID (void)
+* 기능 : MPU6050 WHO_AM_I 플래그를 읽으면 0x68이 반환됨.
+*********************************************************************************/
 uint8_t MPU6050_getDeviceID(void) {
 
 	IICreadBytes(devAddr, MPU6050_RA_WHO_AM_I, 1, buffer);
@@ -233,10 +293,10 @@ uint8_t MPU6050_getDeviceID(void) {
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		uint8_t MPU6050_testConnection(void)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈１PU6050 占쎈쐻占쎈뼄筌뚭쑴�굲占쎈쐻占쎈뼩占쎈섣占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 프로토 타입 : uint8_t MPU6050_testConnection (void)
+* 기능 : MPU6050 연결되어 있는지 확인
+*********************************************************************************/
 uint8_t MPU6050_testConnection(void) {
 	if(MPU6050_getDeviceID() == 0x68)  //0b01101000;
 		return 1;
@@ -244,50 +304,118 @@ uint8_t MPU6050_testConnection(void) {
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void MPU6050_setI2CMasterModeEnabled(uint8_t enabled)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲 MPU6050 占쎈쐻占쎈뼄筌뚭쑴�굲癲낆�쵻X I2C占쎈쐻占쎈솯占쎈쿈占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
-
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setI2CMasterModeEnabled (uint8_t enabled)
+* 기능 : MPU6050 AUX I2C 호스트 설정
+*********************************************************************************/
 void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void MPU6050_setI2CBypassEnabled(uint8_t enabled)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲 MPU6050 占쎈쐻占쎈뼄筌뚭쑴�굲癲낆�쵻X I2C占쎈쐻占쎈솯占쎈쿈占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
-
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setI2CBypassEnabled (uint8_t enabled)
+* 기능 : MPU6050 AUX I2C 호스트 설정
+*********************************************************************************/
 void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
 }
 
 
-/**************************占쎈샑占쎈쐻占쎈솂�뇡�빘�굲占쎈쐻占쎈짗占쎌굲********************************************
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲沃ㅲ뮪�쐻占쎈짗占쎌굲:		void MPU6050_initialize(void)
- *占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲:	    占쎈쐻占쎈짗占쎌굲�벀占쏙옙�쐻占쎈짗占쎌굲 	MPU6050 占쎈쐻占쎈셾占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솊占쎈뮩占쎈씮�굲占쎈쐻�뜝占�
- *******************************************************************************/
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_initialize (void)
+* 기능 : MPU6050을 초기화하여 사용 가능한 상태로 들어갑니다.
+**************************************************** *****************************/
 void MPU6050_initialize(void) {
-	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈♧占쎈쐻占쎈짗占쎌굲
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占� +-1000占쎈쐻占쎈짗占쎌굲筌ｌ뇯�쐻占쎈짗占쎌굲
-	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솏占쎌굤占쎌뵛占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占� +-2G
-	MPU6050_setSleepEnabled(0); //占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈윥�눧琉룸쐻占쎈짗占쎌굲鹽뽯떥梨�
-	MPU6050_setI2CMasterModeEnabled(0);	 //占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲MPU6050 占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲AUXI2C
-	MPU6050_setI2CBypassEnabled(0);	 //占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲I2C占쎈쐻占쎈짗占쎌굲	MPU6050占쎈쐻占쎈짗占쎌굲AUXI2C	繞섓옙嚥싥깷�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲繞섓옙占쎈쐻占쎈셽筌뚭쑴�굲占쎈쐻占쎈짗占쎌굲HMC5883L
+	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //클럭설정
+	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//자이로 최대범위 +/- 초당 1000 도
+	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//최대 가속도 범위 +/- 2g
+	MPU6050_setSleepEnabled(0); //슬립모드 off
+	MPU6050_setI2CMasterModeEnabled(0);	 //auxi2c off
+	MPU6050_setI2CBypassEnabled(0);	 //bypass auxi2c
 }
 
+//static inline
+void run_self_test2(void)
+{
+    int result;
+    long gyro[3], accel[3];
 
+//    result = mpu_run_self_test(gyro, accel);
+//
+//    if (result == 0x7) {
+//    	printf("\rPassed!\n");
+//        printf("\raccel: %7.4f %7.4f %7.4f\n",
+//                    accel[0]/65536.f,
+//                    accel[1]/65536.f,
+//                    accel[2]/65536.f);
+//        printf("\rgyro: %7.4f %7.4f %7.4f\n",
+//                    gyro[0]/65536.f,
+//                    gyro[1]/65536.f,
+//                    gyro[2]/65536.f);
 
+        accel[0] =  0.0779f;
+        accel[1] = -0.0310f;
+        accel[2] = -0.0649f;
 
-/**************************************************************************
+        gyro[0] = -5.9375f;
+        gyro[1] =  1.1875f;
+        gyro[2] = -0.3125f;
 
-占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솦影�瑜곸굲MPU6050占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲DMP占쎈쐻占쎈뻼占쎈꺋占쎌굲�벀占쏙옙�쐻占쎈짗占쎌굲
-占쎈쐻占쎈짗占쎌굲閭잙쑚�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占�
-占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲  繞볝뀿�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
-占쎈쐻占쎈짗占쎌굲    占쎈쐻占쎈솯影�瑜곸굲占쎈뼓占쎈쐻占쎈짗占쎌굲筌껋뇯�쐻占쎈짗占쎌굲�뜏洹쏅쐻占쎈짗占쎌굲
+        /* Test passed. We can trust the gyro data here, so now we need to update calibrated data*/
+#define USE_CAL_HW_REGISTERS
+        #ifdef USE_CAL_HW_REGISTERS
+        /*
+         * This portion of the code uses the HW offset registers that are in the MPUxxxx devices
+         * instead of pushing the cal data to the MPL software library
+         */
+        unsigned char i = 0;
 
- **************************************************************************/
+        for(i = 0; i<3; i++) {
+        	gyro[i] = (long)(gyro[i] * 16.384f);//32.8f); //convert to +-1000dps
+        	accel[i] *= 16384.0f;//2048.f; //convert to +-16G
+        	accel[i] = accel[i] >> 16;
+        	gyro[i] = (long)(gyro[i] >> 16);
+        }
+
+        mpu_set_gyro_bias_reg(gyro);
+        mpu_set_accel_bias_reg(accel);
+#else
+        /* Push the calibrated data to the MPL library.
+         *
+         * MPL expects biases in hardware units << 16, but self test returns
+		 * biases in g's << 16.
+		 */
+    	unsigned short accel_sens;
+    	float gyro_sens;
+
+		mpu_get_accel_sens(&accel_sens);
+		accel[0] *= accel_sens;
+		accel[1] *= accel_sens;
+		accel[2] *= accel_sens;
+		inv_set_accel_bias(accel, 3);
+		mpu_get_gyro_sens(&gyro_sens);
+		gyro[0] = (long) (gyro[0] * gyro_sens);
+		gyro[1] = (long) (gyro[1] * gyro_sens);
+		gyro[2] = (long) (gyro[2] * gyro_sens);
+		inv_set_gyro_bias(gyro, 3);
+#endif
+//    }
+//    else {
+//            if (!(result & 0x1))
+//                printf("\rGyro failed.\n");
+//            if (!(result & 0x2))
+//            	printf("\rAccel failed.\n");
+//            if (!(result & 0x4))
+//            	printf("\rCompass failed.\n");
+//     }
+}
+
+/****************************************************************************
+기능 : MPU6050의 내장 DMP 초기화
+입력 매개 변수 : 없음
+반환 값 : 없음
+****************************************************************************/
 void DMP_Init(void)
 { 
 	uint8_t temp[1]={0};
@@ -299,6 +427,7 @@ void DMP_Init(void)
 	if(temp[0]!=0x68)NVIC_SystemReset();
 	if(!mpu_init())
 	{
+//		run_self_test2();
 		if(!mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL))
 			printf("mpu_set_sensor complete ......\r\n");
 		if(!mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL))
@@ -310,14 +439,13 @@ void DMP_Init(void)
 		if(!dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation)))
 			printf("dmp_set_orientation complete ......\r\n");
 		if(!dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
-
-				DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
-				DMP_FEATURE_GYRO_CAL))
-
+				DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_RAW_GYRO | DMP_FEATURE_SEND_CAL_GYRO))//|
+				//DMP_FEATURE_GYRO_CAL))
 			printf("dmp_enable_feature complete ......\r\n");
+		run_self_test();
+		run_self_test2();
 		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))
 			printf("dmp_set_fifo_rate complete ......\r\n");
-		run_self_test();
 		if(!mpu_set_dmp_state(1))
 			printf("mpu_set_dmp_state complete ......\r\n");
 	}
@@ -333,13 +461,12 @@ float qToFloat(long number, unsigned char q)
 	}
 	return (number >> q) + ((number & mask) / (float) (2<<(q-1)));
 }
-/**************************************************************************
-占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솦影�瑜곸굲占쎈쐻占쎈짗占쎌굲占쎌궎MPU6050占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲DMP占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲�뙶袁��쐻占쎈짗占쎌굲占쎈－
-占쎈쐻占쎈짗占쎌굲閭잙쑚�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占�
-占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲  繞볝뀿�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
-占쎈쐻占쎈짗占쎌굲    占쎈쐻占쎈솯影�瑜곸굲占쎈뼓占쎈쐻占쎈짗占쎌굲筌껋뇯�쐻占쎈짗占쎌굲�뜏洹쏅쐻占쎈짗占쎌굲
 
- **************************************************************************/
+/****************************************************************************
+기능 : MPU6050 내장 DMP의 자세 정보를 읽습니다.
+입력 매개 변수 : 없음
+반환 값 : 없음
+****************************************************************************/
 //int8_t sign=3, sign_hold=0;//sign_back=3;
 void Read_DMP(void)
 {	
@@ -360,19 +487,22 @@ void Read_DMP(void)
 		dqy = quat[2] / q30; //y
 		dqz = quat[3] / q30; //z
 
-		float ysqr = dqy * dqy;
-//		float t0 = -2.0f * (ysqr + dqz * dqz) + 1.0f;
-//		float t1 = +2.0f * (dqx * dqy - dqw * dqz);
-		float t2 = -2.0f * (dqx * dqz + dqw * dqy);
-		float t3 = +2.0f * (dqy * dqz - dqw * dqx);
-		float t4 = -2.0f * (dqx * dqx + ysqr) + 1.0f;
+//		Pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3;
+		Roll = atan2(2 * dqy * dqz + 2 * dqw * dqx, -2 * dqx * dqx - 2 * dqy* dqy + 1); // roll
 
-		// Keep t2 within range of asin (-1, 1)
-		t2 = t2 > 1.0f ? 1.0f : t2;
-		t2 = t2 < -1.0f ? -1.0f : t2;
+//		float ysqr = dqy * dqy;
+////		float t0 = -2.0f * (ysqr + dqz * dqz) + 1.0f;
+////		float t1 = +2.0f * (dqx * dqy - dqw * dqz);
+//		float t2 = -2.0f * (dqx * dqz + dqw * dqy);
+//		float t3 = +2.0f * (dqy * dqz - dqw * dqx);
+//		float t4 = -2.0f * (dqx * dqx + ysqr) + 1.0f;
+//
+//		// Keep t2 within range of asin (-1, 1)
+//		t2 = t2 > 1.0f ? 1.0f : t2;
+//		t2 = t2 < -1.0f ? -1.0f : t2;
 
 //		Pitch = asin(t2) * 2;
-		Roll = atan2(t3, t4); //radian
+//		Roll = atan2(t3, t4); //radian
 //		Roll_reverse = atan2(t4, t3); //radian
 //		Yaw = atan2(t1, t0);
 
@@ -404,12 +534,11 @@ void Read_DMP(void)
 		}
 	}
 }
-/**************************************************************************
-占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈솦影�瑜곸굲占쎈쐻占쎈짗占쎌굲占쎌궎MPU6050占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뱟占쎌굤占쎈솇占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲
-占쎈쐻占쎈짗占쎌굲閭잙쑚�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻�뜝占�
-占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲  繞볝뀿�쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈짗占쎌굲占쎈쐻占쎈뱟占쎌뵛占쎌굲
-占쎈쐻占쎈짗占쎌굲    占쎈쐻占쎈솯影�瑜곸굲占쎈뼓占쎈쐻占쎈짗占쎌굲筌껋뇯�쐻占쎈짗占쎌굲�뜏洹쏅쐻占쎈짗占쎌굲
- **************************************************************************/
+/****************************************************************************
+기능 : MPU6050 내장 온도 센서에서 데이터 읽기
+입력 매개 변수 : 없음
+반환 값 : 섭씨 온도
+****************************************************************************/
 int Read_Temperature(void)
 {	   
 	float Temp;

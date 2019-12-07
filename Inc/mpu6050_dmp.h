@@ -367,6 +367,7 @@
 
 #define MPU6050_WHO_AM_I_BIT        6
 #define MPU6050_WHO_AM_I_LENGTH     6
+
 extern	short gyro[3], accel[3];
 extern int16_t Gx_offset,Gy_offset,Gz_offset;
 extern float Acc1G_Values;
@@ -391,5 +392,7 @@ uint8_t MPU6050_getDeviceID(void); //占쏙옙혤MPU6050占쏙옙ID
 void MPU6050_InitGyro_Offset(void);//占쏙옙迦占쏙옙占쏙옙占쏙옙占쏙옙튤占쏙옙
 void DMP_Init(void);
 void Read_DMP(void);
+void run_self_test(void);
+void run_self_test2(void);
 int Read_Temperature(void);
 #endif

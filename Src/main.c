@@ -151,27 +151,29 @@ int main(void)
   EMA_FILTER_Init(EMA_Alpha, Cal_Filter);
 
   DMP_Init();
-
+//  HAL_Delay(1000);
 //  printf("Calibration ready\r\n");
   // Waiting the device status until the stable state
-//  for(register int i=0; i<1000; i++) {
+//  for(register int i=0; i<2000; i++) {
 //	  Read_DMP();
 //	  HAL_Delay(5);
 //	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
 //  }
+
+////  run_self_test2();
 //  printf("\r\nCalibration start\r\n");
-  // Calibration of the mpu6050
+////   Calibration of the mpu6050
 //  for(register int i=0; i<2000; i++)
 //  {
 //	  Read_DMP();
 //	  DEMA_Filter( Roll, 		&Cal_Filter[0] );
-////	  DEMA_Filter( Pitch, 		&Cal_Filter[1] );
-////	  DEMA_Filter( Yaw,	 		&Cal_Filter[2] );
-////	  DEMA_Filter( Roll_reverse, &Cal_Filter[3] );
-////	  vt100SetCursorPos( 3, 0);
-////	  vt100ClearLinetoEnd();
-////	  printf("\rRoll : %f\r\n", Roll);
-////	  printf("\rDEMA : %f\r\n", Cal_Filter[0].DEMA);
+//	  DEMA_Filter( Pitch, 		&Cal_Filter[1] );
+//	  DEMA_Filter( Yaw,	 		&Cal_Filter[2] );
+//	  DEMA_Filter( Roll_reverse, &Cal_Filter[3] );
+//	  vt100SetCursorPos( 3, 0);
+//	  vt100ClearLinetoEnd();
+//	  printf("\rRoll : %f\r\n", Roll);
+//	  printf("\rDEMA : %f\r\n", Cal_Filter[0].DEMA);
 //	  HAL_Delay(5);
 //	  if( (i%100) == 0 ) HAL_UART_Transmit(&huart1, (uint8_t *)&".", 1, 100);
 //  }
@@ -180,7 +182,7 @@ int main(void)
 //  base_yaw			= Cal_Filter[2].DEMA;
 //  base_roll_reverse	= Cal_Filter[3].DEMA;
 //  printf("\r\nCalibration is done.\r\n");
-  //HAL_Delay(2000);
+//  HAL_Delay(2000);
   Cal_done = 1;
   targetAnglel -= base_roll;
   if (targetAnglel < 0) targetAnglel = 360.0 + targetAnglel;
@@ -323,11 +325,12 @@ int main(void)
 //		  memset(buff, 0, sizeof(buff));
 //		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
 //		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
+//		  vt100SetCursorPos(30, 0);
+//		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
 
 
 	  }
-	  DWT_Delay_us(1);
+//	  DWT_Delay_us(1);
 #endif
 //    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
 //    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {

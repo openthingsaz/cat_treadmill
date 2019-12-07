@@ -20,7 +20,6 @@
 // Variable definitions
 float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
 volatile float last_x_angle, last_y_angle, last_z_angle;
-float ledPos = 0;
 
 int16_t accelCount[3];  // Stores the 16-bit signed accelerometer sensor output
 float ax, ay, az;       // Stores the real accel value in g's
@@ -40,6 +39,8 @@ int Gscale = GFS_250DPS;
 int Ascale = AFS_2G;
 
 float aRes, gRes; // scale resolutions per LSB for the sensors
+
+//float ledPos = 0.0f;
 
 // parameters for 6 DoF sensor fusion calculations
 //float GyroMeasError = PI * (60.0f / 180.0f);     // gyroscope measurement error in rads/s (start at 60 deg/s), then reduce after ~10 s to 3
@@ -406,7 +407,8 @@ void MPU6050_Calibration(float * dest1, float * dest2)
 	fifo_count = ((uint16_t)data[0] << 8) | data[1];
 	packet_count = fifo_count/12;// How many sets of full gyro and accelerometer data for averaging
 
-//	printf("\r Packet_count : %d\n", packet_count);
+	printf("\r Packet_count : %d\n", packet_count);
+
 	for (ii = 0; ii < packet_count; ii++) {
 		int16_t accel_temp[3] = {0, 0, 0}, gyro_temp[3] = {0, 0, 0};
 		MPU6050_ReadBuff(MPU6050_RA_FIFO_R_W, 12, &data[0]); // read data for averaging
@@ -435,6 +437,12 @@ void MPU6050_Calibration(float * dest1, float * dest2)
 	if(accel_bias[2] > 0L) {accel_bias[2] -= (int32_t) accelsensitivity;}  // Remove gravity from the z-axis accelerometer bias calculation
 	else {accel_bias[2] += (int32_t) accelsensitivity;}
 
+	for(int i=0; i<3; i++)
+		printf("\r accel_bias[%d] : %ld\n", i, accel_bias[i]);
+
+	for(int i=0; i<3; i++)
+		printf("\r gyro_bias[%d]  : %ld\n", i, gyro_bias[i]);
+
 	// Construct the gyro biases for push to the hardware gyro bias registers, which are reset to zero upon device startup
 	data[0] = (-gyro_bias[0]/4  >> 8) & 0xFF; // Divide by 4 to get 32.9 LSB per deg/s to conform to expected bias input format
 	data[1] = (-gyro_bias[0]/4)       & 0xFF; // Biases are additive, so change sign on calculated average gyro biases
@@ -442,6 +450,9 @@ void MPU6050_Calibration(float * dest1, float * dest2)
 	data[3] = (-gyro_bias[1]/4)       & 0xFF;
 	data[4] = (-gyro_bias[2]/4  >> 8) & 0xFF;
 	data[5] = (-gyro_bias[2]/4)       & 0xFF;
+
+	for(int i=0; i<6; i++)
+		printf("\r gyro_data[%d]  : %ld\n", i, data[i]);
 
 	// Push gyro biases to hardware registers
 	MPU6050_WriteOneByte(MPU6050_RA_XG_OFFS_USRH, data[0]);
