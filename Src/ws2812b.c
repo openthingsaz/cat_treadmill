@@ -361,6 +361,14 @@ void set_led_col(uint32_t data)
   red = r;
   green = g;
   blue = b;
+
+  if (data == 0) {
+    led_power_off();
+  }
+  else {
+    led_power_on();  
+    HAL_Delay(1);   
+  }
   setPixelColor(ledPos, red, green, blue);
 }
 
