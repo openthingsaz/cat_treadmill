@@ -315,14 +315,14 @@ uint16_t crc16_ccitt(const void *buf, int len)
 	return crc;
 }
 
-void send_data(uint32_t* data, uint32_t len) 
+void send_data(uint8_t cmd, uint32_t* data, uint32_t len) 
 {
   uint16_t crc = 0;
   uint8_t buf[10];
 
   buf[0] = STX;
   buf[1] = 0x01;
-  buf[2] = GET_DEGREE;
+  buf[2] = cmd;
   memcpy(&buf[3], data, len);
   crc = crc16_ccitt((void*)&buf[1], 6);
   buf[7] = (crc & 0xFF00) >> 8;
@@ -331,27 +331,38 @@ void send_data(uint32_t* data, uint32_t len)
   HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
 }
 
+void send_data8(uint8_t cmd, uint32_t timestamp, uint16_t distance, uint16_t move_time) 
+{
+  uint16_t crc = 0;
+  uint8_t buf[14];
+
+  buf[0] = STX;
+  buf[1] = 0x01;
+  buf[2] = cmd;
+  memcpy(&buf[3], &timestamp, sizeof(timestamp));
+  memcpy(&buf[7], &distance, sizeof(distance));
+  memcpy(&buf[9], &move_time, sizeof(move_time));
+  crc = crc16_ccitt((void*)&buf[1], 10);
+  buf[11] = (crc & 0xFF00) >> 8;
+  buf[12] = (crc & 0x00FF);
+  buf[13] = ETX;
+  HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
+  //HAL_Delay(100);
+}
+
 void cmd_process(uint8_t cmd, uint32_t data)
 {
-  uint8_t buff[256];
-
+  //uint8_t buff[256];
+  //printf("cmd : %d\r\n", cmd);
   switch (cmd) {
     case GET_STATUS :
       data = (uint32_t)get_status();
-      send_data(&data, sizeof(data));
-      break;
-
-    case SET_WAKEUP :
-      set_wakeup();
-      break;
-
-    case SET_SLEEP :
-      set_sleep();
+      send_data(GET_STATUS, &data, sizeof(data));
       break;
 
     case GET_DEGREE :      
       data = (uint32_t)get_degree();
-      send_data(&data, sizeof(data));
+      send_data(GET_DEGREE, &data, sizeof(data));
       break;
     
     case SET_LED_POS :
@@ -375,22 +386,26 @@ void cmd_process(uint8_t cmd, uint32_t data)
     
     case GET_N_TIME_AUTO_OFF :
       data = get_n_time_auto_off();
-      send_data(&data, sizeof(data));
+      send_data(GET_N_TIME_AUTO_OFF, &data, sizeof(data));
       break;
 
     case GET_BAT :
+      data = get_bat_val();
+      send_data(GET_BAT, &data, sizeof(data));
       break;
 
-    case GET_RUN_TIME :
-      break;
+    //case GET_RUN_TIME :
+    //  send_data(GET_BAT, &data, sizeof(data));
+    //  break;
 
     case SET_TIME_SYNC :
+      timestamp = data;
       break;
 
-    case SET_LED_CONT_MODE :
-      led_control_mode = (uint8_t)data;
+    case GET_MOVE_DATA :
+      printf("GET_MOVE_DATA\r\n");
+      send_data8(GET_MOVE_DATA, timestamp, 1, 10);
       break;
-
 
     default :
       printf("default\r\n"); 
@@ -431,7 +446,7 @@ void process(void)
   uint16_t head = 0;
   uint16_t tail = 0;
   uint16_t rxLen = 0;
-  uint16_t txLen = 0;
+
   uint16_t i = 0;
   uint16_t crc = 0;
   bool recv_end = false;
@@ -491,7 +506,7 @@ void process(void)
 
       if (recv_end == true) 
       {
-        printf("recv_end : %d\r\n", recv_end);
+        //printf("recv_end : %d\r\n", recv_end);
     	  memset(&ble_cmd, 0, sizeof(ble_cmd));
         ble_cmd.addr = packet[0];
         ble_cmd.cmd = packet[1];
