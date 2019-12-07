@@ -519,7 +519,6 @@ void Read_DMP(void)
 //				Pitch -= base_pitch;
 //				Yaw   -= base_yaw;
 
-
 				if (Roll < 0) Roll = 360.0 + Roll;
 //				if (Pitch < 0) Pitch = 360.0 + Pitch;
 //				if (Yaw < 0) Yaw = 360.0 + Yaw;
