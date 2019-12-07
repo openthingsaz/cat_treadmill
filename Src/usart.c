@@ -315,20 +315,30 @@ uint16_t crc16_ccitt(const void *buf, int len)
 	return crc;
 }
 
+void send_data(uint32_t* data, uint32_t len) 
+{
+  uint16_t crc = 0;
+  uint8_t buf[10];
+
+  buf[0] = STX;
+  buf[1] = 0x01;
+  buf[2] = GET_DEGREE;
+  memcpy(&buf[3], data, len);
+  crc = crc16_ccitt((void*)&buf[1], 6);
+  buf[7] = (crc & 0xFF00) >> 8;
+  buf[8] = (crc & 0x00FF);
+  buf[9] = ETX;
+  HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
+}
+
 void cmd_process(uint8_t cmd, uint32_t data)
 {
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
   uint8_t buff[256];
-
-  //HAL_UART_Transmit(&huart2, (uint8_t *)"ACK2\r\n", strlen("ACK2\r\n"), 100);
 
   switch (cmd) {
     case GET_STATUS :
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "data : %d\r\n", get_status());
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
+      data = (uint32_t)get_status();
+      send_data(&data, sizeof(data));
       break;
 
     case SET_WAKEUP :
@@ -339,46 +349,33 @@ void cmd_process(uint8_t cmd, uint32_t data)
       set_sleep();
       break;
 
-    case GET_DEGREE :
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "GET_DEGREE\r\n");
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-      get_degree();
+    case GET_DEGREE :      
+      data = (uint32_t)get_degree();
+      send_data(&data, sizeof(data));
       break;
     
     case SET_LED_POS :
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "data : %d\r\n", data);
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
       set_led_pos((uint8_t)data);
       break;
 
     case SET_LED_COLOR :
-      red = (data >> 16) & 0xff;
-      green = (data >> 8) & 0xff;
-      blue = (data >> 0) & 0xff;
-      set_led_col(red, green, blue);
+      set_led_col(data);
       break;
     
     case SET_RAND_LED_MODE :
       break;
 
     case SET_AUTO_TIME_OFF_MODE :
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "data : %d\r\n", data);
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
       set_auto_time_off_mode((uint8_t)data);
       break;
 
     case SET_N_TIME_AUTO_OFF :
-      memset(buff, 0, sizeof(buff));
-      sprintf(buff, "data : %d\r\n", data);
-      HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
       set_n_time_auto_off(data);
       break;
     
     case GET_N_TIME_AUTO_OFF :
-
+      data = get_n_time_auto_off();
+      send_data(&data, sizeof(data));
       break;
 
     case GET_BAT :
@@ -508,9 +505,9 @@ void process(void)
         crc = crc16_ccitt((void*)&packet[0], 8);
         if (crc == 0) // Crc OK
         {
-          //cmd_process(ble_cmd.cmd, ble_cmd.data);
-          SerialTx.buf[0] = ACK;
-          HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
+          cmd_process(ble_cmd.cmd, ble_cmd.data);
+          //SerialTx.buf[0] = ACK;
+          //HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
         }
         else {
           //send NACK
