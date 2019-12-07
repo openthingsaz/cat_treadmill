@@ -35,7 +35,7 @@ void initLEDMOSI(void);
 void test_led_rgb(void);
 void set_led_update(uint8_t ledPos);
 void set_led_pos(uint8_t pos);
-void set_led_col(uint8_t r, uint8_t g, uint8_t b);
+void set_led_col(uint32_t data);
 
 extern uint8_t red;
 extern uint8_t green;

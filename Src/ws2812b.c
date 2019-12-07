@@ -349,8 +349,15 @@ void set_led_pos(uint8_t pos)
   ledPosUser = pos;
 }
 
-void set_led_col(uint8_t r, uint8_t g, uint8_t b) 
+void set_led_col(uint32_t data) 
 {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+
+  r = (data >> 16) & 0xff;
+  g = (data >> 8) & 0xff;
+  b = (data >> 0) & 0xff;
   red = r;
   green = g;
   blue = b;
