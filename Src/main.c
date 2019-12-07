@@ -92,7 +92,7 @@ uint8_t running_mode = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t buff[100];
+
   /* USER CODE END 1 */
   
 
@@ -167,12 +167,9 @@ int main(void)
   base_pitch	= Cal_Filter[1].DEMA;
   base_yaw		= Cal_Filter[2].DEMA;
 
-
-
   printf("\r\nCalibration is done.\r\n");
   HAL_Delay(2000);
   Cal_done = 1;
-
 
   /* USER CODE END 2 */
 
@@ -184,31 +181,20 @@ int main(void)
   vt100ClearScreen();
   //HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_Base_Start_IT(&htim11);
-  //uint8_t buff[256];
 
-  max17043_init();
-
-  
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    led_control_mode = 1;
     if (led_control_mode == 0) // Gyro Control
       set_led_update(ledPos);
     else {
       set_led_update(ledPosUser); // User App Control
     }
-  
-    //memset(buff, 0, sizeof(buff));
-    //sprintf(buff, "ledPos : %d, led_control_mode : %d\r\n", (uint16_t)ledPos, led_control_mode);
-    //HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-
-    int cellVoltage = MAX17043_getVCell();
-    printf("V: %d\r\n", cellVoltage);
     HAL_Delay(500);
-
     process();
 
   }
@@ -312,8 +298,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     else {
       time_cnt = 0;
     }
-    if (time_off != 1)
-      HAL_TIM_Base_Start_IT(&htim11);
+    HAL_TIM_Base_Start_IT(&htim11);
   }
 }
 
