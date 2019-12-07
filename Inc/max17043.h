@@ -27,7 +27,7 @@
 #define MODE_REGISTER		0x06
 #define COMMAND_REGISTER	0xFE
 
-void max17043_init(void);
+int32_t get_bat_val(void);
 
 #ifdef __cplusplus
 }

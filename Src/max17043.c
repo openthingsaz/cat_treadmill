@@ -9,6 +9,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "max17043.h"
 #include "i2c.h"
+#include "usart.h"
 typedef unsigned char byte;
 int32_t MAX17043_ADDRESS = 0x36 << 1;
 
@@ -18,7 +19,7 @@ int32_t readFuntion = 0 ;
 float decimal ;
 
 // Function reading register Values
-int32_t MAX17043_readRegister (int32_t addrL, int32_t addrH){
+int32_t MAX17043_readRegister (int32_t addrL, int32_t addrH) {
   uint8_t LSB;
   HAL_I2C_Mem_Read(&hi2c1, MAX17043_ADDRESS, addrL, I2C_MEMADD_SIZE_8BIT, &LSB, 1, 100);
   //printf("lower byte is:%02x\n\r ",LSB);    //Testing purposes
@@ -83,7 +84,7 @@ uint32_t MAX17043_getVCell()
 int32_t MAX17043_getSoC()
 {
   readFuntion =2 ;
-  return MAX17043_readRegister(SOC_REGISTER_LSB,SOC_REGISTER_MSB);
+  return MAX17043_readRegister(SOC_REGISTER_LSB, SOC_REGISTER_MSB);
 }
 
 int32_t MAX17043_getVersion()
@@ -136,6 +137,7 @@ int32_t MAX17043_getAlertStatus(void)
 
 void max17043_init(void) 
 {
+
   MAX17043_reset ();
   //printf("Battery Status:\t");
   HAL_Delay(1);
@@ -146,6 +148,8 @@ void max17043_init(void)
   printf("V: %1.5f\r\n",cellVoltage);
 
   printf("C: %2d\r\n", MAX17043_getSoC());    
+
+
 
   int MAX17043Version = MAX17043_getVersion ();
   printf("MAX17043 v.%d\r\n",MAX17043Version);
@@ -165,4 +169,13 @@ void max17043_init(void)
   else {
     printf("0\n\r");
   }
+}
+//void get_bat_volt(void)
+
+int32_t get_bat_val(void) 
+{
+  MAX17043_reset ();
+  HAL_Delay(1);
+  MAX17043_quickStart ();
+  return MAX17043_getSoC();
 }
