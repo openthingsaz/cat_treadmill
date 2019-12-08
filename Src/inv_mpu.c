@@ -566,7 +566,7 @@ const struct gyro_reg_s reg = {
 #if 1
 const struct test_s test = {
     .gyro_sens      = 32768/2000,
-    .accel_sens     = 32768/2,
+    .accel_sens     = 32768/8,
     .reg_rate_div   = 0,    /* 1kHz. */
     .reg_lpf        = 1,    /* 188Hz. */
     .reg_gyro_fsr   = 0,    /* 250dps. */
@@ -2230,6 +2230,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
 		data[0] = st.test->reg_gyro_fsr | 0xE0;
 	else
 		data[0] = st.test->reg_gyro_fsr;
+
 	if (i2c_write(st.hw->addr, st.reg->gyro_cfg, 1, data))
 		return -1;
 
@@ -2369,6 +2370,7 @@ int mpu_run_self_test(long *gyro, long *accel)
 	for (ii = 0; ii < tries; ii++)
 		if (!get_st_biases(gyro, accel, 0))
 			break;
+
 	if (ii == tries) {
 		/* If we reach this point, we most likely encountered an I2C error.
 		 * We'll just report an error for all three sensors.
@@ -2376,23 +2378,26 @@ int mpu_run_self_test(long *gyro, long *accel)
 		result = 0;
 		goto restore;
 	}
+
 	for (ii = 0; ii < tries; ii++)
 		if (!get_st_biases(gyro_st, accel_st, 1))
 			break;
+
 	if (ii == tries) {
 		/* Again, probably an I2C error. */
 		result = 0;
 		goto restore;
 	}
+
 	accel_result = accel_self_test(accel, accel_st);
 	gyro_result = gyro_self_test(gyro, gyro_st);
 
-	result = 0;
+	result = 0x04;
+//	result |= 0x04;
 	if (!gyro_result)
 		result |= 0x01;
 	if (!accel_result)
 		result |= 0x02;
-
 #ifdef AK89xx_SECONDARY
 	compass_result = compass_self_test();
 	if (!compass_result)
@@ -2406,7 +2411,6 @@ int mpu_run_self_test(long *gyro, long *accel)
 	get_st_biases(gyro, accel, 0);
 	result = 0x7;
 #endif
-	result |= 0x04;
 	printf("Exiting HWST\n");
 	/* Set to invalid values to ensure no I2C writes are skipped. */
 	st.chip_cfg.gyro_fsr = 0xFF;

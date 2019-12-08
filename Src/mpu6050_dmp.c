@@ -101,37 +101,37 @@ void run_self_test(void)
 	int result;
 	long gyro[3], accel[3];
 
-	result = mpu_run_self_test(gyro, accel);
-	if (result == 0x7) {
-		/* Test passed. We can trust the gyro data here, so let's push it down
-		 * to the DMP.
-		 */
-		float sens;
-		unsigned short accel_sens;
-		mpu_get_gyro_sens(&sens);
-		gyro[0] = (long)(gyro[0] * sens);
-		gyro[1] = (long)(gyro[1] * sens);
-		gyro[2] = (long)(gyro[2] * sens);
-
-		printf("\rgyro : %7.4f, %7.4f, %7.4f\n",
-				gyro[0]/1.0f,
-				gyro[1]/1.0f,
-				gyro[2]/1.0f);
-
-		dmp_set_gyro_bias(gyro);
-		mpu_get_accel_sens(&accel_sens);
-		accel[0] *= accel_sens;
-		accel[1] *= accel_sens;
-		accel[2] *= accel_sens;
-
-		printf("\raccel:   %7.4f, %7.4f, %7.4f\n",
-				accel[0]/1.0f,
-				accel[1]/1.0f,
-				accel[2]/1.0f);
-
-		dmp_set_accel_bias(accel);
-		printf("setting bias succesfully ......\r\n");
-	}
+//	result = mpu_run_self_test(gyro, accel);
+//	if (result == 0x7) {
+//		/* Test passed. We can trust the gyro data here, so let's push it down
+//		 * to the DMP.
+//		 */
+//		float sens;
+//		unsigned short accel_sens;
+//		mpu_get_gyro_sens(&sens);
+//		gyro[0] = (long)(gyro[0] * sens);
+//		gyro[1] = (long)(gyro[1] * sens);
+//		gyro[2] = (long)(gyro[2] * sens);
+//
+//		printf("\rgyro : %7.4f, %7.4f, %7.4f\n",
+//				gyro[0]/1.0f,
+//				gyro[1]/1.0f,
+//				gyro[2]/1.0f);
+//
+//		dmp_set_gyro_bias(gyro);
+//		mpu_get_accel_sens(&accel_sens);
+//		accel[0] *= accel_sens;
+//		accel[1] *= accel_sens;
+//		accel[2] *= accel_sens;
+//
+//		printf("\raccel:   %7.4f, %7.4f, %7.4f\n",
+//				accel[0]/1.0f,
+//				accel[1]/1.0f,
+//				accel[2]/1.0f);
+//
+//		dmp_set_accel_bias(accel);
+//		printf("setting bias succesfully ......\r\n");
+//	}
 
 	gyro[0] = (long)-7523532;
 	gyro[1] = (long)1612185;
