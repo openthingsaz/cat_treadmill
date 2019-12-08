@@ -1,9 +1,6 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
-/**************************************************************************
-占쏙옙占쌩ｏ옙틱占쏙옙鬼占쏙옙裂占쏙옙
-占쌀듸옙占쌉깍옙鬼占쎄：http://shop114407458.taobao.com/
- **************************************************************************/
+
 //#include "sys.h"
 #include "stdint.h"
 #include "math.h"
@@ -381,18 +378,18 @@ extern float targetLedPos;
 extern float targetAnglel;
 
 //extern float q0,q1,q2,q3;
-//占쏙옙占썩꼬占쏙옙占시듸옙API
-void MPU6050_initialize(void); //占쏙옙迦占쏙옙
-uint8_t MPU6050_testConnection(void); //占쏙옙占폦PU6050占실뤄옙占쏙옙占�
+// 외부 호출을위한 API
+void MPU6050_initialize(void); // 초기화
+uint8_t MPU6050_testConnection(void);  // MPU6050 상태 확인
 //占쏙옙혤ADC令
 void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
 void MPU6050_getlastMotion6(int16_t* ax, int16_t* ay, 
 														int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
-uint8_t MPU6050_getDeviceID(void); //占쏙옙혤MPU6050占쏙옙ID
-void MPU6050_InitGyro_Offset(void);//占쏙옙迦占쏙옙占쏙옙占쏙옙占쏙옙튤占쏙옙
-void DMP_Init(void);
-void Read_DMP(void);
-void run_self_test(void);
-void run_self_test2(void);
+uint8_t MPU6050_getDeviceID(void); // MPU6050 ID 체크
+void MPU6050_InitGyro_Offset(void); // 자이로 오프셋 초기화
+void DMP_Init(void); // DMP 초기화
+void Read_DMP(void); // 쿼터니언 데이터 획득 후 각도 변환
+void run_self_test(void); // 캘리브레이션 1
+void run_self_test2(void); //캘리브레이션 2
 int Read_Temperature(void);
 #endif
