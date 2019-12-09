@@ -125,7 +125,7 @@ void MAX17043_setAlertThreshold (int32_t alertThresholdValue)
   //printf("writeData:%02x %\n\r ",writeData);
   //printf("writeData_swapped:%02x \n\r ",writeData_swapped);
   MAX17043_writeRegister(CONFIG_REGISTER_MSB, writeData_swapped);
-  usleep(1000);
+  HAL_Delay(1);
 }
 
 int32_t MAX17043_getAlertStatus(void)
