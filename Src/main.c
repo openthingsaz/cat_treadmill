@@ -27,7 +27,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "max17043.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "mdbt42q.h"
@@ -122,10 +122,7 @@ int main(void)
   MX_RTC_Init();
   MX_TIM1_Init();
   MX_TIM11_Init();
-  MX_USART6_UART_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
-  MX_TIM3_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
