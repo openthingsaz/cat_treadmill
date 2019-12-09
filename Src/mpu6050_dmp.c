@@ -55,12 +55,12 @@ static signed char gyro_orientation[9] =
 //	  {-1, 0, 0,
 //		0,-1, 0,
 //		0, 0, 1};
-//		{  0, 1, 0,
-//		 -1, 0, 0,
-//		  0, 0, 1  };
-{  0, -1, 0,
-  1, 0, 0,
-  0, 0, 1  };
+		{  0, 1, 0,
+		 -1, 0, 0,
+		  0, 0, 1  };
+//{  0, -1, 0,
+//  1, 0, 0,
+//  0, 0, 1  };
 
 static  unsigned short inv_row_2_scale(const signed char *row)
 {
