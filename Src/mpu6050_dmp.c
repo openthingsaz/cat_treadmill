@@ -310,10 +310,6 @@ void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 }
 
 
-/************************** 구현 기능 ***********************************************
-* 함수 프로토 타입 : void MPU6050_setI2CBypassEnabled (uint8_t enabled)
-* 기능 : MPU6050이 AUX I2C 회선의 호스트인지 설정
-*********************************************************************************/
 void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
 }
