@@ -52,9 +52,6 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, BLE_WAKEUP_Pin|BLE_UART2_PD_Pin|BLE_RESET_Pin|BLE_FLASHED_DEFAULT_Pin 
                           |LED_LMIT_EN_Pin|LED_3V3_PWR_nEN_Pin|PERI_3V3_PWR_nEN_Pin|BATT_ALRT_INT_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
-
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = MPU6050_INT1_X_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
