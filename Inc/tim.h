@@ -31,23 +31,21 @@
 /* USER CODE END Includes */
 
 extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
 
 /* USER CODE BEGIN Private defines */
-
+extern uint32_t timestamp;
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
-void MX_TIM3_Init(void);
 void MX_TIM10_Init(void);
 void MX_TIM11_Init(void);
-                        
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                    
-/* USER CODE BEGIN Prototypes */
 
+/* USER CODE BEGIN Prototypes */
+void set_auto_time_off_mode(uint8_t mode);
+void set_n_time_auto_off(uint32_t data);
+uint32_t get_n_time_auto_off(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

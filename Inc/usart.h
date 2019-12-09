@@ -32,7 +32,6 @@
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
 #define GET_STATUS  0x01
@@ -47,15 +46,20 @@ extern UART_HandleTypeDef huart6;
 #define GET_N_TIME_AUTO_OFF 0x10
 #define GET_BAT 0x11
 #define GET_RUN_TIME  0x12
-#define START 0x13
-#define STOP  0x14
+//#define START 0x13
+//#define STOP  0x14
 #define SET_TIME_SYNC 0x15
+#define GET_MOVE_DATA 0x20
+
+#define STX 0x02
+#define ETX 0x03
+//#define ACK 0x06
+#define NCK 0x15
 
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
 void MX_USART2_UART_Init(void);
-void MX_USART6_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -83,7 +87,8 @@ typedef struct
 void process(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void uart_recv_int_enable(void);
-
+uint16_t crc16_ccitt(const void *buf, int len);
+int32_t get_bat_val(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

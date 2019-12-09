@@ -8,6 +8,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "ws2812b.h"
+#include "tim.h"
+#include "power.h"
+#include "ble_cmd.h"
 
 const uint8_t leddata[256*4] = { // size = 256 * 3
   0X44 , 0X44 , 0X44 , 0X44 , // 0
@@ -294,8 +297,7 @@ void Send_2812(void)
  {
     HAL_SPI_Transmit_DMA( &hspi1, ws_buffer, LED_BUFFER_LENGTH );
     // wait until finished
-    //while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
-    while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY) != RESET);
+    while(__HAL_SPI_GET_FLAG(&hspi1, SPI_FLAG_BSY ));
  }
 
 void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
@@ -322,6 +324,54 @@ void initLEDMOSI(void)
   uint8_t buffer0[2] = { 0, 0 };
   HAL_SPI_Transmit(&hspi1, buffer0, 1, 100 );
 }
+
+uint8_t ledPos_before = 0;
+uint8_t red = 0;
+uint8_t green = 50;
+uint8_t blue = 0;
+void set_led_update(uint8_t pos)
+{
+  if (ledPos_before != pos) {
+      setAllPixelColor(0, 0, 0);
+      setPixelColor( (uint16_t)pos, red, green, blue);
+      //printf("ledpos : %d\r\n", ledPos);
+      ledPos_before = pos;
+      // if If there is motion, wakeup
+      if (running_mode == STAT_SLEEP)
+        set_wakeup();
+      
+    }
+}
+
+
+void set_led_pos(uint8_t pos) 
+{
+  ledPosUser = pos;
+}
+
+void set_led_col(uint32_t data) 
+{
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+
+  r = (data >> 16) & 0xff;
+  g = (data >> 8) & 0xff;
+  b = (data >> 0) & 0xff;
+  red = r;
+  green = g;
+  blue = b;
+
+  if (data == 0) {
+    led_power_off();
+  }
+  else {
+    led_power_on();  
+    HAL_Delay(1);   
+  }
+  setPixelColor(ledPos, red, green, blue);
+}
+
 
 void test_led_rgb(void) {
   int8_t i;

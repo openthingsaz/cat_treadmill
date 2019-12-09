@@ -1,3 +1,6 @@
 {
-    "githd.blameView.enabled": false
+    "githd.blameView.enabled": false,
+    "files.associations": {
+        "ble_cmd.h": "c"
+    }
 }

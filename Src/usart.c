@@ -21,6 +21,10 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include "ble_cmd.h"
+#include "ws2812b.h"
+#include "power.h"
+#include "tim.h"
 #include <stdbool.h>
 int _write(int fd, char *str, int len)
 {
@@ -35,7 +39,6 @@ int _write(int fd, char *str, int len)
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
-UART_HandleTypeDef huart6;
 
 /* USART1 init function */
 
@@ -70,25 +73,6 @@ void MX_USART2_UART_Init(void)
   huart2.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
   huart2.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-}
-/* USART6 init function */
-
-void MX_USART6_UART_Init(void)
-{
-
-  huart6.Instance = USART6;
-  huart6.Init.BaudRate = 115200;
-  huart6.Init.WordLength = UART_WORDLENGTH_8B;
-  huart6.Init.StopBits = UART_STOPBITS_1;
-  huart6.Init.Parity = UART_PARITY_NONE;
-  huart6.Init.Mode = UART_MODE_TX_RX;
-  huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart6.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart6) != HAL_OK)
   {
     Error_Handler();
   }
@@ -156,30 +140,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 
   /* USER CODE END USART2_MspInit 1 */
   }
-  else if(uartHandle->Instance==USART6)
-  {
-  /* USER CODE BEGIN USART6_MspInit 0 */
-
-  /* USER CODE END USART6_MspInit 0 */
-    /* USART6 clock enable */
-    __HAL_RCC_USART6_CLK_ENABLE();
-  
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    /**USART6 GPIO Configuration    
-    PC6     ------> USART6_TX
-    PC7     ------> USART6_RX 
-    */
-    GPIO_InitStruct.Pin = BLE_UART6_TX_Pin|BLE_UART6_RX_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN USART6_MspInit 1 */
-
-  /* USER CODE END USART6_MspInit 1 */
-  }
 }
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
@@ -227,24 +187,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
   /* USER CODE END USART2_MspDeInit 1 */
   }
-  else if(uartHandle->Instance==USART6)
-  {
-  /* USER CODE BEGIN USART6_MspDeInit 0 */
-
-  /* USER CODE END USART6_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_USART6_CLK_DISABLE();
-  
-    /**USART6 GPIO Configuration    
-    PC6     ------> USART6_TX
-    PC7     ------> USART6_RX 
-    */
-    HAL_GPIO_DeInit(GPIOC, BLE_UART6_TX_Pin|BLE_UART6_RX_Pin);
-
-  /* USER CODE BEGIN USART6_MspDeInit 1 */
-
-  /* USER CODE END USART6_MspDeInit 1 */
-  }
 } 
 
 /* USER CODE BEGIN 1 */
@@ -257,6 +199,7 @@ uint8_t rx2_data;
 uint8_t rxBuff[MAX_SERIAL_BUF];
 uint8_t packet[PACKET_SIZE];
 uint8_t inx = 0;
+uint8_t recv_step  = 0;
 
 
 
@@ -328,68 +271,106 @@ static const unsigned short crc16tab[256]= {
 	0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
 };
   
-unsigned short crc16_ccitt(const void *buf, int len)
+uint16_t crc16_ccitt(const void *buf, int len)
 {
-	register int counter;
-	register unsigned short crc = 0;
+	int counter;
+	unsigned short crc = 0;
 	for( counter = 0; counter < len; counter++)
 		crc = (crc<<8) ^ crc16tab[((crc>>8) ^ *(char *)buf++)&0x00FF];
 	return crc;
 }
 
-#define STX 0x02
-#define ETX 0x03
-#define ACK 0x06
-#define NCK 0x15
-
-void cmd_process(uint8_t cmd)
+void send_data(uint8_t cmd, uint32_t* data, uint32_t len) 
 {
+  uint16_t crc = 0;
+  uint8_t buf[10];
+
+  buf[0] = STX;
+  buf[1] = 0x01;
+  buf[2] = cmd;
+  memcpy(&buf[3], data, len);
+  crc = crc16_ccitt((void*)&buf[1], 6);
+  buf[7] = (crc & 0xFF00) >> 8;
+  buf[8] = (crc & 0x00FF);
+  buf[9] = ETX;
+  HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
+}
+
+void send_data8(uint8_t cmd, uint32_t timestamp, uint16_t distance, uint16_t move_time) 
+{
+  uint16_t crc = 0;
+  uint8_t buf[14];
+
+  buf[0] = STX;
+  buf[1] = 0x01;
+  buf[2] = cmd;
+  memcpy(&buf[3], &timestamp, sizeof(timestamp));
+  memcpy(&buf[7], &distance, sizeof(distance));
+  memcpy(&buf[9], &move_time, sizeof(move_time));
+  crc = crc16_ccitt((void*)&buf[1], 10);
+  buf[11] = (crc & 0xFF00) >> 8;
+  buf[12] = (crc & 0x00FF);
+  buf[13] = ETX;
+  HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
+  //HAL_Delay(100);
+}
+
+void cmd_process(uint8_t cmd, uint32_t data)
+{
+  //uint8_t buff[256];
+  //printf("cmd : %d\r\n", cmd);
   switch (cmd) {
     case GET_STATUS :
+      data = (uint32_t)get_status();
+      send_data(GET_STATUS, &data, sizeof(data));
       break;
 
-    case SET_WAKEUP :
-      break;
-
-    case SET_SLEEP :
-      break;
-
-    case GET_DEGREE :
+    case GET_DEGREE :      
+      data = (uint32_t)get_degree();
+      send_data(GET_DEGREE, &data, sizeof(data));
       break;
     
     case SET_LED_POS :
+      set_led_pos((uint8_t)data);
       break;
 
     case SET_LED_COLOR :
+      set_led_col(data);
       break;
     
     case SET_RAND_LED_MODE :
       break;
 
     case SET_AUTO_TIME_OFF_MODE :
+      set_auto_time_off_mode((uint8_t)data);
       break;
 
     case SET_N_TIME_AUTO_OFF :
+      set_n_time_auto_off(data);
       break;
     
     case GET_N_TIME_AUTO_OFF :
+      data = get_n_time_auto_off();
+      send_data(GET_N_TIME_AUTO_OFF, &data, sizeof(data));
       break;
 
     case GET_BAT :
+      data = get_bat_val();
+      send_data(GET_BAT, &data, sizeof(data));
       break;
 
-    case GET_RUN_TIME :
-      break;
-    
-    case START :
-      break;
-    
-    case STOP :
-      break;
+    //case GET_RUN_TIME :
+    //  send_data(GET_BAT, &data, sizeof(data));
+    //  break;
 
     case SET_TIME_SYNC :
+      timestamp = data;
       break;
 
+    case GET_MOVE_DATA :
+      printf("GET_MOVE_DATA\r\n");
+      send_data8(GET_MOVE_DATA, timestamp, 1, 10);
+      break;
 
     default :
       printf("F?��급입?��?��."); 
@@ -400,17 +381,13 @@ void process(void)
   uint16_t head = 0;
   uint16_t tail = 0;
   uint16_t rxLen = 0;
-  uint16_t txLen = 0;
+
   uint16_t i = 0;
-  uint32_t cmd = 0;
+  uint16_t crc = 0;
   bool recv_end = false;
-  bool crc_chk = false;
   BLE_Cmd_Data ble_cmd;
-
-
   head = SerialRx.head;
   tail = SerialRx.tail;
-
   if (head != tail) 
   {
     if (head <= tail)
@@ -421,38 +398,34 @@ void process(void)
     {
       rxLen = tail + MAX_SERIAL_BUF - head;
     }
-
     if (rxLen)
     {
       memset(rxBuff, 0, sizeof(rxBuff));
       memcpy(rxBuff, &SerialRx.buf[SerialRx.head], rxLen);
-
       for (i=0; i<rxLen; i++) 
       {
-        //if (rxBuff[i] == STX)
-        if (rxBuff[i] == 'a')
-          continue;
-
-        //else if (rxBuff[i] == ETX)
-        else if (rxBuff[i] == 'z')
-        {
-          recv_end = true;
-          
+        if (recv_step == 0) {
+          if (inx == 0 && rxBuff[i] == STX) {
+            recv_step = 1;
+            continue;
+          }
         }
-        else 
-        {
+        else if (recv_step == 1) {
           packet[inx++] = rxBuff[i];
+          if (inx >= 8)
+            recv_step = 2;
         }
+        else if (recv_step == 2) {
+          if(rxBuff[i] == ETX && inx == 8)
+          {
+            recv_end = true;
+          }
+          recv_step = 0;
+          inx = 0;
+        }
+        printf("R : %02x\r\n", rxBuff[i]);
       }
 
-      if (recv_end == true) 
-      {
-        ble_cmd.addr = packet[0];
-        ble_cmd.cmd = packet[1];
-        memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
-        memcpy(&ble_cmd.crc, &packet[6], sizeof(ble_cmd.crc));
-      }
-      
       while(rxLen--)
       {
         if (MAX_SERIAL_BUF <= SerialRx.head + 1)
@@ -461,12 +434,32 @@ void process(void)
         }
         else
         {
-          SerialRx.head++; 
+          SerialRx.head++; //시작 데이터 위치를 옮김.
         }
       }
 
-      if (crc_chk == true) {
-        cmd_process(ble_cmd.cmd);
+      if (recv_end == true) 
+      {
+        //printf("recv_end : %d\r\n", recv_end);
+    	  memset(&ble_cmd, 0, sizeof(ble_cmd));
+        ble_cmd.addr = packet[0];
+        ble_cmd.cmd = packet[1];
+        memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
+        crc = crc16_ccitt((void*)&packet[0], 8);
+        if (crc == 0) // Crc OK
+        {
+          cmd_process(ble_cmd.cmd, ble_cmd.data);
+          //SerialTx.buf[0] = ACK;
+          //HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
+        }
+        else {
+          //send NACK
+          SerialTx.buf[0] = NCK;
+          HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
+          printf("NACK\r\n");
+        }
+        memset(packet, 0, sizeof(packet));
+        inx = 0;
       }
       else {
         //send NACK
@@ -477,6 +470,7 @@ void process(void)
 			HAL_UART_Transmit(&huart2, SerialTx.buf, txLen, 100);
     }
   }
+  HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
 }
 
 /* USER CODE END 1 */

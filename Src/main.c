@@ -32,11 +32,14 @@
 /* USER CODE BEGIN Includes */
 #include "mdbt42q.h"
 #include "ws2812b.h"
+#include "power.h"
 #include <stdio.h>
 #include <string.h>
 #include "ema_filter.h"
 #include "dwt_stm32_delay.h"
+#include "ble_cmd.h"
 //#include "pid.h"
+
 #ifdef USE_DMP
 #include "mpu6050_dmp.h"
 #else
@@ -74,17 +77,17 @@ static void MX_NVIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void power_en(void)
-{
-  // POWER Controler
-  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
-  HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, 			LED_LMIT_EN_Pin, 			GPIO_PIN_SET); // LED_LMIT_EN, Hight Enable, Low Disable
-  HAL_GPIO_WritePin(LED_3V3_PWR_nEN_GPIO_Port, 	LED_3V3_PWR_nEN_Pin, 	GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable
-}
 
 //float ledPos = 0;
 float ledPos_before = 0.0f;
 float pidControl = 0.0f;
+uint8_t ledPosUser = 0;
+uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Select
+uint8_t auto_time_off_mode = 0;
+uint32_t ntime_auto_off_mode = 0;
+uint32_t time_cnt = 0;
+uint8_t running_mode = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -94,7 +97,7 @@ float pidControl = 0.0f;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	//float ledPos = 0;
+
 
   /* USER CODE END 1 */
   
@@ -125,21 +128,20 @@ int main(void)
   MX_RTC_Init();
   MX_TIM1_Init();
   MX_TIM11_Init();
-  MX_USART6_UART_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
-  MX_TIM3_Init();
-  MX_I2C3_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+
   vt100SetCursorPos( 0, 0);
   printf("Booting LittleCat Board!!!!221\r\n\n");
+
   power_en();
   ble_gpio_init();
   initLEDMOSI();
   time_setup();
+
   DWT_Delay_Init();
 #ifdef USE_DMP
 //  pidData = (PidData_t *)calloc(1, sizeof(PidData_t));
@@ -170,6 +172,7 @@ int main(void)
 //	  DEMA_Filter( Pitch, 		&Cal_Filter[1] );
 //	  DEMA_Filter( Yaw,	 		&Cal_Filter[2] );
 //	  DEMA_Filter( Roll_reverse, &Cal_Filter[3] );
+
 //	  vt100SetCursorPos( 3, 0);
 //	  vt100ClearLinetoEnd();
 //	  printf("\rRoll : %f\r\n", Roll);
@@ -214,6 +217,7 @@ int main(void)
   }
   else
   	printf("\rMPU6050 Init failed!\r\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -222,8 +226,14 @@ int main(void)
   HAL_Delay(1000);
 
   vt100ClearScreen();
+
 //  HAL_TIM_Base_Start_IT(&htim10);
+  HAL_TIM_Base_Start_IT(&htim11);
 #endif
+
+  
+
+
 
   while (1)
   {
@@ -347,6 +357,7 @@ int main(void)
 //      printf("I2C ERROR\r\n");
 //    }
 //    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
+process();
   }
 
   /* USER CODE END 3 */
@@ -400,9 +411,11 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Enables the Clock Security System 
   */
   HAL_RCC_EnableCSS();
+
 }
 
 /**
