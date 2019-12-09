@@ -335,7 +335,7 @@ void set_led_update(uint8_t pos)
   if (ledPos_before != pos) {
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)pos, red, green, blue);
-      printf("Roll %7.2f, ledpos : %d\r\n", Roll, ledPos);
+//      printf("Roll %7.2f, ledpos : %d\r\n", Roll, ledPos);
       ledPos_before = pos;
       // if If there is motion, wakeup
       if (running_mode == STAT_SLEEP)
