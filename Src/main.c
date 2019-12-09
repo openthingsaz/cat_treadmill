@@ -79,7 +79,6 @@ static void MX_NVIC_Init(void);
 /* USER CODE BEGIN 0 */
 
 //float ledPos = 0;
-float ledPos_before = 0.0f;
 float pidControl = 0.0f;
 uint8_t ledPosUser = 0;
 uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Select
@@ -326,21 +325,17 @@ int main(void)
   		count = time_ms();
   	}
 #else
+  	/*
 	  if (ledPos_before != ledPos) {
 
 		  setAllPixelColor(0, 0, 0);
-//		  setPixelColor( (uint16_t)DEMA_Filter( ledPos, &Cal_Filter[0] ), 0, 50, 0 );
 		  setPixelColor( (uint16_t)ledPos, 0, 50, 0 );
 		  ledPos_before = ledPos;
-//		  memset(buff, 0, sizeof(buff));
-//		  sprintf(buff, "roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-//		  HAL_UART_Transmit(&huart2, buff, strlen(buff), 100);
-//		  vt100SetCursorPos(30, 0);
-//		  printf("roll : %d, pos : %d\r\n", (uint16_t)Roll, (uint16_t)ledPos);
-
-
 	  }
 //	  DWT_Delay_us(1);
+ */
+  	set_led_update(ledPos);
+
 #endif
 //    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
 //    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {
