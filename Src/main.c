@@ -216,7 +216,6 @@ int main(void)
   }
   else
   	printf("\rMPU6050 Init failed!\r\n");
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -225,14 +224,9 @@ int main(void)
   HAL_Delay(1000);
 
   vt100ClearScreen();
-
 //  HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_Base_Start_IT(&htim11);
 #endif
-
-  
-
-
 
   while (1)
   {
@@ -335,7 +329,7 @@ int main(void)
 //	  DWT_Delay_us(1);
  */
   	set_led_update(ledPos);
-
+  	//DWT_Delay_us(1);
 #endif
 //    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
 //    if (HAL_I2C_Master_Receive_DMA(&hi2c1,(uint16_t)(0x68<<1), i2c_rd_buff, 8) == HAL_OK) {
@@ -352,7 +346,7 @@ int main(void)
 //      printf("I2C ERROR\r\n");
 //    }
 //    memset(i2c_rd_buff, 0, sizeof(i2c_rd_buff));
-process();
+  	process();
   }
 
   /* USER CODE END 3 */
@@ -406,11 +400,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
   /** Enables the Clock Security System 
   */
   HAL_RCC_EnableCSS();
-
 }
 
 /**
