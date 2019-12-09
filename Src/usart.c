@@ -201,33 +201,6 @@ uint8_t packet[PACKET_SIZE];
 uint8_t inx = 0;
 uint8_t recv_step  = 0;
 
-
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-	{
-    SerialRx.buf[SerialRx.tail] = rx2_data;
-    HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
-    
-		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
-		{
-			SerialRx.tail = 0;
-		}
-		else
-		{
-			SerialRx.tail++;
-		}
-	}
-
-  if(huart->Instance == USART1)
-	{
-    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
-    printf("%c\r\n", rx1_data);
-    	
-	}
-}
-
 void uart_recv_int_enable(void)
 {
   memset(&SerialRx, 0, sizeof(SerialRx));
@@ -373,8 +346,38 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
 
     default :
-      printf("F?��급입?��?��."); 
+      printf("default\r\n"); 
   }
+}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+
+  if(huart->Instance == USART1)
+  {
+    HAL_UART_Receive_IT(&huart1, &rx1_data, 1);
+    printf("%c\r\n", rx1_data);	
+  }
+ 
+  if(huart->Instance == USART2)
+	{
+    SerialRx.buf[SerialRx.tail] = rx2_data;
+    HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
+		if (MAX_SERIAL_BUF <= SerialRx.tail + 1)
+		{
+			SerialRx.tail = 0;
+		}
+		else
+		{
+			SerialRx.tail++;
+		}
+	}
+}
+
+void DebugPrint(uint8_t ch){
+  uint8_t buff[256];
+  memset(buff, 0, sizeof(buff));
 }
 void process(void)
 {
@@ -386,6 +389,7 @@ void process(void)
   uint16_t crc = 0;
   bool recv_end = false;
   BLE_Cmd_Data ble_cmd;
+
   head = SerialRx.head;
   tail = SerialRx.tail;
   if (head != tail) 
@@ -461,13 +465,6 @@ void process(void)
         memset(packet, 0, sizeof(packet));
         inx = 0;
       }
-      else {
-        //send NACK
-      }
-      
-			//SerialTx.buf[txLen++] = 0xf0;
-			//SerialTx.buf[txLen++] = 0xf1;
-			HAL_UART_Transmit(&huart2, SerialTx.buf, txLen, 100);
     }
   }
   HAL_UART_Receive_IT(&huart2, &rx2_data, 1);
