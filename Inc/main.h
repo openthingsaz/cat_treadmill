@@ -42,7 +42,6 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-extern float ledPos;
 extern uint8_t ledPosUser;
 extern uint8_t led_control_mode;
 extern uint8_t auto_time_off_mode;

@@ -1,8 +1,5 @@
 #include "mpu6050_dmp.h"
-//#include "IOI2C.h"
 #include "HAL_I2C.h"
-//#include "usart.h"
-//#include "usart.h"
 #include "main.h"
 #include "ema_filter.h"
 #include <stdio.h>
@@ -46,7 +43,7 @@ float Pitch, Roll, Roll_reverse, Yaw, Rangle=0.0f, Pangle=0.0f;
 
 float base_pitch=0.0f, base_roll=0.0f, base_yaw=0.0f, base_roll_reverse=0.0f;
 float dqw=1.0f, dqx=0.0f, dqy=0.0f, dqz=0.0f, sign=0.0f;
-float ledPos = 0.0f;
+uint8_t ledPos = 0;
 float targetLedPos = 0;
 float targetAnglel = 120.0f;
 uint8_t Cal_done = 0;
@@ -98,7 +95,7 @@ static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx)
 
 void run_self_test(void)
 {
-	int result;
+//	int result;
 	long gyro[3], accel[3];
 
 //	result = mpu_run_self_test(gyro, accel);
@@ -169,7 +166,7 @@ int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
 /************************** 구현 기능 ***********************************************
 * 함수 프로토 타입 : void MPU6050_newValues ​​(int16_t ax, int16_t ay, int16_t az, int16_t gx, int16_t gy, int16_t gz)
-* 기능 : 필터링을 위해 새로운 ADC 데이터를 FIFO 배열로 업데이트
+* 기능 : 필터링을 위해 새로운 ADC 데이터를 FIFO 어레이로 업데이트
 *********************************************************************************/
 void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 {
@@ -184,7 +181,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 		MPU6050_FIFO[4][i-1]=MPU6050_FIFO[4][i];
 		MPU6050_FIFO[5][i-1]=MPU6050_FIFO[5][i];
 	}
-	MPU6050_FIFO[0][9]=ax;//// 데이터 끝에 새 데이터를 배치
+	MPU6050_FIFO[0][9]=ax;  // 데이터 끝에 새 데이터를 배치
 	MPU6050_FIFO[1][9]=ay;
 	MPU6050_FIFO[2][9]=az;
 	MPU6050_FIFO[3][9]=gx;
@@ -193,7 +190,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 
 	sum=0;
 
-	for(i=0;i<10;i++){	//현재 배열의 합을 찾아 평균을 구함.
+	for(i=0;i<10;i++){	// 현재 배열의 합을 찾아 평균을 구함
 
 		sum+=MPU6050_FIFO[0][i];
 	}
@@ -231,9 +228,9 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 }
 
 
-/************************** 구현 기능 ***********************************************
-* 함수 프로토 타입 : void MPU6050_setClockSource (uint8_t source)
-* 기능 : MPU6050의 클럭 소스 설정
+/************************** 援ы쁽 湲곕뒫 ***********************************************
+* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_setClockSource (uint8_t source)
+* 湲곕뒫 : MPU6050�쓽 �겢�윮 �냼�뒪 �꽕�젙
  * CLK_SEL | Clock Source
  * --------+--------------------------------------
  * 0       | Internal oscillator
@@ -266,7 +263,7 @@ void MPU6050_setFullScaleGyroRange(uint8_t range) {
 /************************** 구현 기능 ***********************************************
 * 함수 프로토 타입 : void MPU6050_setFullScaleAccelRange (uint8_t range)
 * 기능 : MPU6050 가속도계의 최대 범위 설정
-*********************************************************************************/
+**************************************************** *****************************/
 void MPU6050_setFullScaleAccelRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
@@ -274,9 +271,9 @@ void MPU6050_setFullScaleAccelRange(uint8_t range) {
 
 /************************** 구현 기능 ***********************************************
 * 프로토 타입 : void MPU6050_setSleepEnabled (uint8_t enabled)
-* 기능 : MPU6050의 슬립 모드 진입 여부 설정
-				enabled  = 1 슬립
-			    disabled = 0
+* 기능 : 절전 모드
+* 1 슬립모드
+* 0 동작모드
 *********************************************************************************/
 void MPU6050_setSleepEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
@@ -295,7 +292,7 @@ uint8_t MPU6050_getDeviceID(void) {
 
 /************************** 구현 기능 ***********************************************
 * 프로토 타입 : uint8_t MPU6050_testConnection (void)
-* 기능 : MPU6050 연결되어 있는지 확인
+* 기능 : MPU6050이 연결되어 있는지 확인
 *********************************************************************************/
 uint8_t MPU6050_testConnection(void) {
 	if(MPU6050_getDeviceID() == 0x68)  //0b01101000;
@@ -306,8 +303,8 @@ uint8_t MPU6050_testConnection(void) {
 
 /************************** 구현 기능 ***********************************************
 * 함수 프로토 타입 : void MPU6050_setI2CMasterModeEnabled (uint8_t enabled)
-* 기능 : MPU6050 AUX I2C 호스트 설정
-*********************************************************************************/
+* 기능 : MPU6050이 AUX I2C 호스트 설정
+**************************************************** *****************************/
 void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
 }
@@ -315,7 +312,7 @@ void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 
 /************************** 구현 기능 ***********************************************
 * 함수 프로토 타입 : void MPU6050_setI2CBypassEnabled (uint8_t enabled)
-* 기능 : MPU6050 AUX I2C 호스트 설정
+* 기능 : MPU6050이 AUX I2C 회선의 호스트인지 설정
 *********************************************************************************/
 void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
@@ -324,13 +321,13 @@ void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 
 /************************** 구현 기능 ***********************************************
 * 함수 프로토 타입 : void MPU6050_initialize (void)
-* 기능 : MPU6050을 초기화하여 사용 가능한 상태로 들어갑니다.
-**************************************************** *****************************/
+* 기능 : MPU6050을 초기화.
+*********************************************************************************/
 void MPU6050_initialize(void) {
-	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //클럭설정
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//자이로 최대범위 +/- 초당 1000 도
-	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//최대 가속도 범위 +/- 2g
-	MPU6050_setSleepEnabled(0); //슬립모드 off
+	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //�겢�윮�꽕�젙
+	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//�옄�씠濡� 理쒕�踰붿쐞 +/- 珥덈떦 1000 �룄
+	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//理쒕� 媛��냽�룄 踰붿쐞 +/- 2g
+	MPU6050_setSleepEnabled(0); //�뒳由쎈え�뱶 off
 	MPU6050_setI2CMasterModeEnabled(0);	 //auxi2c off
 	MPU6050_setI2CBypassEnabled(0);	 //bypass auxi2c
 }
@@ -338,7 +335,7 @@ void MPU6050_initialize(void) {
 //static inline
 void run_self_test2(void)
 {
-    int result;
+//    int result;
     long gyro[3], accel[3];
 
 //    result = mpu_run_self_test(gyro, accel);
@@ -412,9 +409,9 @@ void run_self_test2(void)
 }
 
 /****************************************************************************
-기능 : MPU6050의 내장 DMP 초기화
-입력 매개 변수 : 없음
-반환 값 : 없음
+ * 기능 : MPU6050의 내장 DMP 초기화
+ * 입력 매개 변수 : 없음
+ * 반환 값 : None
 ****************************************************************************/
 void DMP_Init(void)
 { 
@@ -449,36 +446,22 @@ void DMP_Init(void)
 		if(!mpu_set_dmp_state(1))
 			printf("mpu_set_dmp_state complete ......\r\n");
 	}
+	Cal_done = 1;
 	//	Flag_Show=0;
 }
 
-float qToFloat(long number, unsigned char q)
-{
-	unsigned long mask;
-	for (int i=0; i<q; i++)
-	{
-		mask |= (1<<i);
-	}
-	return (number >> q) + ((number & mask) / (float) (2<<(q-1)));
-}
-
 /****************************************************************************
-기능 : MPU6050 내장 DMP의 자세 정보를 읽습니다.
-입력 매개 변수 : 없음
-반환 값 : 없음
+ * 기능 : MPU6050 내장 DMP의 자세 정보를 읽습니다.
+ * 입력 매개 변수 : 없음
+ * 반환 값 : None
 ****************************************************************************/
-//int8_t sign=3, sign_hold=0;//sign_back=3;
 void Read_DMP(void)
 {	
 	unsigned long sensor_timestamp;
 	unsigned char more;
 	long quat[4];
-	uint8_t degrees = 1;
-	//	float gravity0, gravity1, gravity2, ypr0, ypr1, ypr2;
 
-	int8_t req;
-
-	req = dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
+	dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
 	if (sensors & INV_WXYZ_QUAT )
 	{
 
@@ -487,54 +470,26 @@ void Read_DMP(void)
 		dqy = quat[2] / q30; //y
 		dqz = quat[3] / q30; //z
 
-//		Pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3;
 		Roll = atan2(2 * dqy * dqz + 2 * dqw * dqx, -2 * dqx * dqx - 2 * dqy* dqy + 1); // roll
 
-//		float ysqr = dqy * dqy;
-////		float t0 = -2.0f * (ysqr + dqz * dqz) + 1.0f;
-////		float t1 = +2.0f * (dqx * dqy - dqw * dqz);
-//		float t2 = -2.0f * (dqx * dqz + dqw * dqy);
-//		float t3 = +2.0f * (dqy * dqz - dqw * dqx);
-//		float t4 = -2.0f * (dqx * dqx + ysqr) + 1.0f;
-//
-//		// Keep t2 within range of asin (-1, 1)
-//		t2 = t2 > 1.0f ? 1.0f : t2;
-//		t2 = t2 < -1.0f ? -1.0f : t2;
+		Roll *= (180.0 / PI);
 
-//		Pitch = asin(t2) * 2;
-//		Roll = atan2(t3, t4); //radian
-//		Roll_reverse = atan2(t4, t3); //radian
-//		Yaw = atan2(t1, t0);
+		if(Cal_done) {
+			Roll  -= base_roll;
+			//
+			if (Roll < 0) Roll = 360.0 + Roll;
+			//
+			ledPos =  (uint8_t)((LED_TOTAL / 360.0f) * roundf(Roll));
 
-		if(degrees)
-		{
-//			Pitch *= (180.0 / PI);
-			Roll *= (180.0 / PI);
-//			Roll_reverse *= (180.0 / PI);
-//			Yaw *= (180.0 / PI);
-
-			if(Cal_done) {
-				Roll  -= base_roll;
-//				Roll_reverse -= base_roll_reverse;
-//				Pitch -= base_pitch;
-//				Yaw   -= base_yaw;
-
-				if (Roll < 0) Roll = 360.0 + Roll;
-//				if (Pitch < 0) Pitch = 360.0 + Pitch;
-//				if (Yaw < 0) Yaw = 360.0 + Yaw;
-//				if (Roll_reverse < 0) Roll_reverse = 360.0 + Roll_reverse;
-
-				ledPos =  (LED_TOTAL / 360.0f) * roundf(Roll);//Roll);
-				ledPos = ledPos - targetLedPos;
-				if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
-			}
+			if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
 		}
 	}
 }
+
 /****************************************************************************
-기능 : MPU6050 내장 온도 센서에서 데이터 읽기
-입력 매개 변수 : 없음
-반환 값 : 섭씨 온도
+ * 기능 : MPU6050 내장 온도 센서에서 데이터 읽기
+ * 입력 매개 변수 : 없음
+ * 반환 값 : 섭씨
 ****************************************************************************/
 int Read_Temperature(void)
 {	   

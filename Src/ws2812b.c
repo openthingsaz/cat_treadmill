@@ -11,6 +11,7 @@
 #include "tim.h"
 #include "power.h"
 #include "ble_cmd.h"
+#include "mpu6050_dmp.h"
 
 const uint8_t leddata[256*4] = { // size = 256 * 3
   0X44 , 0X44 , 0X44 , 0X44 , // 0
