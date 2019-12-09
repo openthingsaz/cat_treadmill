@@ -130,6 +130,7 @@ int main(void)
   initLEDMOSI();
   time_setup();
   DMP_Init();
+  targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
 
   while (1)
   {

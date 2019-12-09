@@ -43,7 +43,7 @@ float Pitch, Roll, Roll_reverse, Yaw, Rangle=0.0f, Pangle=0.0f;
 
 float base_pitch=0.0f, base_roll=0.0f, base_yaw=0.0f, base_roll_reverse=0.0f;
 float dqw=1.0f, dqx=0.0f, dqy=0.0f, dqz=0.0f, sign=0.0f;
-uint8_t ledPos = 0;
+float ledPos = 0;
 float targetLedPos = 0;
 float targetAnglel = 120.0f;
 uint8_t Cal_done = 0;
@@ -91,73 +91,6 @@ static  unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx)
 
 
 	return scalar;
-}
-
-void run_self_test(void)
-{
-//	int result;
-	long gyro[3], accel[3];
-
-//	result = mpu_run_self_test(gyro, accel);
-//	if (result == 0x7) {
-//		/* Test passed. We can trust the gyro data here, so let's push it down
-//		 * to the DMP.
-//		 */
-//		float sens;
-//		unsigned short accel_sens;
-//		mpu_get_gyro_sens(&sens);
-//		gyro[0] = (long)(gyro[0] * sens);
-//		gyro[1] = (long)(gyro[1] * sens);
-//		gyro[2] = (long)(gyro[2] * sens);
-//
-//		printf("\rgyro : %7.4f, %7.4f, %7.4f\n",
-//				gyro[0]/1.0f,
-//				gyro[1]/1.0f,
-//				gyro[2]/1.0f);
-//
-//		dmp_set_gyro_bias(gyro);
-//		mpu_get_accel_sens(&accel_sens);
-//		accel[0] *= accel_sens;
-//		accel[1] *= accel_sens;
-//		accel[2] *= accel_sens;
-//
-//		printf("\raccel:   %7.4f, %7.4f, %7.4f\n",
-//				accel[0]/1.0f,
-//				accel[1]/1.0f,
-//				accel[2]/1.0f);
-//
-//		dmp_set_accel_bias(accel);
-//		printf("setting bias succesfully ......\r\n");
-//	}
-
-	gyro[0] = (long)-7523532;
-	gyro[1] = (long)1612185;
-	gyro[2] = (long)-335872;
-	dmp_set_gyro_bias(gyro);
-
-	accel[0] = (long)88342528;
-	accel[1] = (long)-34340864;
-	accel[2] = (long)-72613888;
-	dmp_set_accel_bias(accel);
-
-	accel[0] = 0.0412f;
-	accel[1] = -0.0213f;
-	accel[2] = -0.0020f;
-
-	gyro[0] = -53.8675f;
-	gyro[1] = -13.7650f;
-	gyro[2] = -10.1487f;
-
-    for(int i = 0; i<3; i++) {
-    	gyro[i] = (long)(gyro[i] * 16.384f); //convert to +-2000dps
-    	accel[i] *= 16384.0f;//2048.f; //convert to +-16G
-    	accel[i] = accel[i] >> 16;
-    	gyro[i] = (long)(gyro[i] >> 16);
-    }
-
-    mpu_set_gyro_bias_reg(gyro);
-    mpu_set_accel_bias_reg(accel);
-    printf("setting bias succesfully ......\r\n");
 }
 
 uint8_t buffer[14];
@@ -320,33 +253,154 @@ void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 * 기능 : MPU6050을 초기화.
 *********************************************************************************/
 void MPU6050_initialize(void) {
-	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //�겢�윮�꽕�젙
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//�옄�씠濡� 理쒕�踰붿쐞 +/- 珥덈떦 1000 �룄
-	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//理쒕� 媛��냽�룄 踰붿쐞 +/- 2g
-	MPU6050_setSleepEnabled(0); //�뒳由쎈え�뱶 off
+	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); // 클럭설정
+	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//자이로 최대범위 +/- 1000 도 (초당)
+	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//가속도 최대범위 +/- 2g
+	MPU6050_setSleepEnabled(0); //동작모드 설정
 	MPU6050_setI2CMasterModeEnabled(0);	 //auxi2c off
 	MPU6050_setI2CBypassEnabled(0);	 //bypass auxi2c
 }
+//#define CAL_MPU
+void run_self_test(void)
+{
 
+	long gyro[3], accel[3];
+#ifdef CAL_MPU
+		int result;
+	result = mpu_run_self_test(gyro, accel);
+	if (result == 0x7) {
+		/* Test passed. We can trust the gyro data here, so let's push it down
+		 * to the DMP.
+		 */
+		float sens;
+		unsigned short accel_sens;
+		mpu_get_gyro_sens(&sens);
+		gyro[0] = (long)(gyro[0] * sens);
+		gyro[1] = (long)(gyro[1] * sens);
+		gyro[2] = (long)(gyro[2] * sens);
+
+		printf("\rgyro : %7.4f, %7.4f, %7.4f\n",
+				(float)gyro[0]/1.0f,
+				(float)gyro[1]/1.0f,
+				(float)gyro[2]/1.0f);
+
+		dmp_set_gyro_bias(gyro);
+		mpu_get_accel_sens(&accel_sens);
+		accel[0] *= accel_sens;
+		accel[1] *= accel_sens;
+		accel[2] *= accel_sens;
+
+		printf("\raccel:   %7.4f, %7.4f, %7.4f\n",
+				(float)accel[0]/1.0f,
+				(float)accel[1]/1.0f,
+				(float)accel[2]/1.0f);
+
+		dmp_set_accel_bias(accel);
+		printf("setting bias succesfully ......\r\n");
+	}
+#else
+//2g
+//	gyro[0] = (long)-7523532;
+//	gyro[1] = (long)1612185;
+//	gyro[2] = (long)-335872;
+
+	//new 2g
+	gyro[0] = (long)-9135718;
+	gyro[1] = (long)-2418278;
+	gyro[2] = (long)-1880883;
+
+	//8g
+//	gyro[0] = (long)-7389184;
+//	gyro[1] = (long)-1746534;
+//	gyro[2] = (long)-1545011;
+	dmp_set_gyro_bias(gyro);
+
+	//2g
+//	accel[0] = (long)88342528;
+//	accel[1] = (long)-34340864;
+//	accel[2] = (long)-72613888;
+
+	//new 2g
+	accel[0] = (long)53477376;
+	accel[1] = (long)-47710208;
+	accel[2] = (long)-8781824;
+
+	//8g
+//	accel[0] = (long)14385152;
+//	accel[1] = (long)-11370496;
+//	accel[2] = (long)-1114112;
+	dmp_set_accel_bias(accel);
+
+//	//TEST OLD
+//	accel[0] = 0.0412f;
+//	accel[1] = -0.0213f;
+//	accel[2] = -0.0020f;
+//
+//	gyro[0] = -53.8675f;
+//	gyro[1] = -13.7650f;
+//	gyro[2] = -10.1487f;
+
+	//TEST 1 2g
+//    accel[0] =  0.0779f;
+//    accel[1] = -0.0310f;
+//    accel[2] = -0.0649f;
+//
+//    gyro[0] = -5.9375f;
+//    gyro[1] =  1.1875f;
+//    gyro[2] = -0.3125f;
+
+	//TEST 2 2g
+    accel[0] =  0.0491f;
+    accel[1] = -0.0376f;
+    accel[2] = -0.0042f;
+    gyro[0] = -6.8750f;
+    gyro[1] = -1.7500f;
+    gyro[2] = -1.3750f;
+
+	//TEST 2 8g
+//    accel[0] =  0.0485f;
+//    accel[1] = -0.0394f;
+//    accel[2] = -0.0068f;
+//    gyro[0] = -6.8750f;
+//    gyro[1] = -1.7500f;
+//    gyro[2] = -1.3750f;
+#endif
+
+    for(int i = 0; i<3; i++) {
+    	gyro[i] = (long)(gyro[i] * 16.384f); //convert to +-2000dps
+    	accel[i] *= 16384.0f;//2048.f; //convert to +-16G
+    	accel[i] = accel[i] >> 16;
+    	gyro[i] = (long)(gyro[i] >> 16);
+    }
+
+    mpu_set_gyro_bias_reg(gyro);
+    mpu_set_accel_bias_reg(accel);
+    printf("setting bias succesfully ......\r\n");
+
+}
+
+//#define CAL_FRS
 //static inline
 void run_self_test2(void)
 {
-//    int result;
+
     long gyro[3], accel[3];
 
-//    result = mpu_run_self_test(gyro, accel);
-//
-//    if (result == 0x7) {
-//    	printf("\rPassed!\n");
-//        printf("\raccel: %7.4f %7.4f %7.4f\n",
-//                    accel[0]/65536.f,
-//                    accel[1]/65536.f,
-//                    accel[2]/65536.f);
-//        printf("\rgyro: %7.4f %7.4f %7.4f\n",
-//                    gyro[0]/65536.f,
-//                    gyro[1]/65536.f,
-//                    gyro[2]/65536.f);
+#ifdef CAL_FRS
+    int result;
+    result = mpu_run_self_test(gyro, accel);
 
+    if (result == 0x7) {
+    	printf("\rPassed!\n");
+        printf("\raccel: %7.4f %7.4f %7.4f\n",
+                    accel[0]/65536.f,
+                    accel[1]/65536.f,
+                    accel[2]/65536.f);
+        printf("\rgyro: %7.4f %7.4f %7.4f\n",
+                    gyro[0]/65536.f,
+                    gyro[1]/65536.f,
+                    gyro[2]/65536.f);
+#else
         accel[0] =  0.0779f;
         accel[1] = -0.0310f;
         accel[2] = -0.0649f;
@@ -354,7 +408,7 @@ void run_self_test2(void)
         gyro[0] = -5.9375f;
         gyro[1] =  1.1875f;
         gyro[2] = -0.3125f;
-
+#endif
         /* Test passed. We can trust the gyro data here, so now we need to update calibrated data*/
 #define USE_CAL_HW_REGISTERS
         #ifdef USE_CAL_HW_REGISTERS
@@ -393,15 +447,18 @@ void run_self_test2(void)
 		gyro[2] = (long) (gyro[2] * gyro_sens);
 		inv_set_gyro_bias(gyro, 3);
 #endif
-//    }
-//    else {
-//            if (!(result & 0x1))
-//                printf("\rGyro failed.\n");
-//            if (!(result & 0x2))
-//            	printf("\rAccel failed.\n");
-//            if (!(result & 0x4))
-//            	printf("\rCompass failed.\n");
-//     }
+
+#ifdef CAL_FRS
+    }
+    else {
+            if (!(result & 0x1))
+                printf("\rGyro failed.\n");
+            if (!(result & 0x2))
+            	printf("\rAccel failed.\n");
+            if (!(result & 0x4))
+            	printf("\rCompass failed.\n");
+     }
+#endif
 }
 
 /****************************************************************************
@@ -435,8 +492,9 @@ void DMP_Init(void)
 				DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_RAW_GYRO | DMP_FEATURE_SEND_CAL_GYRO))//|
 				//DMP_FEATURE_GYRO_CAL))
 			printf("dmp_enable_feature complete ......\r\n");
+		//1번 캘리브레이션 하고 2번 캘리브레이션
 		run_self_test();
-		run_self_test2();
+//		run_self_test2();
 		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))
 			printf("dmp_set_fifo_rate complete ......\r\n");
 		if(!mpu_set_dmp_state(1))
@@ -471,12 +529,10 @@ void Read_DMP(void)
 		Roll *= (180.0 / PI);
 
 		if(Cal_done) {
-			Roll  -= base_roll;
-			//
 			if (Roll < 0) Roll = 360.0 + Roll;
 			//
-			ledPos =  (uint8_t)((LED_TOTAL / 360.0f) * roundf(Roll));
-
+			ledPos =  (LED_TOTAL / 360.0f) * roundf(Roll);
+			ledPos = ledPos - targetLedPos;
 			if (ledPos < 0) ledPos = LED_TOTAL + ledPos;
 		}
 	}

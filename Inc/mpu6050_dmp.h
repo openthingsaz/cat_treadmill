@@ -373,7 +373,7 @@ extern float Pitch,Roll,Roll_reverse,Yaw, Rangle, Pangle;
 extern float base_pitch,base_roll,base_yaw,base_roll_reverse;
 extern float dqw, dqx, dqy, dqz;
 extern uint8_t Cal_done;
-extern uint8_t ledPos;
+extern float ledPos;
 extern float targetLedPos;
 extern float targetAnglel;
 

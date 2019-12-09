@@ -566,10 +566,10 @@ const struct gyro_reg_s reg = {
 #if 1
 const struct test_s test = {
     .gyro_sens      = 32768/2000,
-    .accel_sens     = 32768/8,
+    .accel_sens     = 32768/2,
     .reg_rate_div   = 0,    /* 1kHz. */
     .reg_lpf        = 1,    /* 188Hz. */
-    .reg_gyro_fsr   = 0,    /* 250dps. */
+    .reg_gyro_fsr   = 3,    /* 250dps. */
     .reg_accel_fsr  = 0x0, /* 16g. */
     .wait_ms        = 1,
     .packet_thresh  = 5,    /* 5% */
@@ -911,7 +911,7 @@ int mpu_init(void)
 
 	if (mpu_set_gyro_fsr(2000))
 		return -1;
-	if (mpu_set_accel_fsr(2))
+	if (mpu_set_accel_fsr(8))
 		return -1;
 	if (mpu_set_lpf(42))
 		return -1;
