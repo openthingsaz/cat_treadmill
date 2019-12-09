@@ -14,12 +14,12 @@ extern "C" {
 #endif
   
 /*EMA ALPHAS*/
-#define EMA_Alpha 0.76f ///< initialization of EMA alpha
+#define EMA_Alpha 0.6f ///< initialization of EMA alpha
   
   /**
   Section: Macro Declarations
   */
-#define round( x )        ( ( x ) >= 0 ? (long)( ( x ) + 0.5 ) : (long)( ( x ) - 0.5 ) )
+//#define round( x )        ( ( x ) >= 0 ? (long)( ( x ) + 0.5 ) : (long)( ( x ) - 0.5 ) )
 //#define EMA_Function( alpha, latest, stored )     (double)( round( (alpha) * (latest) ) )  + ( round( ( (1) - (alpha) ) * (stored)))
 //#define EMA_Filter( sensorValue )  ((EMA_S) = ( EMA_Alpha * (max(1,sensorValue)) ) + ( ( 1 - EMA_Alpha ) * EMA_S ))     
   /**

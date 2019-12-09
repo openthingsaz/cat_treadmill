@@ -1348,44 +1348,6 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,
 
     myget_ms(timestamp);
 
-//				float roll=atan2(2*(quat[0]*quat[1]+quat[2]*quat[3]), 1-2*(quat[1]*quat[1]+quat[2]*quat[2]));
-//				float pitch=asin(CLMAP(2*(quat[0]*quat[2]-quat[1]*quat[3]), -1.0f, 1.0f));
-//				float yaw=atan2(2*(quat[0]*quat[3]+quat[1]*quat[2]), 1-2 * (quat[3]*quat[3]+quat[2]*quat[2]));
-//
-//      	vt100SetCursorPos( 3, 0);
-//      	printf("%7.2f, %7.2f, %7.2f\r\n", roll, pitch, yaw);
-
-
-//    // below calculations unnecessary for orientation only using toxilibs
-//    quat_q14[0] = quat[0]  / 16384;
-//    quat_q14[1] = quat[1]  / 16384;
-//    quat_q14[2] = quat[2]  / 16384;
-//    quat_q14[3] = quat[3]  / 16384;
-//    // calculate gravity vector
-//    gravity[0] = 2 * (quat_q14[1]*quat_q14[3] - quat_q14[0]*quat_q14[2]);
-//    gravity[1] = 2 * (quat_q14[0]*quat_q14[1] + quat_q14[2]*quat_q14[3]);
-//    gravity[2] = quat_q14[0]*quat_q14[0] - quat_q14[1]*quat_q14[1] - quat_q14[2]*quat_q14[2] + quat_q14[3]*quat_q14[3];
-//
-//    // calculate Euler angles
-//    euler[0] = atan2(2*quat_q14[1]*quat_q14[2] - 2*quat_q14[0]*quat_q14[3], 2*quat_q14[0]*quat_q14[0] + 2*quat_q14[1]*quat_q14[1] - 1);
-//    euler[1] = -asin(2*quat_q14[1]*quat_q14[3] + 2*quat_q14[0]*quat_q14[2]);
-//    euler[2] = atan2(2*quat_q14[2]*quat_q14[3] - 2*quat_q14[0]*quat_q14[1], 2*quat_q14[0]*quat_q14[0] + 2*quat_q14[3]*quat_q14[3] - 1);
-//
-//    // calculate yaw/pitch/roll angles
-//    ypr[0] = atan2(2*quat_q14[1]*quat_q14[2] - 2*quat_q14[0]*quat_q14[3], 2*quat_q14[0]*quat_q14[0] + 2*quat_q14[1]*quat_q14[1] - 1);
-//    ypr[1] = atan(gravity[0] / sqrt(gravity[1]*gravity[1] + gravity[2]*gravity[2]));
-//    ypr[2] = atan(gravity[1] / sqrt(gravity[0]*gravity[0] + gravity[2]*gravity[2]));
-//
-//    // output various components for debugging
-//    vt100SetCursorPos( 3, 0);
-////    printf("q:\t" + round(quat[0]*100.0f)/100.0f + "\t" + round(quat[1]*100.0f)/100.0f + "\t" + round(quat[2]*100.0f)/100.0f + "\t" + round(quat[3]*100.0f)/100.0f);
-//    printf("q:\t %7.2f, %7.2f ,%7.2f ,%7.2f\r\n", round(quat[0]*100.0f)/100.0f, round(quat[1]*100.0f)/100.0f, round(quat[2]*100.0f)/100.0f, round(quat[3]*100.0f)/100.0f);
-////    printf("euler:\t" + euler[0]*180.0f/PI + "\t" + euler[1]*180.0f/PI + "\t" + euler[2]*180.0f/PI);
-//    printf("euler:\t %7.2f, %7.2f, %7.2f\r\n", euler[0]*180.0f/PI, euler[1]*180.0f/PI, euler[2]*180.0f/PI);
-////    printf("ypr:\t" + ypr[0]*180.0f/PI + "\t" + ypr[1]*180.0f/PI + "\t" + ypr[2]*180.0f/PI);
-//    printf("ypr:\t %7.2f, %7.2f, %7.2f\r\n", ypr[0]*180.0f/PI, ypr[1]*180.0f/PI, ypr[2]*180.0f/PI);
-
-
     return 0;
 }
 

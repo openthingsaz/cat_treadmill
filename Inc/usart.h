@@ -69,18 +69,19 @@ void MX_USART2_UART_Init(void);
 typedef struct
 {
 	uint8_t  buf[MAX_SERIAL_BUF];
-	uint16_t head; //처리하면 head 증가.
-	uint16_t tail; //수신되면 tail 증가.
+	uint16_t head; //처리?���?? head 증�?.
+	uint16_t tail; //?��?��?���?? tail 증�?.
 } Buffer_Serial;
 
-extern Buffer_Serial SerialTx; //송신은 head,tail 사용안하고 buf만 사용.
-extern Buffer_Serial SerialRx; //수신은 링버퍼 사용
+extern Buffer_Serial SerialTx; //?��?��?? head,tail ?��?��?��?���?? buf�?? ?��?��.
+extern Buffer_Serial SerialRx; //?��?��?? 링버?�� ?��?��
 
 typedef struct
 {
   uint8_t addr;
   uint8_t cmd;
-  uint32_t data;
+  uint8_t data;
+  uint16_t crc;
 } BLE_Cmd_Data;
 
 void process(void);

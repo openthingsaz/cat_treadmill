@@ -25,8 +25,8 @@
 #define __MPU6050_H
 
 
-#define MPU6050_I2C_PORT		hi2c1
-//#define MPU6050_I2C_PORT		hi2c2
+//#define MPU6050_I2C_PORT		hi2c1
+#define MPU6050_I2C_PORT		hi2c3
 
 #define MPU6050_DEVICE_ADDR         0xD0
 
@@ -40,12 +40,16 @@
 #define MPU6050_RA_X_FINE_GAIN      0x03 //[7:0] X_FINE_GAIN
 #define MPU6050_RA_Y_FINE_GAIN      0x04 //[7:0] Y_FINE_GAIN
 #define MPU6050_RA_Z_FINE_GAIN      0x05 //[7:0] Z_FINE_GAIN
-#define MPU6050_RA_XA_OFFS_H        0x06 //[15:0] XA_OFFS
-#define MPU6050_RA_XA_OFFS_L_TC     0x07
-#define MPU6050_RA_YA_OFFS_H        0x08 //[15:0] YA_OFFS
-#define MPU6050_RA_YA_OFFS_L_TC     0x09
-#define MPU6050_RA_ZA_OFFS_H        0x0A //[15:0] ZA_OFFS
-#define MPU6050_RA_ZA_OFFS_L_TC     0x0B
+#define MPU6050_RA_XA_OFFSET_H      0x06 //[15:0] XA_OFFS User-defined trim values for accelerometer
+#define MPU6050_RA_XA_OFFSET_L_TC   0x07
+#define MPU6050_RA_YA_OFFSET_H      0x08 //[15:0] YA_OFFS
+#define MPU6050_RA_YA_OFFSET_L_TC   0x09
+#define MPU6050_RA_ZA_OFFSET_H      0x0A //[15:0] ZA_OFFS
+#define MPU6050_RA_ZA_OFFSET_L_TC   0x0B
+#define MPU6050_RA_SELF_TEST_X      0x0D //[7:5] XA_TEST[4-2], [4:0] XG_TEST[4-0]
+#define MPU6050_RA_SELF_TEST_Y      0x0E //[7:5] YA_TEST[4-2], [4:0] YG_TEST[4-0]
+#define MPU6050_RA_SELF_TEST_Z      0x0F //[7:5] ZA_TEST[4-2], [4:0] ZG_TEST[4-0]
+#define MPU6050_RA_SELF_TEST_A      0x10 //[5:4] XA_TEST[1-0], [3:2] YA_TEST[1-0], [1:0] ZA_TEST[1-0]
 #define MPU6050_RA_XG_OFFS_USRH     0x13 //[15:0] XG_OFFS_USR
 #define MPU6050_RA_XG_OFFS_USRL     0x14
 #define MPU6050_RA_YG_OFFS_USRH     0x15 //[15:0] YG_OFFS_USR
@@ -356,6 +360,8 @@
 #define true 1
 #define false 0
 
+#define PI 3.1415926535897932384626433832795
+
 #define	ALPHA	0.95         // Į������ ���İ�
 
 
@@ -385,6 +391,47 @@ typedef enum {
 	MPU6050_Device_1 = 0x02 /*!< AD0 pin is set to high */
 } MPU6050_Device_t;
 
+// Set initial input parameters
+enum Ascale {
+  AFS_2G = 0,
+  AFS_4G,
+  AFS_8G,
+  AFS_16G
+};
+
+enum Gscale {
+  GFS_250DPS = 0x00,
+  GFS_500DPS,
+  GFS_1000DPS,
+  GFS_2000DPS
+};
+
+extern float x_acc, y_acc, z_acc, x_gyr, y_gyr, z_gyr, x_fil, y_fil, z_fil;
+extern volatile float last_x_angle, last_y_angle, last_z_angle;
+
+// Specify sensor full scale
+extern int Gscale;
+extern int Ascale;
+extern float aRes, gRes; // scale resolutions per LSB for the sensors
+
+// parameters for 6 DoF sensor fusion calculations
+extern float GyroMeasError, beta, GyroMeasDrift, zeta, deltat, count, q[4];
+extern int lastUpdate, firstUpdate, Now;
+extern float Pitch, Roll, Yaw;
+
+extern int16_t accelCount[3];  // Stores the 16-bit signed accelerometer sensor output
+extern float ax, ay, az;       // Stores the real accel value in g's
+extern int16_t gyroCount[3];   // Stores the 16-bit signed gyro sensor output
+extern float gx, gy, gz;       // Stores the real gyro value in degrees per seconds
+extern int16_t tempCount;   // Stores the real internal chip temperature in degrees Celsius
+extern float temperature;
+
+extern float gyroBias[3];
+extern float accelBias[3]; // Bias corrections for gyro and accelerometer
+extern float SelfTest[6];
+
+//extern float ledPos;
+
 uint8_t MPU6050_ReadOneByte(uint8_t RegAddr);
 void MPU6050_WriteOneByte(uint8_t RegAddr, uint8_t Data);
 bool MPU6050_WriteBits(uint8_t RegAddr, uint8_t BitStart, uint8_t Length, uint8_t Data);
@@ -401,7 +448,15 @@ void MPU6050_SetLastReadAngleData(uint32_t time, float x, float y, float z, floa
 void MPU6050_GetRawAccelGyro(int16_t * AccelGyro);
 void MPU6050_CalibrateSensors(void);
 void MPU6050_SendSerialAccelGryro( int16_t accelgyro[6] );
+
+void MPU6050_GetGres(void);
+void MPU6050_GetAres(void);
+int16_t MPU6050_ReadTempData(void);
+void MPU6050_ReadGyroData(int16_t * destination);
+void MPU6050_ReadAccelData(int16_t * destination);
+void MPU6050_SelfTest(float * destination);
+void MPU6050_Calibration(float * dest1, float * dest2);
+void MPU6050_Reset( void );
 #endif
 
 /******************* (C) COPYRIGHT 2014 Waveshare *****END OF FILE*******************/
-

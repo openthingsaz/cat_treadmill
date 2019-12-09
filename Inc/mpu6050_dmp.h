@@ -1,9 +1,6 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
-/**************************************************************************
-���ߣ�ƽ��С��֮��
-�ҵ��Ա�С�꣺http://shop114407458.taobao.com/
- **************************************************************************/
+
 //#include "sys.h"
 #include "stdint.h"
 #include "math.h"
@@ -367,27 +364,32 @@
 
 #define MPU6050_WHO_AM_I_BIT        6
 #define MPU6050_WHO_AM_I_LENGTH     6
+
 extern	short gyro[3], accel[3];
 extern int16_t Gx_offset,Gy_offset,Gz_offset;
 extern float Acc1G_Values;
-extern float Pitch,Roll,Yaw, Rangle, Pangle;
-extern uint8_t ledPos;
+extern float Pitch,Roll,Roll_reverse,Yaw, Rangle, Pangle;
 
-extern float base_pitch,base_roll,base_yaw;
+extern float base_pitch,base_roll,base_yaw,base_roll_reverse;
 extern float dqw, dqx, dqy, dqz;
 extern uint8_t Cal_done;
+extern float ledPos;
+extern float targetLedPos;
+extern float targetAnglel;
 
 //extern float q0,q1,q2,q3;
-//���ⲿ���õ�API
-void MPU6050_initialize(void); //��ʼ��
-uint8_t MPU6050_testConnection(void); //���MPU6050�Ƿ����
-//��ȡADCֵ
+// 외부 호출을위한 API
+void MPU6050_initialize(void); // 초기화
+uint8_t MPU6050_testConnection(void);  // MPU6050 상태 확인
+//占쏙옙혤ADC令
 void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
 void MPU6050_getlastMotion6(int16_t* ax, int16_t* ay, 
 														int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
-uint8_t MPU6050_getDeviceID(void); //��ȡMPU6050��ID
-void MPU6050_InitGyro_Offset(void);//��ʼ��������ƫ��
-void DMP_Init(void);
-void Read_DMP(void);
+uint8_t MPU6050_getDeviceID(void); // MPU6050 ID 체크
+void MPU6050_InitGyro_Offset(void); // 자이로 오프셋 초기화
+void DMP_Init(void); // DMP 초기화
+void Read_DMP(void); // 쿼터니언 데이터 획득 후 각도 변환
+void run_self_test(void); // 캘리브레이션 1
+void run_self_test2(void); //캘리브레이션 2
 int Read_Temperature(void);
 #endif
