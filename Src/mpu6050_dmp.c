@@ -228,10 +228,10 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_setClockSource (uint8_t source)
-* 湲곕뒫 : MPU6050�쓽 �겢�윮 �냼�뒪 �꽕�젙
- * CLK_SEL | Clock Source
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setClockSource (uint8_t source)
+* 기능 : 설정 MPU6050 클럭 소스
+ * CLK_SEL | 클럭 소스
  * --------+--------------------------------------
  * 0       | Internal oscillator
  * 1       | PLL with X Gyro reference
