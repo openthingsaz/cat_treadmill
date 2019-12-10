@@ -10,7 +10,7 @@
  *                  differentiate among MPL and general driver function calls.
  */
 //#include "sys.h"
-#include "mpu6050.h"
+#include "mpu6050_dmp.h"
 #include <stdio.h>
 #include <string.h>
 #include "math.h"

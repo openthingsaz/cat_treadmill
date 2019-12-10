@@ -12,13 +12,9 @@
  *                  MPU9150 (or MPU6050 w/ AK8975 on the auxiliary bus)
  *                  MPU9250 (or MPU6500 w/ AK8963 on the auxiliary bus)
  */
-//#include <sys.h>
-//#include "delay.h"
 #include "stm32f4xx_hal.h"
-//#include "usart.h"
-//#include "IOI2C.h"
 #include "HAL_I2C.h"
-#include "mpu6050.h"
+#include "mpu6050_dmp.h"
 #include "string.h"
 #include "time.h"
 #include <stdio.h>
