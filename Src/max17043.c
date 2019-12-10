@@ -60,7 +60,7 @@ int32_t MAX17043_readRegister (int32_t addrL, int32_t addrH) {
 
 // Function writing values to register
 int32_t MAX17043_writeRegister(int32_t addr, int16_t data ){
-  HAL_I2C_Mem_Write(&hi2c1, MAX17043_ADDRESS, addr, I2C_MEMADD_SIZE_16BIT, &data, sizeof(data), 100);
+  HAL_I2C_Mem_Write(&hi2c1, MAX17043_ADDRESS, addr, I2C_MEMADD_SIZE_16BIT, (uint8_t *)&data, sizeof(data), 100);
   return 1;
 }
 
@@ -144,10 +144,10 @@ void max17043_init(void)
 
   MAX17043_quickStart ();
 
-  uint32_t cellVoltage = MAX17043_getVCell ();
-  printf("V: %1.5f\r\n",cellVoltage);
+  //uint32_t cellVoltage = MAX17043_getVCell ();
+  //printf("V: %1.5f\r\n",cellVoltage);
 
-  printf("C: %2d\r\n", MAX17043_getSoC());    
+  //printf("C: %2d\r\n", MAX17043_getSoC());
 
 
 
