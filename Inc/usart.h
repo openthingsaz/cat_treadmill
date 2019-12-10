@@ -69,11 +69,11 @@ void MX_USART2_UART_Init(void);
 typedef struct
 {
 	uint8_t  buf[MAX_SERIAL_BUF];
-	uint16_t head; //처리?���?? head 증�?.
-	uint16_t tail; //?��?��?���?? tail 증�?.
+	uint16_t head; //처리?���?? head 증�?.
+	uint16_t tail; //?��?��?���?? tail 증�?.
 } Buffer_Serial;
 
-extern Buffer_Serial SerialTx; //?��?��?? head,tail ?��?��?��?���?? buf�?? ?��?��.
+extern Buffer_Serial SerialTx; //?��?��?? head,tail ?��?��?��?���?? buf�?? ?��?��.
 extern Buffer_Serial SerialRx; //?��?��?? 링버?�� ?��?��
 
 typedef struct
