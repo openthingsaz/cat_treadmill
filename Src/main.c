@@ -70,7 +70,7 @@ static void MX_NVIC_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//float ledPos = 0;
+uint8_t ledPosTmp = 0;
 uint8_t ledPosUser = 0;
 uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Select
 uint8_t auto_time_off_mode = 0;
@@ -124,6 +124,7 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
   vt100SetCursorPos( 0, 0);
+   HAL_TIM_Base_Start_IT(&htim11);
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_gpio_init();
@@ -265,6 +266,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  if (htim->Instance == TIM11)
+  {
+    if ( ledPos_before == ledPosTmp) 
+    {
+      timecnt++;
+      if (timecnt >= OFF_TIME) 
+      {
+        timecnt = 0;
+        set_sleep();
+      }
+    }
+    else 
+    {
+      ledPosTmp = ledPos_before;
+    }
+  }
 
   /* USER CODE END Callback 1 */
 }
