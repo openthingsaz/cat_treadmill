@@ -27,7 +27,7 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#define OFF_TIME 5 // 5 seconds
 /* USER CODE END Includes */
 
 extern TIM_HandleTypeDef htim1;
@@ -36,6 +36,7 @@ extern TIM_HandleTypeDef htim11;
 
 /* USER CODE BEGIN Private defines */
 extern uint32_t timestamp;
+extern uint32_t timecnt;
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);

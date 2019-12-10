@@ -40,7 +40,7 @@ void set_led_col(uint32_t data);
 extern uint8_t red;
 extern uint8_t green;
 extern uint8_t blue;
-
+extern uint8_t ledPos_before;
 
 #ifdef __cplusplus
 }

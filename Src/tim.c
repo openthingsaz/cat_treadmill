@@ -22,6 +22,8 @@
 
 /* USER CODE BEGIN 0 */
 uint32_t timestamp = 0;
+uint32_t timecnt = 0;
+
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
