@@ -64,7 +64,7 @@ void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 #define MAX_SERIAL_BUF 1024
-#define PACKET_SIZE 12
+#define PACKET_SIZE (9*1024)+20 // 9Kbyte + 20byte
 
 typedef struct
 {
@@ -75,14 +75,6 @@ typedef struct
 
 extern Buffer_Serial SerialTx; //?��?��?? head,tail ?��?��?��?���?? buf�?? ?��?��.
 extern Buffer_Serial SerialRx; //?��?��?? 링버?�� ?��?��
-
-typedef struct
-{
-  uint8_t addr;
-  uint8_t cmd;
-  uint8_t data;
-  uint16_t crc;
-} BLE_Cmd_Data;
 
 void process(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);

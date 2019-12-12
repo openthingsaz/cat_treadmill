@@ -23,6 +23,7 @@
 /* USER CODE BEGIN 0 */
 #include "ble_cmd.h"
 #include "ws2812b.h"
+#include "mpu6050_dmp.h"
 #include "power.h"
 #include "tim.h"
 #include <stdbool.h>
@@ -196,10 +197,16 @@ Buffer_Serial SerialTx;
 Buffer_Serial SerialRx;
 uint8_t rx1_data;
 uint8_t rx2_data;
-uint8_t rxBuff[MAX_SERIAL_BUF];
+//uint8_t rxBuff[MAX_SERIAL_BUF];
 uint8_t packet[PACKET_SIZE];
+//uint8_t packet[1024];
+uint8_t mem_chk = 0;
 uint8_t inx = 0;
 uint8_t recv_step  = 0;
+uint16_t dataLen = 0;
+uint16_t dataLenTmp = 0;
+uint16_t data_chk = 0;
+uint16_t crc_chk = 0;
 
 void uart_recv_int_enable(void)
 {
@@ -304,7 +311,8 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
     
     case SET_LED_POS :
-      set_led_pos((uint8_t)data);
+      targetLedPos = (LED_TOTAL / 360.0f) * data;
+      //set_led_pos((uint8_t)data);
       break;
 
     case SET_LED_COLOR :
@@ -384,11 +392,12 @@ void process(void)
   uint16_t head = 0;
   uint16_t tail = 0;
   uint16_t rxLen = 0;
-
   uint16_t i = 0;
   uint16_t crc = 0;
   bool recv_end = false;
-  BLE_Cmd_Data ble_cmd;
+  
+  uint8_t cmd;
+  uint32_t data;
 
   head = SerialRx.head;
   tail = SerialRx.tail;
@@ -404,33 +413,70 @@ void process(void)
     }
     if (rxLen)
     {
-      memset(rxBuff, 0, sizeof(rxBuff));
-      memcpy(rxBuff, &SerialRx.buf[SerialRx.head], rxLen);
+      printf("rxLen : %d\r\n", rxLen);
       for (i=0; i<rxLen; i++) 
       {
+        printf("R : %02x, recv_step : %d, dataLenTmp : %d, dataLen : %d\r\n", SerialRx.buf[SerialRx.head+i], recv_step, dataLenTmp, dataLen);
         if (recv_step == 0) {
-          if (inx == 0 && rxBuff[i] == STX) {
+          if (inx == 0 && SerialRx.buf[SerialRx.head+i] == STX) {
             recv_step = 1;
+            dataLen = 0;
+            data_chk = 0;
             continue;
           }
         }
+
         else if (recv_step == 1) {
-          packet[inx++] = rxBuff[i];
-          if (inx >= 8)
+          if (data_chk == 0) 
+          {
+            dataLen = SerialRx.buf[SerialRx.head+i];
+            ++data_chk;
+            continue;
+          }
+          else {
+            dataLen = dataLen | (SerialRx.buf[SerialRx.head+i] << 8);
+            dataLenTmp = dataLen;
+            memset(packet, 0, sizeof(packet));
+            printf("dataLenTmp : %d\r\n", dataLenTmp);
+            data_chk = 0;
             recv_step = 2;
+            continue;
+          }
         }
         else if (recv_step == 2) {
-          if(rxBuff[i] == ETX && inx == 8)
+          packet[inx++] = SerialRx.buf[SerialRx.head+i];
+          --dataLenTmp;
+          if (dataLenTmp == 0) {
+            recv_step = 3;
+            printf("i : %d, rxLen : %d\r\n", i, rxLen);
+            continue;
+          }
+        }
+        else if (recv_step == 3) {
+          packet[inx++] = SerialRx.buf[SerialRx.head+i];
+          ++crc_chk;
+          if (crc_chk >= 2) 
           {
+            crc_chk = 0;
+            recv_step = 4;
+            continue;
+          }
+        }
+        else if (recv_step == 4) 
+        {
+          if (SerialRx.buf[SerialRx.head+i] == ETX) {
             recv_end = true;
+          }
+          else {
+            dataLen = 0;
+            dataLenTmp = 0;
           }
           recv_step = 0;
           inx = 0;
         }
-        printf("R : %02x\r\n", rxBuff[i]);
       }
 
-      while(rxLen--)
+      while (rxLen--)
       {
         if (MAX_SERIAL_BUF <= SerialRx.head + 1)
         {
@@ -444,17 +490,16 @@ void process(void)
 
       if (recv_end == true) 
       {
-        //printf("recv_end : %d\r\n", recv_end);
-    	  memset(&ble_cmd, 0, sizeof(ble_cmd));
-        ble_cmd.addr = packet[0];
-        ble_cmd.cmd = packet[1];
-        memcpy(&ble_cmd.data, &packet[2], sizeof(ble_cmd.data));
-        crc = crc16_ccitt((void*)&packet[0], 8);
+        printf("recv_end : %d\r\n", recv_end);
+        for(int i=0; i<dataLen+2; i++)
+          printf("packet : %02x\r\n", packet[i]);
+        crc = crc16_ccitt((void*)&packet[0], dataLen + 2); // 
         if (crc == 0) // Crc OK
         {
-          cmd_process(ble_cmd.cmd, ble_cmd.data);
-          //SerialTx.buf[0] = ACK;
-          //HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
+          cmd = packet[0];
+          memcpy(&data, &packet[1], dataLen-1); // -1 is command
+          cmd_process(cmd, data);
+          printf("cmd : %02x, data : %08x\r\n", cmd, data);
         }
         else {
           //send NACK
@@ -462,8 +507,9 @@ void process(void)
           HAL_UART_Transmit(&huart2, SerialTx.buf, 1, 1);
           printf("NACK\r\n");
         }
-        memset(packet, 0, sizeof(packet));
+        dataLen = 0;
         inx = 0;
+
       }
     }
   }
