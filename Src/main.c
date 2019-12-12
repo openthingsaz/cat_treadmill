@@ -37,6 +37,8 @@
 #include <string.h>
 #include "ble_cmd.h"
 #include "mpu6050_dmp.h"
+#include "workout.h"
+#include "flash_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,7 +79,6 @@ uint8_t auto_time_off_mode = 0;
 uint32_t ntime_auto_off_mode = 0;
 uint32_t time_cnt = 0;
 uint8_t running_mode = 0;
-
 /* USER CODE END 0 */
 
 /**
@@ -131,6 +132,8 @@ int main(void)
   initLEDMOSI();
   time_setup();
   DMP_Init();
+  FLASH_If_Init();
+  initExercise();
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
   /* USER CODE END 2 */
 
@@ -143,6 +146,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
+  	amountOfExercise(exData);
   }
 
   /* USER CODE END 3 */

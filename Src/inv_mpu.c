@@ -560,46 +560,46 @@ const struct gyro_reg_s reg = {
 
 //Ʃ���ʿ�
 #if 1
-const struct test_s test = {
-    .gyro_sens      = 32768/250,
-    .accel_sens     = 32768/16,
-    .reg_rate_div   = 0,    /* 1kHz. */
-    .reg_lpf        = 1,    /* 188Hz. */
-    .reg_gyro_fsr   = 0,    /* 250dps. */
-    .reg_accel_fsr  = 0x18, /* 16g. */
-    .wait_ms        = 50,
-    .packet_thresh  = 5,    /* 5% */
-    .min_dps        = 10.f,
-    .max_dps        = 105.f,
-    .max_gyro_var   = 0.14f,
-    .min_g          = 0.3f,
-    .max_g          = 0.95f,
-    .max_accel_var  = 0.14f
-};
 //const struct test_s test = {
-//    .gyro_sens      = 32768/1000,
-//    .accel_sens     = 32768/8,
+//    .gyro_sens      = 32768/250,
+//    .accel_sens     = 32768/16,
 //    .reg_rate_div   = 0,    /* 1kHz. */
 //    .reg_lpf        = 1,    /* 188Hz. */
-//    .reg_gyro_fsr   = 0x10,    /* 250dps. */
-//    .reg_accel_fsr  = 0x10, /* 16g. */
-//    .wait_ms        = 1,
+//    .reg_gyro_fsr   = 0,    /* 250dps. */
+//    .reg_accel_fsr  = 0x18, /* 16g. */
+//    .wait_ms        = 50,
 //    .packet_thresh  = 5,    /* 5% */
 //    .min_dps        = 10.f,
 //    .max_dps        = 105.f,
-//    .max_gyro_var   = 0.9f,
-//    .min_g          = 0.225f,
-//    .max_g          = 0.675f,
-//    .max_accel_var  = 0.5f
-////    .wait_ms        = 50,
-////    .packet_thresh  = 5,    /* 5% */
-////    .min_dps        = 10.f,
-////    .max_dps        = 105.f,
-////    .max_gyro_var   = 0.14f,
-////    .min_g          = 0.3f,
-////    .max_g          = 0.95f,
-////    .max_accel_var  = 0.14f
+//    .max_gyro_var   = 0.14f,
+//    .min_g          = 0.3f,
+//    .max_g          = 0.95f,
+//    .max_accel_var  = 0.14f
 //};
+const struct test_s test = {
+    .gyro_sens      = 32768/2000,
+    .accel_sens     = 32768/8,
+    .reg_rate_div   = 0,    /* 1kHz. */
+    .reg_lpf        = 1,    /* 188Hz. */
+    .reg_gyro_fsr   = 0x10,    /* 250dps. */
+    .reg_accel_fsr  = 0x10, /* 16g. */
+    .wait_ms        = 1,
+    .packet_thresh  = 5,    /* 5% */
+    .min_dps        = 10.f,
+    .max_dps        = 105.f,
+    .max_gyro_var   = 0.9f,
+    .min_g          = 0.225f,
+    .max_g          = 0.675f,
+    .max_accel_var  = 0.5f
+//    .wait_ms        = 50,
+//    .packet_thresh  = 5,    /* 5% */
+//    .min_dps        = 10.f,
+//    .max_dps        = 105.f,
+//    .max_gyro_var   = 0.14f,
+//    .min_g          = 0.3f,
+//    .max_g          = 0.95f,
+//    .max_accel_var  = 0.14f
+};
 #else
 const struct test_s test={
 		32768/2000,		 //gyro_sens

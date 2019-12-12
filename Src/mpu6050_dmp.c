@@ -300,9 +300,9 @@ void run_self_test(void)
 	}
 #else
 	//250
-	gyro[0] = (long)-7150301;
-	gyro[1] = (long)-2034715;
-	gyro[2] = (long)-998038;
+//	gyro[0] = (long)-7150301;
+//	gyro[1] = (long)-2034715;
+//	gyro[2] = (long)-998038;
 
 //2g
 //	gyro[0] = (long)-7523532;
@@ -310,9 +310,9 @@ void run_self_test(void)
 //	gyro[2] = (long)-335872;
 
 	//new 2g <=
-//	gyro[0] = (long)-9135718;
-//	gyro[1] = (long)-2418278;
-//	gyro[2] = (long)-1880883;
+	gyro[0] = (long)-9135718;
+	gyro[1] = (long)-2418278;
+	gyro[2] = (long)-1880883;
 
 	//원통 가운데 상이 0도 기준
 //	gyro[0] = (long)-7456358;
@@ -336,9 +336,9 @@ void run_self_test(void)
 	dmp_set_gyro_bias(gyro);
 
 	//250
-	accel[0] = (long)8814592;
-	accel[1] = (long)-11255808;
-	accel[2] = (long)-10797056;
+//	accel[0] = (long)8814592;
+//	accel[1] = (long)-11255808;
+//	accel[2] = (long)-10797056;
 
 	//2g
 //	accel[0] = (long)88342528;
@@ -346,9 +346,9 @@ void run_self_test(void)
 //	accel[2] = (long)-72613888;
 
 	//new 2g <=
-//	accel[0] = (long)53477376;
-//	accel[1] = (long)-47710208;
-//	accel[2] = (long)-8781824;
+	accel[0] = (long)53477376;
+	accel[1] = (long)-47710208;
+	accel[2] = (long)-8781824;
 
 	//원통 가운데 상이 0도 기준
 //	accel[0] = (long)-246415360;
@@ -373,12 +373,12 @@ void run_self_test(void)
 	dmp_set_accel_bias(accel);
 
 	//250
-	accel[0] =  0.0156f;
-	accel[1] = -0.0111f;
-	accel[2] = -0.0117f;
-	gyro[0] = -6.7138f;
-	gyro[1] = -1.6818f;
-	gyro[2] = -0.9470f;
+//	accel[0] =  0.0156f;
+//	accel[1] = -0.0111f;
+//	accel[2] = -0.0117f;
+//	gyro[0] = -6.7138f;
+//	gyro[1] = -1.6818f;
+//	gyro[2] = -0.9470f;
 
 
 	//TEST 1 2g
@@ -390,12 +390,12 @@ void run_self_test(void)
 //    gyro[2] = -0.3125f;
 
 	//TEST 2 2g <=
-//    accel[0] =  0.0491f;
-//    accel[1] = -0.0376f;
-//    accel[2] = -0.0042f;
-//    gyro[0] = -6.8750f;
-//    gyro[1] = -1.7500f;
-//    gyro[2] = -1.3750f;
+    accel[0] =  0.0491f;
+    accel[1] = -0.0376f;
+    accel[2] = -0.0042f;
+    gyro[0] = -6.8750f;
+    gyro[1] = -1.7500f;
+    gyro[2] = -1.3750f;
 
 	//원통 가운데 상이 0도 기준
 //    accel[0] = -0.2294f;
