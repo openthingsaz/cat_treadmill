@@ -31,7 +31,6 @@
 /* USER CODE END Includes */
 
 extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
 
 /* USER CODE BEGIN Private defines */
@@ -40,7 +39,6 @@ extern uint32_t timecnt;
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
-void MX_TIM10_Init(void);
 void MX_TIM11_Init(void);
 
 /* USER CODE BEGIN Prototypes */
