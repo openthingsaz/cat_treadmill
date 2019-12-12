@@ -123,10 +123,11 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
   vt100SetCursorPos( 0, 0);
-   HAL_TIM_Base_Start_IT(&htim11);
+  HAL_TIM_Base_Start_IT(&htim11);
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_gpio_init();
+  uart_recv_int_enable();
   initLEDMOSI();
   time_setup();
   DMP_Init();
