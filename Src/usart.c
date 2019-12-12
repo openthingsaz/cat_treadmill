@@ -207,6 +207,8 @@ uint16_t dataLen = 0;
 uint16_t dataLenTmp = 0;
 uint16_t data_chk = 0;
 uint16_t crc_chk = 0;
+uint16_t dataLen2 = 0;
+uint16_t data_chk2 = 0;
 
 void uart_recv_int_enable(void)
 {
@@ -422,6 +424,7 @@ void process(void)
             recv_step = 1;
             dataLen = 0;
             data_chk = 0;
+            inx = 0;
             continue;
           }
         }
@@ -444,25 +447,45 @@ void process(void)
           }
         }
         else if (recv_step == 2) {
-          packet[inx++] = SerialRx.buf[SerialRx.head+i];
-          --dataLenTmp;
-          if (dataLenTmp == 0) {
-            recv_step = 3;
-            printf("i : %d, rxLen : %d\r\n", i, rxLen);
+          if (data_chk2 == 0) 
+          {
+            dataLen2 = SerialRx.buf[SerialRx.head+i];
+            ++data_chk2;
+            continue;
+          }
+          else {
+            dataLen2 = dataLen2 | (SerialRx.buf[SerialRx.head+i] << 8);
+            printf("dataLen2 : %d\r\n", dataLen2);
+            data_chk2 = 0;
+            if (dataLen != dataLen2) {
+              recv_step = 0;
+              dataLen2 = 0;
+              dataLen = 0;
+            }
+            else recv_step = 3;
             continue;
           }
         }
         else if (recv_step == 3) {
           packet[inx++] = SerialRx.buf[SerialRx.head+i];
+          --dataLenTmp;
+          if (dataLenTmp == 0) {
+            recv_step = 4;
+            printf("i : %d, rxLen : %d\r\n", i, rxLen);
+            continue;
+          }
+        }
+        else if (recv_step == 4) {
+          packet[inx++] = SerialRx.buf[SerialRx.head+i];
           ++crc_chk;
           if (crc_chk >= 2) 
           {
             crc_chk = 0;
-            recv_step = 4;
+            recv_step = 5;
             continue;
           }
         }
-        else if (recv_step == 4) 
+        else if (recv_step == 5) 
         {
           if (SerialRx.buf[SerialRx.head+i] == ETX) {
             recv_end = true;
