@@ -21,6 +21,7 @@ typedef struct {
 	uint32_t timeStamp;
 	uint32_t distExercised;
 	uint32_t timeExercised;
+	uint8_t dayExercised;
 	void (*reset)(void);
 }exerciseReport;
 
@@ -41,8 +42,8 @@ extern dataExercise* exData;
 void initExercise( void );
 void resetRerot( void );
 void resetExercise ( void );
-void loadDataFromFlash( void );
-void writeDataToFlash( exerciseReport* exReport );
+void loadDataFromFlash( uint8_t day_index );
+void writeDataToFlash( exerciseReport* exReport, uint8_t day_index );
 uint16_t arcLength ( float degreeMoved );
 uint16_t acumulateAngle ( uint16_t degree );
 uint32_t get_acumulatedDegree( void );

@@ -438,7 +438,7 @@ void process(void)
         }
         else
         {
-          SerialRx.head++; //ì‹œì‘ ë°ì´í„° ìœ„ì¹˜ë¥¼ ì˜®ê¹€.
+          SerialRx.head++; //?‹œ?‘ ?°?´?„° ?œ„ì¹˜ë?? ?˜®ê¹?.
         }
       }
 

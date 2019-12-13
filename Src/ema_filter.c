@@ -37,7 +37,7 @@ void EMA_FILTER_Reset( MovingFilter_t *pFilter ) {
 float EMA_Filter( float sensorValue, MovingFilter_t *pFilter ) {
   
  /* Avoid dividing by zero */
-  //sensorValue = max(1,sensorValue);
+  sensorValue = max(1,sensorValue);
   
    /*RUN SENSOR EMA*/
   return pFilter->EMA_S = ( EMA_Alpha * sensorValue ) + ( ( 1 - EMA_Alpha ) * pFilter->EMA_S );    //run the EMA

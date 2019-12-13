@@ -84,11 +84,16 @@ enum {
 };
 
 /* Application address, size, write protection */
-#define USER_START_ADDRESS       ADDR_FLASH_SECTOR_2
-#define USER_END_ADDRESS         ADDR_FLASH_SECTOR_6
+#define BOOT_START_ADDRESS       ADDR_FLASH_SECTOR_0
+#define BOOT_END_ADDRESS         ADDR_FLASH_SECTOR_2
+
+#define USER_START_ADDRESS       ADDR_FLASH_SECTOR_3
+#define USER_END_ADDRESS         ADDR_FLASH_SECTOR_5
 #define USER_FLASH_SIZE          ((uint32_t)(USER_END_ADDRESS - USER_START_ADDRESS))
 #define USER_WRP_SECTORS         (OB_WRP_SECTOR_2 | OB_WRP_SECTOR_3 | OB_WRP_SECTOR_4 | OB_WRP_SECTOR_5)
 
+#define DATA_START_ADDRESS       ADDR_FLASH_SECTOR_6
+#define DATA_END_ADDRESS       	 ADDR_FLASH_SECTOR_7
 ///* Application address, size, write protection */
 //#define USER_START_ADDRESS       ADDR_FLASH_SECTOR_4
 //#define APP_START_ADDRESS       ADDR_FLASH_SECTOR_5
