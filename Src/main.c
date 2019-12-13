@@ -135,7 +135,7 @@ int main(void)
   FLASH_If_Init();
   initExercise();
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
-  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_SET); // PERI_3V3_PWR_nEN, Gyroscope, Bluetooth, High Disable, Low Enable
   /* USER CODE END 2 */
 
   /* Infinite loop */

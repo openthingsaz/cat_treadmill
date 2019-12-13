@@ -169,14 +169,15 @@ amountOfExercise( dataExercise *exData ) {
 	if( (exReport[second_index].timeExercised > maxTime) || (second_index > maxCnt) ) {
 
 		//플래쉬에 데이터 기록
-		writeDataToFlash(exReport, day_index);
+//		writeDataToFlash(exReport, day_index);
 		//변수 초기화
-			exReport->reset();
-			exReport[day_index].dayExercised += 1;
-			if(exReport[day_index].dayExercised == 15) {
+//			exReport->reset();
+//			exReport[day_index].dayExercised += 1;
+			if(exReport[day_index].dayExercised > 15-1) {
 				day_index = 0;
 			}
 			day_index++;
+		second_index = 0;
 	}
 }
 
