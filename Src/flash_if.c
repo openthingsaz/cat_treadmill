@@ -91,7 +91,7 @@ uint32_t FLASH_If_Erase_Range(uint32_t start, uint32_t end)
 	HAL_FLASH_Unlock();
 
 	/* Erase from SECTOR 2~5 */
-	FirstSector = GetSector(USER_START_ADDRESS);
+	FirstSector = GetSector(ADDR_FLASH_SECTOR_6);
 	NbOfSectors = GetSector(end) - FirstSector;
 
 	pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
@@ -117,7 +117,7 @@ uint32_t FLASH_If_Write(uint32_t destination, uint32_t *p_source, uint32_t lengt
 
 	HAL_FLASH_Unlock();
 
-	for (i = 0; (i < length) && (destination <= (USER_END_ADDRESS-4)); i++)
+	for (i = 0; (i < length) && (destination <= (ADDR_FLASH_SECTOR_7-4)); i++)
 	{
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, destination, *(uint32_t*)(p_source+i)) == HAL_OK)
 		{

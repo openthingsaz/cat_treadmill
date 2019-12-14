@@ -93,7 +93,7 @@ enum {
 #define USER_WRP_SECTORS         (OB_WRP_SECTOR_2 | OB_WRP_SECTOR_3 | OB_WRP_SECTOR_4 | OB_WRP_SECTOR_5)
 
 #define DATA_START_ADDRESS       ADDR_FLASH_SECTOR_6
-#define DATA_END_ADDRESS       	 ADDR_FLASH_SECTOR_7
+#define DATA_END_ADDRESS       	 ADDR_FLASH_SECTOR_7-1
 ///* Application address, size, write protection */
 //#define USER_START_ADDRESS       ADDR_FLASH_SECTOR_4
 //#define APP_START_ADDRESS       ADDR_FLASH_SECTOR_5
