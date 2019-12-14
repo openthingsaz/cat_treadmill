@@ -381,9 +381,14 @@ void set_led_col(uint32_t data)
   setPixelColor(ledPos, red, green, blue);
 }
 
-void set_rand_led_mode(uint32_t data)
+void set_rand_led_mode(void)
 {
-  rand_led_mode = (uint8_t)data;
+  rand_led_mode = 1;
+}
+
+void dis_rand_led_mode(void)
+{
+  rand_led_mode = 0;
 }
 
 void rand_led(void)
