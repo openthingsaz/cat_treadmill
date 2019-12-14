@@ -19,3 +19,17 @@ void ble_gpio_init(void)
   // POWER Controler
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN
 }
+
+void at_cmd_init(void)
+{
+  //HAL_UART_Transmit(&huart2, "AT+FLOWCONTROLEN\r", sizeof("AT+FLOWCONTROLEN\r"), 1000);
+  //HAL_Delay(1000);
+  //HAL_UART_Transmit(&huart2, "AT+RESET\r", sizeof("AT+RESET\r"), 1000);
+  //HAL_Delay(1000);
+  //HAL_UART_Transmit(&huart2, "AT?FLOWCONTROL\r", sizeof("AT?FLOWCONTROL\r"), 1000);
+  //HAL_Delay(1000);
+
+  //HAL_UART_Receive(&huart2 , (uint8_t *)&dummy_mqtt, sizeof(dummy_mqtt) , 1000);
+  //printf("11 %s\r\n", dummy_mqtt);
+  //printf("2222222222222222222\r\n", dummy_mqtt);
+}
