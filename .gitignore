@@ -47,7 +47,7 @@ EWARM/*
 
 *.o
 .mxproject
-.cproject
+# .cproject
 
 # others 
 .settings/
