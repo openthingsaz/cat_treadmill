@@ -152,25 +152,11 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 } 
 
 /* USER CODE BEGIN 1 */
-void set_auto_time_off_mode(uint8_t mode)
+uint32_t get_now_time(void)
 {
-  if (mode == 1) {
-    auto_time_off_mode = 1;
-  }
-  else {
-    auto_time_off_mode = 0;
-  }
-}
-
-void set_n_time_auto_off(uint32_t data)
-{
-  ntime_auto_off_mode = data;
-}
-
-uint32_t get_n_time_auto_off(void)
-{
-  uint32_t data = ntime_auto_off_mode;
-  return data;
+  uint32_t now_time = 0;
+  now_time = timestamp + timecnt;
+  return now_time;
 }
 
 /* USER CODE END 1 */

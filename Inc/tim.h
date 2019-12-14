@@ -42,9 +42,7 @@ void MX_TIM1_Init(void);
 void MX_TIM11_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void set_auto_time_off_mode(uint8_t mode);
-void set_n_time_auto_off(uint32_t data);
-uint32_t get_n_time_auto_off(void);
+uint32_t get_now_time(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
