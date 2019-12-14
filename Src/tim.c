@@ -23,6 +23,7 @@
 /* USER CODE BEGIN 0 */
 uint32_t timestamp = 0;
 uint32_t timecnt = 0;
+uint32_t offtimecnt = 0;
 
 /* USER CODE END 0 */
 

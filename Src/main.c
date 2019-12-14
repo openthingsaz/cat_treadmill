@@ -239,13 +239,27 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
-
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
 	printf("I2C Interrupt\r\n");
 }
 
-
+void power_off_time_check(void)
+{
+  if (ledPos_before == ledPosTmp) 
+    {
+      offtimecnt++;
+      if (offtimecnt >= OFF_TIME) 
+      {
+        offtimecnt = 0;
+        set_sleep();
+      }
+    }
+    else 
+    {
+      ledPosTmp = ledPos_before;
+    }
+}
 
 /* USER CODE END 4 */
 
@@ -268,9 +282,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM11)
   {
-    timecnt++;
+    power_off_time_check();
+    timecnt++; // time count for timestamp
   }
-
   /* USER CODE END Callback 1 */
 }
 
