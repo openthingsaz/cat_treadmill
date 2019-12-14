@@ -332,12 +332,19 @@ void initLEDMOSI(void)
   HAL_SPI_Transmit(&hspi1, buffer0, 1, 100 );
 }
 
+void random_led(void)
+{
+  red = rand() % 256;
+  green = rand() % 256;
+  blue = rand() % 256;
+}
+
 void set_led_update(uint8_t pos)
 {
   if (ledPos_before != pos) 
   {
       if (rand_led_mode == 1)
-        rand_led();
+        random_led();
 
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)pos, red, green, blue);
@@ -351,7 +358,6 @@ void set_led_update(uint8_t pos)
       
     }
 }
-
 
 void set_led_pos(uint8_t pos) 
 {
@@ -389,13 +395,6 @@ void set_rand_led_mode(void)
 void dis_rand_led_mode(void)
 {
   rand_led_mode = 0;
-}
-
-void rand_led(void)
-{
-  red = rand() % 256;
-  green = rand() % 256;
-  blue = rand() % 256;
 }
 
 void test_led_rgb(void) {
