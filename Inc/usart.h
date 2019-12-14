@@ -50,6 +50,9 @@ extern UART_HandleTypeDef huart2;
 //#define STOP  0x14
 #define SET_TIME_SYNC 0x15
 #define GET_MOVE_DATA 0x20
+#define GET_POWER_MODE 0x30 
+#define SET_POWER_MODE 0x31
+
 
 #define STX 0x02
 #define ETX 0x03
