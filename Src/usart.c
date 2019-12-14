@@ -313,20 +313,7 @@ void cmd_process(uint8_t cmd, uint32_t data)
     case SET_RAND_LED_MODE :
       set_rand_led_mode(data);
       break;
-    /*
-    case SET_AUTO_TIME_OFF_MODE :
-      set_auto_time_off_mode((uint8_t)data);
-      break;
 
-    case SET_N_TIME_AUTO_OFF :
-      set_n_time_auto_off(data);
-      break;
-    
-    case GET_N_TIME_AUTO_OFF :
-      data = get_n_time_auto_off();
-      transmit_data(GET_N_TIME_AUTO_OFF, &data, sizeof(data));
-      break;
-    */
     case GET_BAT :
       data = get_bat_val();
       transmit_data(GET_BAT, &data, sizeof(data));
