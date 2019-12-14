@@ -274,7 +274,13 @@ const uint8_t leddata[256*4] = { // size = 256 * 3
 
 extern SPI_HandleTypeDef hspi1;
 
+uint8_t ledPos_before = 0;
+uint8_t red = 0;
+uint8_t green = 50;
+uint8_t blue = 0;
+uint8_t rand_led_mode = 0;
 uint8_t ws_buffer[LED_BUFFER_LENGTH];
+
 void encode_byte( uint8_t data, int16_t buffer_index )
 {
   int index = data * 4;
@@ -326,15 +332,16 @@ void initLEDMOSI(void)
   HAL_SPI_Transmit(&hspi1, buffer0, 1, 100 );
 }
 
-uint8_t ledPos_before = 0;
-uint8_t red = 0;
-uint8_t green = 50;
-uint8_t blue = 0;
 void set_led_update(uint8_t pos)
 {
-  if (ledPos_before != pos) {
+  if (ledPos_before != pos) 
+  {
+      if (rand_led_mode == 1)
+        rand_led();
+
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)pos, red, green, blue);
+
       ledPos_before = pos;
       // if If there is motion, wakeup
       if (running_mode == STAT_SLEEP) 
@@ -374,6 +381,17 @@ void set_led_col(uint32_t data)
   setPixelColor(ledPos, red, green, blue);
 }
 
+void set_rand_led_mode(uint32_t data)
+{
+  rand_led_mode = (uint8_t)data;
+}
+
+void rand_led(void)
+{
+  red = rand() % 256;
+  green = rand() % 256;
+  blue = rand() % 256;
+}
 
 void test_led_rgb(void) {
   int8_t i;
