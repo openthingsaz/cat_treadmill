@@ -262,54 +262,43 @@ uint16_t crc16_ccitt(const void *buf, int len)
 	return crc;
 }
 
-void send_data(uint8_t cmd, uint32_t* data, uint32_t len) 
+void transmit_data(uint8_t cmd, uint8_t* data, uint32_t len)
 {
   uint16_t crc = 0;
-  uint8_t buf[10];
+  uint32_t inx = 0;
+  uint8_t* send_data;
+  uint32_t cmd_data_len;
 
-  buf[0] = STX;
-  buf[1] = 0x01;
-  buf[2] = cmd;
-  memcpy(&buf[3], data, len);
-  crc = crc16_ccitt((void*)&buf[1], 6);
-  buf[7] = (crc & 0xFF00) >> 8;
-  buf[8] = (crc & 0x00FF);
-  buf[9] = ETX;
-  HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
-}
-
-void send_data8(uint8_t cmd, uint32_t timestamp, uint16_t distance, uint16_t move_time) 
-{
-  uint16_t crc = 0;
-  uint8_t buf[14];
-
-  buf[0] = STX;
-  buf[1] = 0x01;
-  buf[2] = cmd;
-  memcpy(&buf[3], &timestamp, sizeof(timestamp));
-  memcpy(&buf[7], &distance, sizeof(distance));
-  memcpy(&buf[9], &move_time, sizeof(move_time));
-  crc = crc16_ccitt((void*)&buf[1], 10);
-  buf[11] = (crc & 0xFF00) >> 8;
-  buf[12] = (crc & 0x00FF);
-  buf[13] = ETX;
-  HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
-  //HAL_Delay(100);
+  send_data = malloc(len + 20);
+  send_data[inx++] = STX;
+  cmd_data_len = len + 1;
+  memcpy(&send_data[1], &cmd_data_len, sizeof(cmd_data_len));
+  memcpy(&send_data[3], &cmd_data_len, sizeof(cmd_data_len));
+  inx = inx + 4;
+  send_data[inx++] = cmd;
+  memcpy(&send_data[6], data, len);
+  inx = inx + len;
+  crc = crc16_ccitt((void*)&send_data[5], cmd_data_len);
+  send_data[inx++] = (crc & 0xFF00) >> 8;
+  send_data[inx++] = (crc & 0x00FF);
+  send_data[inx++] = ETX;
+  HAL_UART_Transmit(&huart2, send_data, inx , 100);
+  printf("send data\r\n");
+  free(send_data);
 }
 
 void cmd_process(uint8_t cmd, uint32_t data)
 {
-  //uint8_t buff[256];
-  //printf("cmd : %d\r\n", cmd);
   switch (cmd) {
     case GET_STATUS :
       data = (uint32_t)get_status();
-      send_data(GET_STATUS, &data, sizeof(data));
+    	printf("data : %08x", data);
+      transmit_data(GET_STATUS, &data, sizeof(data));
       break;
 
     case GET_DEGREE :      
       data = (uint32_t)get_degree();
-      send_data(GET_DEGREE, &data, sizeof(data));
+      transmit_data(GET_DEGREE, &data, sizeof(data));
       break;
     
     case SET_LED_POS :
@@ -322,8 +311,9 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
     
     case SET_RAND_LED_MODE :
+      set_rand_led_mode(data);
       break;
-
+    /*
     case SET_AUTO_TIME_OFF_MODE :
       set_auto_time_off_mode((uint8_t)data);
       break;
@@ -334,16 +324,16 @@ void cmd_process(uint8_t cmd, uint32_t data)
     
     case GET_N_TIME_AUTO_OFF :
       data = get_n_time_auto_off();
-      send_data(GET_N_TIME_AUTO_OFF, &data, sizeof(data));
+      transmit_data(GET_N_TIME_AUTO_OFF, &data, sizeof(data));
       break;
-
+    */
     case GET_BAT :
       data = get_bat_val();
-      send_data(GET_BAT, &data, sizeof(data));
+      transmit_data(GET_BAT, &data, sizeof(data));
       break;
 
     //case GET_RUN_TIME :
-    //  send_data(GET_BAT, &data, sizeof(data));
+    //  transmit_data(GET_BAT, &data, sizeof(data));
     //  break;
 
     case SET_TIME_SYNC :
@@ -352,7 +342,7 @@ void cmd_process(uint8_t cmd, uint32_t data)
 
     case GET_MOVE_DATA :
       printf("GET_MOVE_DATA\r\n");
-      send_data8(GET_MOVE_DATA, timestamp, 1, 10);
+      //transmit_data(GET_MOVE_DATA, timestamp, 1, 10);
       break;
 
     default :
@@ -415,7 +405,7 @@ void process(void)
     }
     if (rxLen)
     {
-      printf("rxLen : %d\r\n", rxLen);
+      //printf("rxLen : %d\r\n", rxLen);
       for (i=0; i<rxLen; i++) 
       {
         printf("R : %02x, recv_step : %d, dataLenTmp : %d, dataLen : %d\r\n", SerialRx.buf[SerialRx.head+i], recv_step, dataLenTmp, dataLen);
@@ -440,7 +430,7 @@ void process(void)
             dataLen = dataLen | (SerialRx.buf[SerialRx.head+i] << 8);
             dataLenTmp = dataLen;
             memset(packet, 0, sizeof(packet));
-            printf("dataLenTmp : %d\r\n", dataLenTmp);
+            //printf("dataLenTmp : %d\r\n", dataLenTmp);
             data_chk = 0;
             recv_step = 2;
             continue;
@@ -455,7 +445,7 @@ void process(void)
           }
           else {
             dataLen2 = dataLen2 | (SerialRx.buf[SerialRx.head+i] << 8);
-            printf("dataLen2 : %d\r\n", dataLen2);
+            //printf("dataLen2 : %d\r\n", dataLen2);
             data_chk2 = 0;
             if (dataLen != dataLen2) {
               recv_step = 0;
@@ -471,7 +461,7 @@ void process(void)
           --dataLenTmp;
           if (dataLenTmp == 0) {
             recv_step = 4;
-            printf("i : %d, rxLen : %d\r\n", i, rxLen);
+            //printf("i : %d, rxLen : %d\r\n", i, rxLen);
             continue;
           }
         }
@@ -510,19 +500,19 @@ void process(void)
           SerialRx.head++; //시작 데이터 위치를 옮김.
         }
       }
-
+      //printf("recv_end : %d\r\n", recv_end);
       if (recv_end == true) 
       {
-        printf("recv_end : %d\r\n", recv_end);
-        for(int i=0; i<dataLen+2; i++)
-          printf("packet : %02x\r\n", packet[i]);
+        //printf("recv_end : %d\r\n", recv_end);
+        //for(int i=0; i<dataLen+2; i++)
+        //  printf("packet : %02x\r\n", packet[i]);
         crc = crc16_ccitt((void*)&packet[0], dataLen + 2); // 
         if (crc == 0) // Crc OK
         {
           cmd = packet[0];
           memcpy(&data, &packet[1], dataLen-1); // -1 is command
           cmd_process(cmd, data);
-          printf("cmd : %02x, data : %08x\r\n", cmd, data);
+          //printf("cmd : %02x, data : %08x\r\n", cmd, data);
         }
         else {
           //send NACK
