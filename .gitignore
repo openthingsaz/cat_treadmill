@@ -32,7 +32,7 @@
 *.dSYM/
 
 # CubeMX
-STM32L152-Discovery.elf.launch
+littlecat.elf.launch
 
 # Qt
 *.qbs.user
@@ -47,6 +47,7 @@ EWARM/*
 
 *.o
 .mxproject
+.cproject
 
 # others 
 .settings/
