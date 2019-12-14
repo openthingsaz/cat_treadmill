@@ -287,6 +287,13 @@ void transmit_data(uint8_t cmd, uint8_t* data, uint32_t len)
   free(send_data);
 }
 
+typedef struct _cat_data {   // 구조체 이름은 _Person
+    uint32_t timestamp;
+    uint32_t distance;
+    uint32_t move_time;
+} cat_data; 
+
+cat_data cat_mode_data[7];
 void cmd_process(uint8_t cmd, uint32_t data)
 {
   switch (cmd) {
@@ -307,11 +314,12 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
 
     case SET_LED_COLOR :
+      dis_rand_led_mode();
       set_led_col(data);
       break;
     
     case SET_RAND_LED_MODE :
-      set_rand_led_mode(data);
+      set_rand_led_mode();
       break;
 
     case GET_BAT :
@@ -324,12 +332,25 @@ void cmd_process(uint8_t cmd, uint32_t data)
     //  break;
 
     case SET_TIME_SYNC :
+      timecnt = 0;
       timestamp = data;
       break;
 
     case GET_MOVE_DATA :
-      printf("GET_MOVE_DATA\r\n");
-      //transmit_data(GET_MOVE_DATA, timestamp, 1, 10);
+      for (int i=0; i<7; i++) {
+        cat_mode_data[i].timestamp = get_now_time() + i;
+        cat_mode_data[i].distance = i%200;
+        cat_mode_data[i].move_time = i%100;
+        //HAL_Delay(1005);
+      }
+      transmit_data(GET_MOVE_DATA, &cat_mode_data, sizeof(cat_mode_data));
+      break;
+
+    case GET_POWER_MODE :
+      break;
+
+    case SET_POWER_MODE :
+      printf("SET_POWER_MODE\r\n");
       break;
 
     default :
@@ -337,6 +358,10 @@ void cmd_process(uint8_t cmd, uint32_t data)
   }
 }
 
+void get_move_data(uint32_t time)
+{
+  
+}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -395,7 +420,7 @@ void process(void)
       //printf("rxLen : %d\r\n", rxLen);
       for (i=0; i<rxLen; i++) 
       {
-        printf("R : %02x, recv_step : %d, dataLenTmp : %d, dataLen : %d\r\n", SerialRx.buf[SerialRx.head+i], recv_step, dataLenTmp, dataLen);
+        //printf("R : %02x, recv_step : %d, dataLenTmp : %d, dataLen : %d\r\n", SerialRx.buf[SerialRx.head+i], recv_step, dataLenTmp, dataLen);
         if (recv_step == 0) {
           if (inx == 0 && SerialRx.buf[SerialRx.head+i] == STX) {
             recv_step = 1;
