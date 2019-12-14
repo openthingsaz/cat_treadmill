@@ -41,9 +41,9 @@ extern UART_HandleTypeDef huart2;
 #define SET_LED_POS	0x05
 #define SET_LED_COLOR 0x06
 #define SET_RAND_LED_MODE 0x07
-#define SET_AUTO_TIME_OFF_MODE  0x08
-#define SET_N_TIME_AUTO_OFF 0x09
-#define GET_N_TIME_AUTO_OFF 0x10
+//#define SET_AUTO_TIME_OFF_MODE  0x08
+//#define SET_N_TIME_AUTO_OFF 0x09
+//#define GET_N_TIME_AUTO_OFF 0x10
 #define GET_BAT 0x11
 #define GET_RUN_TIME  0x12
 //#define START 0x13
