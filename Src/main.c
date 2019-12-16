@@ -127,11 +127,14 @@ int main(void)
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_gpio_init();
+  ble_module_init();
   uart_recv_int_enable();
   initLEDMOSI();
   time_setup();
   DMP_Init();
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
