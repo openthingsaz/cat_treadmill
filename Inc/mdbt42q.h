@@ -17,7 +17,7 @@
 #include "main.h"
 
 void ble_gpio_init(void);
-
+void ble_module_init(void);
 #ifdef __cplusplus
 }
 #endif

@@ -114,7 +114,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
-  MX_TIM10_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_RTC_Init();
@@ -126,10 +125,12 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
   vt100SetCursorPos( 0, 0);
-   HAL_TIM_Base_Start_IT(&htim11);
+  HAL_TIM_Base_Start_IT(&htim11);
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_gpio_init();
+  ble_module_init();
+  uart_recv_int_enable();
   initLEDMOSI();
   time_setup();
   DMP_Init();
@@ -257,13 +258,27 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
-
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
 	printf("I2C Interrupt\r\n");
 }
 
-
+void power_off_time_check(void)
+{
+  if (ledPos_before == ledPosTmp) 
+    {
+      offtimecnt++;
+      if (offtimecnt >= OFF_TIME) 
+      {
+        offtimecnt = 0;
+        set_sleep();
+      }
+    }
+    else 
+    {
+      ledPosTmp = ledPos_before;
+    }
+}
 
 /* USER CODE END 4 */
 
@@ -286,21 +301,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM11)
   {
-    if ( ledPos_before == ledPosTmp) 
-    {
-      timecnt++;
-      if (timecnt >= OFF_TIME) 
-      {
-        timecnt = 0;
-        set_sleep();
-      }
-    }
-    else 
-    {
-      ledPosTmp = ledPos_before;
-    }
+    power_off_time_check();
+    timecnt++; // time count for timestamp
   }
-
   /* USER CODE END Callback 1 */
 }
 

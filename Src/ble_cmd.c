@@ -43,15 +43,6 @@ uint16_t get_degree(void)
   return degree;  
 }
 
-bool set_rand_led_mode(uint8_t mode) 
-{
-  if (mode == LED_RANDOM) {
-    led_rand_mode = true;
-  }
-  else led_rand_mode = false;
-  return led_rand_mode;
-}
-
 uint32_t get_run_time(void)
 {
   return run_time;

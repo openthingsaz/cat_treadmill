@@ -41,15 +41,18 @@ extern UART_HandleTypeDef huart2;
 #define SET_LED_POS	0x05
 #define SET_LED_COLOR 0x06
 #define SET_RAND_LED_MODE 0x07
-#define SET_AUTO_TIME_OFF_MODE  0x08
-#define SET_N_TIME_AUTO_OFF 0x09
-#define GET_N_TIME_AUTO_OFF 0x10
+//#define SET_AUTO_TIME_OFF_MODE  0x08
+//#define SET_N_TIME_AUTO_OFF 0x09
+//#define GET_N_TIME_AUTO_OFF 0x10
 #define GET_BAT 0x11
 #define GET_RUN_TIME  0x12
 //#define START 0x13
 //#define STOP  0x14
 #define SET_TIME_SYNC 0x15
 #define GET_MOVE_DATA 0x20
+#define GET_POWER_MODE 0x30 
+#define SET_POWER_MODE 0x31
+
 
 #define STX 0x02
 #define ETX 0x03
@@ -64,7 +67,7 @@ void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 #define MAX_SERIAL_BUF 1024
-#define PACKET_SIZE 12
+#define PACKET_SIZE (9*1024)+20 // 9Kbyte + 20byte
 
 typedef struct
 {
@@ -75,14 +78,6 @@ typedef struct
 
 extern Buffer_Serial SerialTx; //?ï¿½ï¿½?ï¿½ï¿½?? head,tail ?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ï¿??? bufï¿??? ?ï¿½ï¿½?ï¿½ï¿½.
 extern Buffer_Serial SerialRx; //?ï¿½ï¿½?ï¿½ï¿½?? ë§ë²„?ï¿½ï¿½ ?ï¿½ï¿½?ï¿½ï¿½
-
-typedef struct
-{
-  uint8_t addr;
-  uint8_t cmd;
-  uint8_t data;
-  uint16_t crc;
-} BLE_Cmd_Data;
 
 void process(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);

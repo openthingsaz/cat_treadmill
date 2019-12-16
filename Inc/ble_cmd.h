@@ -28,7 +28,7 @@ void set_wakeup(void);
 void set_sleep(void);
 uint16_t get_degree(void);
 uint8_t get_battery(void);
-bool set_rand_led_mode(uint8_t mode);
+
 uint32_t get_run_time(void);
 void set_time_sync(uint8_t Hours, uint8_t Minutes, uint8_t Seconds, uint8_t WeekDay, uint8_t Month, uint8_t Date, uint8_t Year);
 
