@@ -283,7 +283,6 @@ void transmit_data(uint8_t cmd, uint8_t* data, uint32_t len)
   send_data[inx++] = (crc & 0x00FF);
   send_data[inx++] = ETX;
   HAL_UART_Transmit(&huart2, send_data, inx , 100);
-  printf("send data\r\n");
   free(send_data);
 }
 
@@ -296,10 +295,11 @@ typedef struct _cat_data {   // 구조체 이름은 _Person
 cat_data cat_mode_data[7];
 void cmd_process(uint8_t cmd, uint32_t data)
 {
+  //printf("cmd : %02x\r\n", cmd);
   switch (cmd) {
     case GET_STATUS :
       data = (uint32_t)get_status();
-    	printf("data : %08x", data);
+    	
       transmit_data(GET_STATUS, &data, sizeof(data));
       break;
 
@@ -309,11 +309,15 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
     
     case SET_LED_POS :
+      if (get_status() == STAT_SLEEP)
+        set_wakeup();
       targetLedPos = (LED_TOTAL / 360.0f) * data;
-      //set_led_pos((uint8_t)data);
+      set_led_pos((uint8_t)data);
       break;
 
     case SET_LED_COLOR :
+      if (get_status() == STAT_SLEEP)
+        set_wakeup();
       dis_rand_led_mode();
       set_led_col(data);
       break;
