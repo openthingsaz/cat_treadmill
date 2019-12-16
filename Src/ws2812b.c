@@ -12,6 +12,7 @@
 #include "power.h"
 #include "ble_cmd.h"
 #include "mpu6050_dmp.h"
+#include "workout.h"
 
 const uint8_t leddata[256*4] = { // size = 256 * 3
   0X44 , 0X44 , 0X44 , 0X44 , // 0
@@ -348,8 +349,9 @@ void set_led_update(uint8_t pos)
 
       setAllPixelColor(0, 0, 0);
       setPixelColor( (uint16_t)pos, red, green, blue);
-
+    
       ledPos_before = pos;
+      printf("\r Roll %d, acul : %lu\n", (uint16_t)Roll, exData->get_acumulatedDegree());
       // if If there is motion, wakeup
       if (running_mode == STAT_SLEEP) 
       {

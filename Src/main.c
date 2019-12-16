@@ -37,6 +37,8 @@
 #include <string.h>
 #include "ble_cmd.h"
 #include "mpu6050_dmp.h"
+#include "workout.h"
+#include "flash_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +71,9 @@ static void MX_NVIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+float Roll_before = 0.0f;
+uint16_t Roll_offset = 0;
+uint8_t Stable_state = 0;
 uint8_t ledPosTmp = 0;
 uint8_t ledPosUser = 0;
 uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Select
@@ -77,7 +81,6 @@ uint8_t auto_time_off_mode = 0;
 uint32_t ntime_auto_off_mode = 0;
 uint32_t time_cnt = 0;
 uint8_t running_mode = 0;
-
 /* USER CODE END 0 */
 
 /**
@@ -87,7 +90,6 @@ uint8_t running_mode = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
 
   /* USER CODE END 1 */
   
@@ -132,8 +134,13 @@ int main(void)
   initLEDMOSI();
   time_setup();
   DMP_Init();
+  FLASH_If_Init();
+  initExercise();
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
 
+  if(FLASH_If_Erase_Range(DATA_START_ADDRESS, DATA_END_ADDRESS) != FLASHIF_OK) {
+  	Error_Handler();
+  }
 
   /* USER CODE END 2 */
 
@@ -146,6 +153,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
+ 		amountOfExercise(exData, Roll_offset, Stable_state);
   }
 
   /* USER CODE END 3 */
@@ -238,7 +246,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     // To do
 	  if(Cal_done) {
 		  Read_DMP();
+
+		  if(Roll_before == Roll)	{
+		  	Stable_state = 1;
+		  	Roll_offset = (uint16_t)Roll;
+		  }
+		  else
+		  	Roll_before = Roll;
 	  }
+
   }
 }
 
