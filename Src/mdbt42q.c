@@ -31,16 +31,18 @@ void ble_module_init(void)
   HAL_UART_Transmit(&huart2, "AT?NAME\r\n", sizeof("AT?NAME\r"), 1000);
   HAL_Delay(50);
 
-  HAL_UART_Transmit(&huart2, "AT?FLOWCONTROL\r", sizeof("AT?FLOWCONTROL\r"), 1000);
+  HAL_UART_Transmit(&huart2, "AT?NAME\r\n", sizeof("AT?NAME\r"), 1000);
   HAL_Delay(50);
   HAL_UART_Receive(&huart2 , (uint8_t *)&data, sizeof(data) , 1000);
-
-  p = strstr(data, "en");
+  
+  p = strstr(data, "B612");
   if (p == NULL) 
   {
+    HAL_UART_Transmit(&huart2, "AT+NAMEthe Little Cat-B612\r", sizeof("AT+NAMEthe Little Cat-B612\r"), 1000);
+    HAL_Delay(100);
     HAL_UART_Transmit(&huart2, "AT+FLOWCONTROLEN\r", sizeof("AT+FLOWCONTROLEN\r"), 1000);
-    HAL_Delay(500);
+    HAL_Delay(100);
     HAL_UART_Transmit(&huart2, "AT+RESET\r", sizeof("AT+RESET\r"), 1000);
-    HAL_Delay(500);
+    HAL_Delay(100);
   }
 }
