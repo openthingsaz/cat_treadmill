@@ -124,15 +124,16 @@ int circular_buf_put_non_overwrite(cbuf_handle_t cbuf, exerciseReport* data)
     return r;
 }
 
-int circular_buf_get(cbuf_handle_t cbuf, exerciseReport * data)
+int circular_buf_get(cbuf_handle_t cbuf, exerciseReport* data)
 {
-    assert(cbuf && data && cbuf->buffer);
+    assert(cbuf && cbuf->buffer);
 
     int r = -1;
 
     if(!circular_buf_empty(cbuf))
     {
         *data = cbuf->buffer[cbuf->tail];
+//        memcpy(data, cbuf->buffer[cbuf->head], 1);
         retreat_pointer(cbuf);
 
         r = 0;

@@ -55,7 +55,7 @@ int circular_buf_put_non_overwrite(cbuf_handle_t cbuf, exerciseReport* data);
 /// Retrieve a value from the buffer
 /// Requires: cbuf is valid and created by circular_buf_init
 /// Returns 0 on success, -1 if the buffer is empty
-int circular_buf_get(cbuf_handle_t cbuf, exerciseReport * data);
+int circular_buf_get(cbuf_handle_t cbuf, exerciseReport* data);
 
 /// CHecks if the buffer is empty
 /// Requires: cbuf is valid and created by circular_buf_init

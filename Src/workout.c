@@ -5,12 +5,15 @@
  *      Author: issacs
  */
 
+#include <stdlib.h>
+#include <assert.h>
+#include <limits.h>
+
 #include "workout.h"
 #include "flash_if.h"
 #include "bitopr.h"
 #include "circular_buffer.h"
-#include <assert.h>
-#include <limits.h>
+#include "tim.h"
 
 #define radius 55
 
@@ -180,15 +183,35 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 		//1초가 되면 기록
 		if( abs(HAL_GetTick() - exData->previousTime[_1000ms]) > 1000 ) {
 			//1초가 되면 운동데이터를 기록한다
-			exReport[cbuf->head].timeStamp = second_index;
+			exReport[cbuf->head].timeStamp = get_now_time();
 			exReport[cbuf->head].distExercised = arcLength(get_acumulatedDegree());
-			exReport[cbuf->head].timeExercised = second_index++;
+			exReport[cbuf->head].timeExercised = second_index;
+
+			//push the buffer
 			circular_buf_put(cbuf, &exReport[cbuf->head]);
+
+			//check the overflow
+			if(second_index++ > USHRT_MAX) second_index = 0;
+
+			//recod the last time
 			exData->previousTime[_1000ms] = HAL_GetTick();
 		}
 
 		//15분이 경과하면 데이터를 플래시에 기록한다
-//		if( (exReport[max(0, cbuf->head-1)].timeExercised >= maxTime) || (cbuf->head >= maxCnt) ) {
+		if(cbuf->head >= maxCnt-1) {
+			while(!circular_buf_empty(cbuf))
+			{
+				exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport));
+				assert(getBuffer);
+
+				circular_buf_get(cbuf, getBuffer);
+				printf("\r\nStime : %lu \n", getBuffer->timeStamp);
+				printf("\r\nAdist : %lu \n", getBuffer->distExercised);
+				printf("\r\nAtime : %u \n", getBuffer->timeExercised);
+
+				assert(getBuffer);
+				free(getBuffer);
+			}
 //
 //			플래쉬에 데이터 기록
 //			writeDataToFlash(exReport, day_index);
@@ -206,7 +229,7 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 //				day_index = 0;
 //			}
 //
-//		}
+		}
 	}
 }
 
