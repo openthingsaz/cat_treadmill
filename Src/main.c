@@ -238,9 +238,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		  Read_DMP();
 
 		  if(Roll_before == Roll)	{
-		  	Stable_state = 1;
-		  	if(!Stable_state)
+		  	if(!Stable_state) {
 		  		Roll_offset = (uint16_t)Roll;
+		  		Stable_state = 1;
+		  	}
 		  }
 		  else {
 		  	if(!Stable_state)
