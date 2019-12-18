@@ -27,14 +27,14 @@ void set_wakeup(void)
 {
   power_en();
   running_mode = STAT_RUNNING;
-  HAL_TIM_Base_Start_IT(&htim11);
+  //HAL_TIM_Base_Start_IT(&htim11);
 }
 
 void set_sleep(void) 
 {
   power_dis();
   running_mode = STAT_SLEEP;
-  HAL_TIM_Base_Stop_IT(&htim11);
+  //HAL_TIM_Base_Stop_IT(&htim11);
 }
 
 uint16_t get_degree(void)
