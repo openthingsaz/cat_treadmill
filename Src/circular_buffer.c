@@ -116,7 +116,7 @@ int circular_buf_put_non_overwrite(cbuf_handle_t cbuf, exerciseReport* data)
 
     if(!circular_buf_full(cbuf))
     {
-        memcpy(&cbuf->buffer[cbuf->head], data, 1);
+        memcpy(&cbuf->buffer[cbuf->head], data, sizeof(exerciseReport));
         advance_pointer(cbuf);
         r = 0;
     }
@@ -133,7 +133,7 @@ int circular_buf_get(cbuf_handle_t cbuf, exerciseReport* data)
     if(!circular_buf_empty(cbuf))
     {
         *data = cbuf->buffer[cbuf->tail];
-//        memcpy(data, cbuf->buffer[cbuf->head], 1);
+//        memcpy(data, cbuf->buffer[cbuf->head], sizeof(exerciseReport));
         retreat_pointer(cbuf);
 
         r = 0;
@@ -156,9 +156,54 @@ bool circular_buf_full(cbuf_handle_t cbuf)
     return cbuf->full;
 }
 
+//exerciseReport_t circular_buf_search(exerciseReport* data, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n)
+int circular_buf_search(cbuf_handle_t cbuf, uint32_t timeStamp)
+{
+	int i, cnt;
+
+	// data가 있는지 확인
+	if(cbuf->head == cbuf->tail)
+	{
+		return 0;
+	}
+	else if(cbuf->head > cbuf->tail)
+	{
+		for(i = cbuf->tail; i < cbuf->head; i++)
+		{
+			if(cbuf->buffer[i].timeStamp == timeStamp)
+			{
+				//데이터 찾음
+				return (i+1);
+			}
+		}
+	}
+	else
+	{
+		for(i = cbuf->tail; i < cbuf->max; i++)
+		{
+			if(cbuf->buffer[i].timeStamp == timeStamp)
+			{
+				return (i+1);
+			}
+		}
+
+		cnt = i;
+
+		for(i = 0; i < cbuf->head; i++)
+		{
+			if(cbuf->buffer[i].timeStamp == timeStamp)
+			{
+				return (cnt+i+1);
+			}
+		}
+	}
+
+	return 0;
+}
+
 void print_buffer_status(cbuf_handle_t cbuf)
 {
-	printf("\rFull: %d, empty: %d, size: %lu\n",
+	printf("\rFull: %d, empty: %d, size: %d\n",
 				 circular_buf_full(cbuf),
 				 circular_buf_empty(cbuf),
 				 circular_buf_size(cbuf));

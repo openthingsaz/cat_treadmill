@@ -199,20 +199,21 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 
 		//15분이 경과하면 데이터를 플래시에 기록한다
 		if(cbuf->head >= maxCnt-1) {
-			while(!circular_buf_empty(cbuf))
-			{
-				exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport));
-				assert(getBuffer);
-
-				circular_buf_get(cbuf, getBuffer);
-				printf("\r\nStime : %lu \n", getBuffer->timeStamp);
-				printf("\r\nAdist : %lu \n", getBuffer->distExercised);
-				printf("\r\nAtime : %u \n", getBuffer->timeExercised);
-
-				assert(getBuffer);
-				free(getBuffer);
-			}
+			printf("\r circular_buf_search : %d \n", circular_buf_search(cbuf, 23));
+//			while(!circular_buf_empty(cbuf))
+//			{
+//				exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport));
+//				assert(getBuffer);
 //
+//				circular_buf_get(cbuf, getBuffer);
+//				printf("\r\nStime : %lu \n", getBuffer->timeStamp);
+//				printf("\r\nAdist : %lu \n", getBuffer->distExercised);
+//				printf("\r\nAtime : %u \n", getBuffer->timeExercised);
+//
+//				assert(getBuffer);
+//				free(getBuffer);
+//			}
+
 //			플래쉬에 데이터 기록
 //			writeDataToFlash(exReport, day_index);
 //			loadDataFromFlash(exReport, day_index);
@@ -228,7 +229,7 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 //				}
 //				day_index = 0;
 //			}
-//
+
 		}
 	}
 }

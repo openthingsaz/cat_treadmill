@@ -37,6 +37,8 @@ typedef struct {
 	uint32_t (*get_acumulatedDegree)(void);
 }dataExercise;
 
+typedef exerciseReport* exerciseReport_t;
+
 extern exerciseReport* exReport;
 extern dataExercise* exData;
 
