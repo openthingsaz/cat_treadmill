@@ -156,49 +156,62 @@ bool circular_buf_full(cbuf_handle_t cbuf)
     return cbuf->full;
 }
 
-//exerciseReport_t circular_buf_search(exerciseReport* data, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n)
-int circular_buf_search(cbuf_handle_t cbuf, uint32_t timeStamp)
+int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n)
+//int circular_buf_search(cbuf_handle_t cbuf, uint32_t timeStamp)
 {
-	int i, cnt;
+	int i, cnt, index = 0;
+	uint32_t search_timeStamp = timeStamp;
+	uint32_t max_timeStamp = timeStamp + n;
+
+	assert(gbuf && cbuf && timeStamp && n);
 
 	// data가 있는지 확인
-	if(cbuf->head == cbuf->tail)
+	if(!circular_buf_empty(cbuf))
 	{
-		return 0;
+		return -1;
 	}
-	else if(cbuf->head > cbuf->tail)
+	else if(cbuf->head > cbuf->tail) //탐색 방법 1
 	{
 		for(i = cbuf->tail; i < cbuf->head; i++)
 		{
-			if(cbuf->buffer[i].timeStamp == timeStamp)
+			if(cbuf->buffer[i].timeStamp == search_timeStamp)
 			{
 				//데이터 찾음
-				return (i+1);
+				gbuf[index++] = cbuf->buffer[i];
+				search_timeStamp += 1;
+				if(search_timeStamp >= max_timeStamp) return 0;
+				//return (i+1);
 			}
 		}
 	}
 	else
 	{
-		for(i = cbuf->tail; i < cbuf->max; i++)
+		for(i = cbuf->tail; i < cbuf->max; i++)  //탐색 방법 2
 		{
-			if(cbuf->buffer[i].timeStamp == timeStamp)
+			if(cbuf->buffer[i].timeStamp == search_timeStamp)
 			{
-				return (i+1);
+				gbuf[index++] = cbuf->buffer[i];
+				search_timeStamp += 1;
+				if(search_timeStamp >= max_timeStamp) return 0;
+				//return (i+1);
 			}
 		}
 
 		cnt = i;
 
-		for(i = 0; i < cbuf->head; i++)
+		for(i = 0; i < cbuf->head; i++)  //탐색 방법 3
 		{
-			if(cbuf->buffer[i].timeStamp == timeStamp)
+			if(cbuf->buffer[i].timeStamp == search_timeStamp)
 			{
-				return (cnt+i+1);
+				gbuf[index++] = cbuf->buffer[i+cnt+1];
+				search_timeStamp += 1;
+				if(search_timeStamp >= max_timeStamp) return 0;
+				//return (cnt+i+1);
 			}
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
 void print_buffer_status(cbuf_handle_t cbuf)

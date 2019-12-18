@@ -199,7 +199,15 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 
 		//15분이 경과하면 데이터를 플래시에 기록한다
 		if(cbuf->head >= maxCnt-1) {
-			printf("\r circular_buf_search : %d \n", circular_buf_search(cbuf, 23));
+			/* test 1 */
+//			printf("\r circular_buf_search : %d \n", circular_buf_search(cbuf, 23));
+
+			/* test 2 */
+			exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport)*2);
+			assert(getBuffer);
+			circular_buf_get_range(getBuffer, cbuf, 23, 2);
+			free(getBuffer);
+
 //			while(!circular_buf_empty(cbuf))
 //			{
 //				exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport));
