@@ -16,8 +16,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-void ble_gpio_init(void);
 void ble_module_init(void);
+void ble_disable(void);
+void ble_enable(void);
 #ifdef __cplusplus
 }
 #endif
