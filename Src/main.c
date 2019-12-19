@@ -126,7 +126,6 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim11);
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
-  ble_gpio_init();
   ble_module_init();
   uart_recv_int_enable();
   initLEDMOSI();
@@ -151,7 +150,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
- 		amountOfExercise(exData, Roll_offset, Stable_state);
+amountOfExercise(exData, Roll_offset, Stable_state);
   }
 
   /* USER CODE END 3 */
@@ -260,18 +259,31 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 void power_off_time_check(void)
 {
   if (ledPos_before == ledPosTmp) 
+  {
+    offtimecnt++;
+    if (offtimecnt >= OFF_TIME) 
     {
-      offtimecnt++;
-      if (offtimecnt >= OFF_TIME) 
-      {
-        offtimecnt = 0;
-        set_sleep();
-      }
+      offtimecnt = 0;
+      set_sleep();
     }
-    else 
-    {
-      ledPosTmp = ledPos_before;
-    }
+  }
+  else 
+  {
+    ledPosTmp = ledPos_before;
+  }
+}
+
+void enter_standby_mode(void)
+{
+  if (get_bat_val() <= 30) 
+  {
+    /* Record cat movement information. */
+    //////////////////////////////////////
+    
+    
+    //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+    //HAL_PWR_EnterSTANDBYMode();
+  }
 }
 
 /* USER CODE END 4 */
@@ -296,6 +308,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM11)
   {
     power_off_time_check();
+    enter_standby_mode();
     timecnt++; // time count for timestamp
   }
   /* USER CODE END Callback 1 */
