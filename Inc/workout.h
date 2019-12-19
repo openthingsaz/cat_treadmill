@@ -12,11 +12,14 @@
 #include "ble_cmd.h"
 #include "time.h"
 
-#define _100ms 	0
-#define _1000ms  1
-#define maxTime	9
+#define __100ms 	0
+#define __1000ms	1
+#define _100mS	100
+#define _1s			1000
+#define maxTime	900
 #define maxCnt	maxTime
-#define maxDay	15-1
+#define maxDay	2
+#define totalBuffSize maxCnt * maxDay
 
 typedef struct {
 	uint32_t timeStamp;

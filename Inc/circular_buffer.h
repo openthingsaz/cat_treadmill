@@ -83,7 +83,6 @@ void print_buffer_status(cbuf_handle_t cbuf);
 
 //TODO: int circular_buf_get_range(circular_buf_t cbuf, uint8_t *data, size_t len);
 int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n);
-
 //TODO: int circular_buf_put_range(circular_buf_t cbuf, uint8_t * data, size_t len);
 
 #endif /* CIRCULAR_BUFFER_H_ */
