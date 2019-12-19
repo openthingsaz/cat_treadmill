@@ -300,12 +300,12 @@ void cmd_process(uint8_t cmd, uint32_t data)
     case GET_STATUS :
       data = (uint32_t)get_status();
     	
-      transmit_data(GET_STATUS, &data, sizeof(data));
+      transmit_data(GET_STATUS, (uint8_t*)&data, sizeof(data));
       break;
 
     case GET_DEGREE :      
       data = (uint32_t)get_degree();
-      transmit_data(GET_DEGREE, &data, sizeof(data));
+      transmit_data(GET_DEGREE, (uint8_t*)&data, sizeof(data));
       break;
     
     case SET_LED_POS :
@@ -328,7 +328,7 @@ void cmd_process(uint8_t cmd, uint32_t data)
 
     case GET_BAT :
       data = get_bat_val();
-      transmit_data(GET_BAT, &data, sizeof(data));
+      transmit_data(GET_BAT, (uint8_t*)&data, sizeof(data));
       break;
 
     //case GET_RUN_TIME :
@@ -347,7 +347,7 @@ void cmd_process(uint8_t cmd, uint32_t data)
         cat_mode_data[i].move_time = i%100;
         //HAL_Delay(1005);
       }
-      transmit_data(GET_MOVE_DATA, &cat_mode_data, sizeof(cat_mode_data));
+      transmit_data(GET_MOVE_DATA, (uint8_t*)&cat_mode_data, sizeof(cat_mode_data));
       break;
 
     case GET_POWER_MODE :
@@ -513,7 +513,7 @@ void process(void)
         }
         else
         {
-          SerialRx.head++; //?‹œ?‘ ?°?´?„° ?œ„ì¹˜ë?? ?˜®ê¹?.
+          SerialRx.head++; //?ï¿½ï¿½?ï¿½ï¿½ ?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ ?ï¿½ï¿½ì¹˜ï¿½?? ?ï¿½ï¿½ï¿½?.
         }
       }
       //printf("recv_end : %d\r\n", recv_end);
