@@ -28,17 +28,17 @@ cbuf_handle_t cbuf;
 void
 initExercise( void ) {
 	//캘리브레이션 필요 : 초기화 시, 현재 원통의 각도값을 받아 이전각도 변수에 넣어야 함
-	exReport = (exerciseReport*)malloc(sizeof(exerciseReport)*maxCnt);
+	exReport = (exerciseReport*)malloc(sizeof(exerciseReport) * totalBuffSize);
 	assert(exReport);
 
-	for(int i = 0; i < maxCnt; i++) {
+	for(int i = 0; i < totalBuffSize - 1; i++) {
 		exReport[i].timeStamp = 0;
 		exReport[i].distExercised = 0;
 		exReport[i].timeExercised = 0;
 		exReport[i].dayExercised = 0;
 	}
 
-	cbuf = circular_buf_init(exReport, maxCnt);
+	cbuf = circular_buf_init(exReport, totalBuffSize);
 	assert(cbuf);
 //	printf("Buffer initialized. ");
 //	print_buffer_status(cbuf);
@@ -51,8 +51,8 @@ initExercise( void ) {
 	exData->acumulatedDistance = 0;
 	exData->currentDegree = 0;
 	exData->previousDegree = 0;
-	exData->previousTime[_100ms] = 0;
-	exData->previousTime[_1000ms] = 0;
+	exData->previousTime[__100ms] = 0;
+	exData->previousTime[__1000ms] = 0;
 	exData->init = initExercise;
 	exData->reset = resetExercise;
 	exData->get_acumulatedDegree = get_acumulatedDegree;
@@ -64,7 +64,7 @@ initExercise( void ) {
  */
 void
 resetReport( void ) {
-	for(int i = 0; i < maxCnt; i++) {
+	for(int i = 0; i < totalBuffSize - 1; i++) {
 		exReport[i].timeStamp = 0;
 		exReport[i].distExercised = 0;
 		exReport[i].timeExercised = 0;
@@ -81,8 +81,8 @@ resetExercise( void ) {
 	exData->acumulatedDistance = 0;
 	exData->currentDegree = 0;
 	exData->previousDegree = 0;
-	exData->previousTime[_100ms] = 0;
-	exData->previousTime[_1000ms] = 0;
+	exData->previousTime[__100ms] = 0;
+	exData->previousTime[__1000ms] = 0;
 }
 
 /*! \brief
@@ -96,7 +96,7 @@ loadDataFromFlash( exerciseReport* exReport, uint8_t day_index ) {
 	day_index += 1;
 	/* Load boot data from flash */
 //	exReport->distExercised	= (*(uint32_t*)(ADDR_FLASH_SECTOR_4));
-	memcpy(exReport, (uint32_t*)(ADDR_FLASH_SECTOR_6), sizeof(exerciseReport)*maxCnt*day_index);
+	memcpy(exReport, (uint32_t*)(ADDR_FLASH_SECTOR_6), sizeof(exerciseReport) * maxCnt * day_index);
 }
 
 /*! \brief
@@ -106,7 +106,7 @@ loadDataFromFlash( exerciseReport* exReport, uint8_t day_index ) {
 void
 writeDataToFlash( exerciseReport* exReport, uint8_t day_index ) {
 	uint32_t ramsource;
-	uint32_t offset = day_index * sizeof(exerciseReport) * maxCnt;
+	uint32_t offset = sizeof(exerciseReport) * maxCnt * day_index;
 
 	assert(exReport);
 
@@ -117,7 +117,7 @@ writeDataToFlash( exerciseReport* exReport, uint8_t day_index ) {
 //	{
 		ramsource = (uint32_t)&exReport[0];
 
-		if(FLASH_If_Write(ADDR_FLASH_SECTOR_6 + offset, (uint32_t*) ramsource, sizeof(exerciseReport)*maxCnt/4)  != FLASHIF_OK);
+		if(FLASH_If_Write(ADDR_FLASH_SECTOR_6 + offset, (uint32_t*) ramsource, sizeof(exerciseReport) * maxCnt / 4)  != FLASHIF_OK);
 			//return ;
 //	}
 //	else
@@ -132,7 +132,7 @@ writeDataToFlash( exerciseReport* exReport, uint8_t day_index ) {
  */
 uint16_t
 arcLength( float degreeMoved ) {
-	return 2 * PI * radius * (degreeMoved /360.0f);
+	return 2 * PI * radius * (degreeMoved / 360.0f);
 }
 
 /*! \brief
@@ -173,18 +173,18 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 	if(enable) {
 		// 최대 속도로 움직일 시, 100mS동안 43.4도 움직일 수 있음 (400mS은 173.6도)
 		//100mS 마다 변화량 측정
-		if( abs(HAL_GetTick() - exData->previousTime[_100ms]) > 100 ) {
+		if( abs(HAL_GetTick() - exData->previousTime[__100ms]) > _100mS ) {
 			//변동된 각도를 누적한다
-			exData->acumulatedDegree += acumulateAngle( get_degree()-Roll_offset );
-			exData->previousTime[_100ms] = HAL_GetTick();
+			exData->acumulatedDegree += acumulateAngle( abs(get_degree() - Roll_offset) );
+			exData->previousTime[__100ms] = HAL_GetTick();
 			//		printf("\r acul : %lu\n", exData->get_acumulatedDegree());
 		}
 
 		//1초가 되면 기록
-		if( abs(HAL_GetTick() - exData->previousTime[_1000ms]) > 1000 ) {
+		if( abs(HAL_GetTick() - exData->previousTime[__1000ms]) > _1s ) {
 			//1초가 되면 운동데이터를 기록한다
 			exReport[cbuf->head].timeStamp = get_now_time();
-			exReport[cbuf->head].distExercised = arcLength(get_acumulatedDegree());
+			exReport[cbuf->head].distExercised = arcLength( get_acumulatedDegree() );
 			exReport[cbuf->head].timeExercised = second_index;
 
 			//push the buffer
@@ -194,20 +194,25 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 			if(second_index++ > USHRT_MAX) second_index = 0;
 
 			//recod the last time
-			exData->previousTime[_1000ms] = HAL_GetTick();
+			exData->previousTime[__1000ms] = HAL_GetTick();
 		}
 
 		//15분이 경과하면 데이터를 플래시에 기록한다
 		if(cbuf->head >= maxCnt-1) {
-			/* test 1 */
+			/* 링버퍼 검색 함수 테스트 */
 //			printf("\r circular_buf_search : %d \n", circular_buf_search(cbuf, 23));
 
-			/* test 2 */
-			exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport)*2);
-			assert(getBuffer);
-			circular_buf_get_range(getBuffer, cbuf, 23, 2);
-			free(getBuffer);
+			/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
+//			int temp = 0;
+//			exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport)*10);
+//			assert(getBuffer);
+//			memset(getBuffer, 0x00, sizeof(exerciseReport)*10);
+//			temp = circular_buf_get_range(getBuffer, cbuf, 23, 10);
+//			if(temp > 1)
+//				printf("temp : %d\r\n", temp);
+//			free(getBuffer);
 
+			/* 링버퍼 get 함수 테스트 */
 //			while(!circular_buf_empty(cbuf))
 //			{
 //				exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport));

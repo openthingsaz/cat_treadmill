@@ -157,18 +157,17 @@ bool circular_buf_full(cbuf_handle_t cbuf)
 }
 
 int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n)
-//int circular_buf_search(cbuf_handle_t cbuf, uint32_t timeStamp)
 {
-	int i, cnt, index = 0;
+	int i = 0, cnt = 0, index = 0, copyiedCnt = 0;
 	uint32_t search_timeStamp = timeStamp;
 	uint32_t max_timeStamp = timeStamp + n;
 
 	assert(gbuf && cbuf && timeStamp && n);
 
 	// data가 있는지 확인
-	if(!circular_buf_empty(cbuf))
+	if(cbuf->head == cbuf->tail)
 	{
-		return -1;
+		return 0;
 	}
 	else if(cbuf->head > cbuf->tail) //탐색 방법 1
 	{
@@ -177,10 +176,10 @@ int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t ti
 			if(cbuf->buffer[i].timeStamp == search_timeStamp)
 			{
 				//데이터 찾음
-				gbuf[index++] = cbuf->buffer[i];
+				memcpy(&gbuf[index++], &cbuf->buffer[i], sizeof(exerciseReport));
 				search_timeStamp += 1;
-				if(search_timeStamp >= max_timeStamp) return 0;
-				//return (i+1);
+				copyiedCnt += 1;
+				if(search_timeStamp >= max_timeStamp) return copyiedCnt;
 			}
 		}
 	}
@@ -190,10 +189,10 @@ int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t ti
 		{
 			if(cbuf->buffer[i].timeStamp == search_timeStamp)
 			{
-				gbuf[index++] = cbuf->buffer[i];
+				memcpy(&gbuf[index++], &cbuf->buffer[i], sizeof(exerciseReport));
 				search_timeStamp += 1;
-				if(search_timeStamp >= max_timeStamp) return 0;
-				//return (i+1);
+				copyiedCnt += 1;
+				if(search_timeStamp >= max_timeStamp) return copyiedCnt;
 			}
 		}
 
@@ -203,15 +202,21 @@ int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t ti
 		{
 			if(cbuf->buffer[i].timeStamp == search_timeStamp)
 			{
-				gbuf[index++] = cbuf->buffer[i+cnt+1];
+				memcpy(&gbuf[index++], &cbuf->buffer[i+cnt+1], sizeof(exerciseReport));
 				search_timeStamp += 1;
-				if(search_timeStamp >= max_timeStamp) return 0;
-				//return (cnt+i+1);
+				copyiedCnt += 1;
+				if(search_timeStamp >= max_timeStamp) return copyiedCnt;
 			}
 		}
 	}
 
-	return -1;
+	//요청한 데이터보다 더 많은 데이터를 요구했을 경우 복사한 만큼 리턴
+	if(i == cbuf->head)
+	{
+		return copyiedCnt;
+	}
+
+	return 0;
 }
 
 void print_buffer_status(cbuf_handle_t cbuf)
