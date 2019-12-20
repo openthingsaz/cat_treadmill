@@ -12,6 +12,7 @@
 #include "mdbt42q.h"
 
 uint8_t bat_val = 0;
+uint8_t power_mode = 0;
 
 /* power Enable */
 void power_en(void)

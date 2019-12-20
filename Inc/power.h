@@ -25,6 +25,7 @@ void power_dis(void);
 void led_power_off(void);
 void led_power_on(void);
 extern uint8_t bat_val;
+extern uint8_t power_mode;
 
 #ifdef __cplusplus
 }
