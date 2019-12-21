@@ -146,7 +146,7 @@ int main(void)
   	set_led_update(ledPos);
   	process();
     amountOfExercise(exData, Roll_offset, Stable_state);
-    enter_standby_mode();
+    //enter_standby_mode();
   }
 
   /* USER CODE END 3 */
