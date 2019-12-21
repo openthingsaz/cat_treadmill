@@ -123,7 +123,6 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
   vt100SetCursorPos( 0, 0);
-  HAL_TIM_Base_Start_IT(&htim11);
   printf("Booting LittleCat Board!!!!221\r\n\n");
   power_en();
   ble_module_init();
@@ -138,7 +137,7 @@ int main(void)
   if(FLASH_If_Erase_Range(DATA_START_ADDRESS, DATA_END_ADDRESS) != FLASHIF_OK) {
   	Error_Handler();
   }
-
+  HAL_TIM_Base_Start_IT(&htim11);
   /* USER CODE END 2 */
 
   /* Infinite loop */
