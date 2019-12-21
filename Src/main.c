@@ -65,7 +65,7 @@
 void SystemClock_Config(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-
+void low_powor_check(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -146,7 +146,7 @@ int main(void)
   	set_led_update(ledPos);
   	process();
     amountOfExercise(exData, Roll_offset, Stable_state);
-    //enter_standby_mode();
+    low_powor_check();
   }
 
   /* USER CODE END 3 */
@@ -269,17 +269,21 @@ void power_off_time_check(void)
   }
 }
 
-void enter_standby_mode(void)
+uint32_t bat_previous_time = 0;
+void low_powor_check(void)
 {
-  if (get_bat_val() <= 30) 
-  {
-    /* Record cat movement information. */
-    //////////////////////////////////////
-    
-    
-    //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
-    //HAL_PWR_EnterSTANDBYMode();
-  }
+  if( abs(HAL_GetTick() - bat_previous_time) > 60000 ) {
+		if (get_bat_val() <= 30) 
+    {
+      /* Record cat movement information. */
+      //////////////////////////////////////
+          
+      //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+      //HAL_PWR_EnterSTANDBYMode();
+    }
+			
+	  bat_previous_time = HAL_GetTick();
+	}
 }
 
 /* USER CODE END 4 */
@@ -304,7 +308,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM11)
   {
     power_off_time_check();
-   // enter_standby_mode();
     timecnt++; // time count for timestamp
   }
   /* USER CODE END Callback 1 */
