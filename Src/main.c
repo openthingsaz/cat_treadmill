@@ -145,7 +145,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
-amountOfExercise(exData, Roll_offset, Stable_state);
+    amountOfExercise(exData, Roll_offset, Stable_state);
+    enter_standby_mode();
   }
 
   /* USER CODE END 3 */
@@ -303,7 +304,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM11)
   {
     power_off_time_check();
-    enter_standby_mode();
+   // enter_standby_mode();
     timecnt++; // time count for timestamp
   }
   /* USER CODE END Callback 1 */
