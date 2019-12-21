@@ -174,8 +174,8 @@ void max17043_init(void)
 
 int32_t get_bat_val(void) 
 {
-  MAX17043_reset ();
-  HAL_Delay(1);
-  MAX17043_quickStart ();
+  //MAX17043_reset ();
+  //HAL_Delay(1);
+  //MAX17043_quickStart ();
   return MAX17043_getSoC();
 }
