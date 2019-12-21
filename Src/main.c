@@ -133,10 +133,6 @@ int main(void)
   FLASH_If_Init();
   initExercise();
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
-
-  if(FLASH_If_Erase_Range(DATA_START_ADDRESS, DATA_END_ADDRESS) != FLASHIF_OK) {
-  	Error_Handler();
-  }
   HAL_TIM_Base_Start_IT(&htim11);
   /* USER CODE END 2 */
 
