@@ -65,7 +65,7 @@
 void SystemClock_Config(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-void low_powor_check(void);
+void low_power_check(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -146,7 +146,7 @@ int main(void)
   	set_led_update(ledPos);
   	process();
     amountOfExercise(exData, Roll_offset, Stable_state);
-    low_powor_check();
+    low_power_check();
   }
 
   /* USER CODE END 3 */
@@ -270,7 +270,7 @@ void power_off_time_check(void)
 }
 
 uint32_t bat_previous_time = 0;
-void low_powor_check(void)
+void low_power_check(void)
 {
   if( abs(HAL_GetTick() - bat_previous_time) > 60000 ) {
 		if (get_bat_val() <= 30) 
