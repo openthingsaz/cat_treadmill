@@ -23,20 +23,6 @@ uint8_t get_status(void)
   return running_mode;
 }
 
-void set_wakeup(void) 
-{
-  power_en();
-  running_mode = STAT_RUNNING;
-  //HAL_TIM_Base_Start_IT(&htim11);
-}
-
-void set_sleep(void) 
-{
-  power_dis();
-  running_mode = STAT_SLEEP;
-  //HAL_TIM_Base_Stop_IT(&htim11);
-}
-
 uint16_t get_degree(void)
 {
   uint16_t degree = (uint16_t)Roll;
