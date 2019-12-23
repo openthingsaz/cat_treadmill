@@ -351,10 +351,12 @@ void cmd_process(uint8_t cmd, uint32_t data)
       break;
 
     case GET_POWER_MODE :
+      get_power_mode();
       break;
 
     case SET_POWER_MODE :
       printf("SET_POWER_MODE\r\n");
+      set_power_mode((uint8_t)data);
       break;
 
     default :
