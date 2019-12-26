@@ -12,7 +12,7 @@
 #include "mdbt42q.h"
 
 uint8_t bat_val = 0;
-uint8_t power_mode = POWR_PERFORMANCE;
+uint8_t power_mode = POWR_PERFORMANCE; //POWR_SAVE, POWR_SAVE, POWR_PERFORMANCE
 
 void led_power_off(void)
 {
