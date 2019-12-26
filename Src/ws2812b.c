@@ -351,7 +351,7 @@ void set_led_update(uint8_t pos)
       setPixelColor( (uint16_t)pos, red, green, blue);
     
       ledPos_before = pos;
-      printf("\r Roll %d, acul : %lu\n", (uint16_t)Roll, exData->get_acumulatedDegree());
+      //printf("\r Roll %d, acul : %lu\n", (uint16_t)Roll, exData->get_acumulatedDegree());
       // if If there is motion, wakeup
       if (running_mode == STAT_SLEEP) 
       {
@@ -360,6 +360,17 @@ void set_led_update(uint8_t pos)
       
     }
 }
+
+uint8_t pos_move_check(uint8_t pos)
+{
+  if (ledPos_before != pos) 
+  {  
+    ledPos_before = pos;   
+    return 0;
+  }
+  else return 1;
+}
+
 
 void set_led_pos(uint8_t pos) 
 {
