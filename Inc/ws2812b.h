@@ -21,7 +21,7 @@
 
 
 
-#define LED_NO    212
+#define LED_NO    LED_TOTAL
 
 #define LED_BUFFER_LENGTH (LED_NO*12)
 
