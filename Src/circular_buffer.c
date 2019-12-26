@@ -103,7 +103,7 @@ void circular_buf_put(cbuf_handle_t cbuf, exerciseReport* data)
 {
 	assert(cbuf && cbuf->buffer);
 
-    memcpy(&cbuf->buffer[cbuf->head], data, 1);
+    memcpy(&cbuf->buffer[cbuf->head], data, sizeof(exerciseReport));
 
     advance_pointer(cbuf);
 }
