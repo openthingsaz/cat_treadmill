@@ -80,3 +80,7 @@ void set_sleep(void)
   running_mode = STAT_SLEEP;
   //HAL_TIM_Base_Stop_IT(&htim11);
 }
+uint8_t get_running_mode(void)
+{
+	return running_mode;
+}

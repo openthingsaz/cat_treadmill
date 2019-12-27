@@ -31,7 +31,7 @@ void set_power_mode(uint8_t mode);
 uint8_t get_power_mode(void);
 void set_wakeup(void);
 void set_sleep(void);
-
+uint8_t get_running_mode(void);
 extern uint8_t bat_val;
 extern uint8_t power_mode;
 
