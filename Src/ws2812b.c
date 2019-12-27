@@ -366,9 +366,9 @@ uint8_t pos_move_check(uint8_t pos)
   if (ledPos_before != pos) 
   {  
     ledPos_before = pos;   
-    return 0;
+    return 1; // led move
   }
-  else return 1;
+  else return 0; // led don't move
 }
 
 

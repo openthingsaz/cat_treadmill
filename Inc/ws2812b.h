@@ -38,6 +38,7 @@ void set_led_pos(uint8_t pos);
 void set_led_col(uint32_t data);
 void set_rand_led_mode(void);
 void dis_rand_led_mode(void);
+uint8_t pos_move_check(uint8_t pos);
 extern uint8_t red;
 extern uint8_t green;
 extern uint8_t blue;
