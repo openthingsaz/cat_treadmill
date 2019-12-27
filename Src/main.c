@@ -65,7 +65,8 @@
 void SystemClock_Config(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-void low_power_check(void);
+void low_bat_check(void);
+void low_pow_enter_check(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -80,6 +81,8 @@ uint8_t auto_time_off_mode = 0;
 uint32_t ntime_auto_off_mode = 0;
 uint32_t time_cnt = 0;
 uint8_t running_mode = 0;
+uint8_t low_power_mode = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -115,8 +118,8 @@ int main(void)
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  MX_TIM1_Init();
-  MX_TIM11_Init();
+  //MX_TIM1_Init();
+  //MX_TIM11_Init();
   MX_SPI1_Init();
 
   /* Initialize interrupts */
@@ -135,7 +138,7 @@ int main(void)
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
   HAL_TIM_Base_Start_IT(&htim11);
   /* USER CODE END 2 */
-
+  
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -146,7 +149,8 @@ int main(void)
   	set_led_update(ledPos);
   	process();
     amountOfExercise(exData, Roll_offset, Stable_state);
-    low_power_check();
+    low_bat_check();
+    low_pow_enter_check();
   }
 
   /* USER CODE END 3 */
@@ -224,10 +228,34 @@ static void MX_NVIC_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void low_pow_enter_check(void)
+{
+  if (get_running_mode() == STAT_SLEEP && low_power_mode == 0)
+  {
+    low_power_mode = 1;
+    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFE);
+    SystemClock_Config();
+  }
+}
+
+void wakeup_check(void)
+{
+  if (get_running_mode() == STAT_SLEEP) 
+  {
+    if (pos_move_check(ledPos) == 1) 
+    {
+      low_power_mode = 0;
+      set_wakeup();
+    }
+  }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if(GPIO_Pin == MPU6050_INT1_X_Pin)
   {
+    wakeup_check();
     // To do
 	  if(Cal_done) {
 		  Read_DMP();
@@ -243,7 +271,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		  		Roll_before = Roll;
 		  }
 	  }
-
   }
 }
 
@@ -254,36 +281,39 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 
 void power_off_time_check(void)
 {
-  if (ledPos_before == ledPosTmp) 
+  if (get_running_mode() != STAT_SLEEP) 
   {
-    offtimecnt++;
-    if (offtimecnt >= OFF_TIME) 
+    if (ledPos_before == ledPosTmp) 
     {
-      offtimecnt = 0;
-      set_sleep();
+      offtimecnt++;
+      if (offtimecnt >= OFF_TIME) 
+      {
+        offtimecnt = 0;
+        set_sleep();
+      }
     }
-  }
-  else 
-  {
-    ledPosTmp = ledPos_before;
+    else 
+    {
+      ledPosTmp = ledPos_before;
+    }
   }
 }
 
 uint32_t bat_previous_time = 0;
-void low_power_check(void)
+void low_bat_check(void)
 {
-  if( abs(HAL_GetTick() - bat_previous_time) > 60000 ) {
-		if (get_bat_val() <= 30) 
+  if (get_running_mode() == STAT_SLEEP)
+  {
+    if( abs(HAL_GetTick() - bat_previous_time) > 60000 )
     {
-      /* Record cat movement information. */
-      //////////////////////////////////////
-          
-      //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
-      //HAL_PWR_EnterSTANDBYMode();
+      if (get_bat_val() <= 30) 
+      {
+        /* Record cat movement information. */
+        //////////////////////////////////////
+      }
+      bat_previous_time = HAL_GetTick();
     }
-			
-	  bat_previous_time = HAL_GetTick();
-	}
+  }
 }
 
 /* USER CODE END 4 */
@@ -301,7 +331,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM5) {
+  if (htim->Instance == TIM5) 
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
