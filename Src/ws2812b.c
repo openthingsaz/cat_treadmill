@@ -353,7 +353,7 @@ void set_led_update(uint8_t pos)
       ledPos_before = pos;
       //printf("\r Roll %d, acul : %lu\n", (uint16_t)Roll, exData->get_acumulatedDegree());
       // if If there is motion, wakeup
-      if (running_mode == STAT_SLEEP) 
+      if (get_running_mode() == STAT_SLEEP) 
       {
         set_wakeup();
       }
