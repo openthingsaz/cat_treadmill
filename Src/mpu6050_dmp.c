@@ -97,9 +97,9 @@ uint8_t buffer[14];
 int16_t  MPU6050_FIFO[6][11];
 int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_newValues �뗢��(int16_t ax, int16_t ay, int16_t az, int16_t gx, int16_t gy, int16_t gz)
-* 湲곕뒫 : �븘�꽣留곸쓣 �쐞�빐 �깉濡쒖슫 ADC �뜲�씠�꽣瑜� FIFO �뼱�젅�씠濡� �뾽�뜲�씠�듃
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_newValues ​​(int16_t ax, int16_t ay, int16_t az, int16_t gx, int16_t gy, int16_t gz)
+* 기능 : 필터링을 위해 새로운 ADC 데이터를 FIFO 어레이로 업데이트
 *********************************************************************************/
 void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 {
@@ -114,7 +114,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 		MPU6050_FIFO[4][i-1]=MPU6050_FIFO[4][i];
 		MPU6050_FIFO[5][i-1]=MPU6050_FIFO[5][i];
 	}
-	MPU6050_FIFO[0][9]=ax;  // �뜲�씠�꽣 �걹�뿉 �깉 �뜲�씠�꽣瑜� 諛곗튂
+	MPU6050_FIFO[0][9]=ax;  // 데이터 끝에 새 데이터를 배치
 	MPU6050_FIFO[1][9]=ay;
 	MPU6050_FIFO[2][9]=az;
 	MPU6050_FIFO[3][9]=gx;
@@ -123,7 +123,7 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 
 	sum=0;
 
-	for(i=0;i<10;i++){	// �쁽�옱 諛곗뿴�쓽 �빀�쓣 李얠븘 �룊洹좎쓣 援ы븿
+	for(i=0;i<10;i++){	// 현재 배열의 합을 찾아 평균을 구함
 
 		sum+=MPU6050_FIFO[0][i];
 	}
@@ -161,10 +161,10 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_setClockSource (uint8_t source)
-* 湲곕뒫 : �꽕�젙 MPU6050 �겢�윮 �냼�뒪
- * CLK_SEL | �겢�윮 �냼�뒪
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setClockSource (uint8_t source)
+* 기능 : 설정 MPU6050 클럭 소스
+ * CLK_SEL | 클럭 소스
  * --------+--------------------------------------
  * 0       | Internal oscillator
  * 1       | PLL with X Gyro reference
@@ -193,28 +193,28 @@ void MPU6050_setFullScaleGyroRange(uint8_t range) {
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_setFullScaleAccelRange (uint8_t range)
-* 湲곕뒫 : MPU6050 媛��냽�룄怨꾩쓽 理쒕� 踰붿쐞 �꽕�젙
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setFullScaleAccelRange (uint8_t range)
+* 기능 : MPU6050 가속도계의 최대 범위 설정
 **************************************************** *****************************/
 void MPU6050_setFullScaleAccelRange(uint8_t range) {
 	IICwriteBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �봽濡쒗넗 ���엯 : void MPU6050_setSleepEnabled (uint8_t enabled)
-* 湲곕뒫 : �젅�쟾 紐⑤뱶
-* 1 �뒳由쎈え�뱶
-* 0 �룞�옉紐⑤뱶
+/************************** 구현 기능 ***********************************************
+* 프로토 타입 : void MPU6050_setSleepEnabled (uint8_t enabled)
+* 기능 : 절전 모드
+* 1 슬립모드
+* 0 동작모드
 *********************************************************************************/
 void MPU6050_setSleepEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
 }
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �봽濡쒗넗 ���엯 : uint8_t MPU6050_getDeviceID (void)
-* 湲곕뒫 : MPU6050 WHO_AM_I �뵆�옒洹몃�� �씫�쑝硫� 0x68�씠 諛섑솚�맖.
+/************************** 구현 기능 ***********************************************
+* 프로토 타입 : uint8_t MPU6050_getDeviceID (void)
+* 기능 : MPU6050 WHO_AM_I 플래그를 읽으면 0x68이 반환됨.
 *********************************************************************************/
 uint8_t MPU6050_getDeviceID(void) {
 
@@ -223,9 +223,9 @@ uint8_t MPU6050_getDeviceID(void) {
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �봽濡쒗넗 ���엯 : uint8_t MPU6050_testConnection (void)
-* 湲곕뒫 : MPU6050�씠 �뿰寃곕릺�뼱 �엳�뒗吏� �솗�씤
+/************************** 구현 기능 ***********************************************
+* 프로토 타입 : uint8_t MPU6050_testConnection (void)
+* 기능 : MPU6050이 연결되어 있는지 확인
 *********************************************************************************/
 uint8_t MPU6050_testConnection(void) {
 	if(MPU6050_getDeviceID() == 0x68)  //0b01101000;
@@ -234,9 +234,9 @@ uint8_t MPU6050_testConnection(void) {
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_setI2CMasterModeEnabled (uint8_t enabled)
-* 湲곕뒫 : MPU6050�씠 AUX I2C �샇�뒪�듃 �꽕�젙
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_setI2CMasterModeEnabled (uint8_t enabled)
+* 기능 : MPU6050이 AUX I2C 호스트 설정
 **************************************************** *****************************/
 void MPU6050_setI2CMasterModeEnabled(uint8_t enabled) {
 	IICwriteBit(devAddr, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
@@ -248,15 +248,15 @@ void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 }
 
 
-/************************** 援ы쁽 湲곕뒫 ***********************************************
-* �븿�닔 �봽濡쒗넗 ���엯 : void MPU6050_initialize (void)
-* 湲곕뒫 : MPU6050�쓣 珥덇린�솕.
+/************************** 구현 기능 ***********************************************
+* 함수 프로토 타입 : void MPU6050_initialize (void)
+* 기능 : MPU6050을 초기화.
 *********************************************************************************/
 void MPU6050_initialize(void) {
-	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); // �겢�윮�꽕�젙
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//�옄�씠濡� 理쒕�踰붿쐞 +/- 1000 �룄 (珥덈떦)
-	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//媛��냽�룄 理쒕�踰붿쐞 +/- 2g
-	MPU6050_setSleepEnabled(0); //�룞�옉紐⑤뱶 �꽕�젙
+	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //클럭설정
+	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//자이로 최대범위 +/- 1000 도 (초당)
+	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//가속도 최대범위 +/- 2g
+	MPU6050_setSleepEnabled(0); //동작모드 설정
 	MPU6050_setI2CMasterModeEnabled(0);	 //auxi2c off
 	MPU6050_setI2CBypassEnabled(0);	 //bypass auxi2c
 }
@@ -408,7 +408,7 @@ void run_self_test(void)
 	//TEST 2 8g
 //    accel[0] =  0.0443f;
 //    accel[1] = -0.0151f;
-//    accel[2] = -0.0018f;                                                  ;
+//    accel[2] = -0.0018f;
 //    gyro[0] = -8.6875f;
 //    gyro[1] = -1.6875f;
 //    gyro[2] = -1.4375f;
@@ -416,7 +416,7 @@ void run_self_test(void)
 	//8g -2
 //    accel[0] =  0.0735f;
 //    accel[1] = -0.0010f;
-//    accel[2] = -0.0154f;                                                  ;
+//    accel[2] = -0.0154f;
 //    gyro[0] = -8.9062f;
 //    gyro[1] = -2.4688f;
 //    gyro[2] = -1.3438f;
@@ -539,9 +539,9 @@ void run_self_test2(void)
 }
 
 /****************************************************************************
- * 湲곕뒫 : MPU6050�쓽 �궡�옣 DMP 珥덇린�솕
- * �엯�젰 留ㅺ컻 蹂��닔 : �뾾�쓬
- * 諛섑솚 媛� : None
+ * 기능 : MPU6050의 내장 DMP 초기화
+ * 입력 매개 변수 : 없음
+ * 반환 값 : None
 ****************************************************************************/
 void DMP_Init(void)
 { 
@@ -569,7 +569,7 @@ void DMP_Init(void)
 				DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_RAW_GYRO | DMP_FEATURE_SEND_CAL_GYRO))//|
 				//DMP_FEATURE_GYRO_CAL))
 			printf("dmp_enable_feature complete ......\r\n");
-		//1踰� 罹섎━釉뚮젅�씠�뀡 �븯怨� 2踰� 罹섎━釉뚮젅�씠�뀡
+		//run_self_test를 먼저 실행하고 run_self_test2 함수를 실행
 		run_self_test();
 //		run_self_test2();
 		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))
@@ -582,9 +582,9 @@ void DMP_Init(void)
 }
 
 /****************************************************************************
- * 湲곕뒫 : MPU6050 �궡�옣 DMP�쓽 �옄�꽭 �젙蹂대�� �씫�뒿�땲�떎.
- * �엯�젰 留ㅺ컻 蹂��닔 : �뾾�쓬
- * 諛섑솚 媛� : None
+ * 기능 : MPU6050 내장 DMP의 자세 정보를 읽습니다.
+ * 입력 매개 변수 : 없음
+ * 반환 값 : None
 ****************************************************************************/
 void Read_DMP(void)
 {	
@@ -616,9 +616,9 @@ void Read_DMP(void)
 }
 
 /****************************************************************************
- * 湲곕뒫 : MPU6050 �궡�옣 �삩�룄 �꽱�꽌�뿉�꽌 �뜲�씠�꽣 �씫湲�
- * �엯�젰 留ㅺ컻 蹂��닔 : �뾾�쓬
- * 諛섑솚 媛� : �꽠�뵪
+ * 기능 : MPU6050 내장 온도 센서에서 데이터 읽기
+ * 입력 매개 변수 : 없음
+ * 반환 값 : 섭씨
 ****************************************************************************/
 int Read_Temperature(void)
 {	   

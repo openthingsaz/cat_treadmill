@@ -16,6 +16,8 @@
 #include "circular_buffer.h"
 #include "workout.h"
 
+cbuf_handle_t cbuf;
+
 static void advance_pointer(cbuf_handle_t cbuf)
 {
 	assert(cbuf);
@@ -39,7 +41,7 @@ static void retreat_pointer(cbuf_handle_t cbuf)
 	cbuf->tail = (cbuf->tail + 1) % cbuf->max;
 }
 
-cbuf_handle_t circular_buf_init(exerciseReport* buffer, size_t size)
+cbuf_handle_t circular_buf_init(exReport_handle_t buffer, size_t size)
 {
 	assert(buffer && size);
 
@@ -99,7 +101,7 @@ size_t circular_buf_capacity(cbuf_handle_t cbuf)
 	return cbuf->max;
 }
 
-void circular_buf_put(cbuf_handle_t cbuf, exerciseReport* data)
+void circular_buf_put(cbuf_handle_t cbuf, exReport_handle_t data)
 {
 	assert(cbuf && cbuf->buffer);
 
@@ -108,7 +110,7 @@ void circular_buf_put(cbuf_handle_t cbuf, exerciseReport* data)
     advance_pointer(cbuf);
 }
 
-int circular_buf_put_non_overwrite(cbuf_handle_t cbuf, exerciseReport* data)
+int circular_buf_put_non_overwrite(cbuf_handle_t cbuf, exReport_handle_t data)
 {
     int r = -1;
 
@@ -124,7 +126,7 @@ int circular_buf_put_non_overwrite(cbuf_handle_t cbuf, exerciseReport* data)
     return r;
 }
 
-int circular_buf_get(cbuf_handle_t cbuf, exerciseReport* data)
+int circular_buf_get(cbuf_handle_t cbuf, exReport_handle_t data)
 {
     assert(cbuf && cbuf->buffer);
 
@@ -132,8 +134,8 @@ int circular_buf_get(cbuf_handle_t cbuf, exerciseReport* data)
 
     if(!circular_buf_empty(cbuf))
     {
-        *data = cbuf->buffer[cbuf->tail];
-//        memcpy(data, cbuf->buffer[cbuf->head], sizeof(exerciseReport));
+//        data = cbuf->buffer[cbuf->tail];
+        memcpy(data, &cbuf->buffer[cbuf->head], sizeof(exerciseReport));
         retreat_pointer(cbuf);
 
         r = 0;
@@ -156,7 +158,7 @@ bool circular_buf_full(cbuf_handle_t cbuf)
     return cbuf->full;
 }
 
-int circular_buf_get_range(exerciseReport* gbuf, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n)
+int circular_buf_get_range(exReport_handle_t gbuf, cbuf_handle_t cbuf, uint32_t timeStamp, size_t n)
 {
 	int i = 0, cnt = 0, index = 0, copyiedCnt = 0;
 	uint32_t search_timeStamp = timeStamp;

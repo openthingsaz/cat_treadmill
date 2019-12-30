@@ -35,6 +35,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "vt100.h"
 #include "vt100.h"
 #include "time.h"

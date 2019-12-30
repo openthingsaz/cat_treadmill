@@ -19,14 +19,12 @@
 
 exerciseReport* exReport;
 dataExercise *exData;
-cbuf_handle_t cbuf;
 
 /*! \brief
  *
  *
  */
-void
-initExercise( void ) {
+void initExercise( void ) {
 	//캘리브레이션 필요 : 초기화 시, 현재 원통의 각도값을 받아 이전각도 변수에 넣어야 함
 	exReport = (exerciseReport*)malloc(sizeof(exerciseReport) * totalBuffSize);
 	assert(exReport);
@@ -62,8 +60,7 @@ initExercise( void ) {
  *
  *
  */
-void
-resetReport( void ) {
+void resetReport( void ) {
 	for(int i = 0; i < totalBuffSize - 1; i++) {
 		exReport[i].timeStamp = 0;
 		exReport[i].distExercised = 0;
@@ -75,8 +72,7 @@ resetReport( void ) {
  *
  *
  */
-void
-resetExercise( void ) {
+void resetExercise( void ) {
 	exData->acumulatedDegree = 0;
 	exData->acumulatedDistance = 0;
 	exData->currentDegree = 0;
@@ -89,8 +85,7 @@ resetExercise( void ) {
  *
  *
  */
-void
-loadDataFromFlash( exerciseReport* exReport, uint8_t day_index ) {
+void loadDataFromFlash( exerciseReport* exReport, uint8_t day_index ) {
 	assert(exReport);
 
 	day_index += 1;
@@ -103,8 +98,7 @@ loadDataFromFlash( exerciseReport* exReport, uint8_t day_index ) {
  *
  *
  */
-void
-writeDataToFlash( exerciseReport* exReport, uint8_t day_index ) {
+void writeDataToFlash( exerciseReport* exReport, uint8_t day_index ) {
 	uint32_t ramsource;
 	uint32_t offset = sizeof(exerciseReport) * maxCnt * day_index;
 
@@ -130,8 +124,7 @@ writeDataToFlash( exerciseReport* exReport, uint8_t day_index ) {
  *
  *
  */
-uint16_t
-arcLength( float degreeMoved ) {
+uint16_t arcLength( float degreeMoved ) {
 	return 2 * PI * radius * (degreeMoved / 360.0f);
 }
 
@@ -139,8 +132,7 @@ arcLength( float degreeMoved ) {
  *
  *
  */
-uint16_t
-acumulateAngle( uint16_t degree ) {
+uint16_t acumulateAngle( uint16_t degree ) {
 	static uint16_t previousDegree, currentDegree;
 	//최대 속도로 회전 시, 1초에 1.2바퀴 434도 회전 가능함
 	previousDegree = currentDegree;
@@ -163,8 +155,7 @@ uint32_t get_acumulatedDegree( void ) {
  *
  *
  */
-void
-amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
+void amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 	static uint16_t second_index = 0;
 //	static uint16_t day_index = 0;
 
@@ -202,9 +193,9 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 			/* 링버퍼 검색 함수 테스트 */
 //			printf("\r circular_buf_search : %d \n", circular_buf_search(cbuf, 23));
 
-			/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
+//			/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
 //			int temp = 0;
-//			exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport)*10);
+//			exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport)*10);
 //			assert(getBuffer);
 //			memset(getBuffer, 0x00, sizeof(exerciseReport)*10);
 //			temp = circular_buf_get_range(getBuffer, cbuf, 23, 10);
@@ -215,7 +206,7 @@ amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enable ) {
 			/* 링버퍼 get 함수 테스트 */
 //			while(!circular_buf_empty(cbuf))
 //			{
-//				exerciseReport* getBuffer = (exerciseReport*)malloc(sizeof(exerciseReport));
+//				exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport));
 //				assert(getBuffer);
 //
 //				circular_buf_get(cbuf, getBuffer);

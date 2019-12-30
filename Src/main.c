@@ -38,6 +38,7 @@
 #include "mpu6050_dmp.h"
 #include "workout.h"
 #include "flash_if.h"
+#include "circular_buffer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -148,7 +149,20 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
-    amountOfExercise(exData, Roll_offset, Stable_state);
+
+  	amountOfExercise(exData, Roll_offset, Stable_state);
+    if(cbuf->head >= maxCnt-1) {
+    	/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
+    	int temp = 0;
+    	exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport)*10);
+    	assert(getBuffer);
+    	memset(getBuffer, 0x00, sizeof(exerciseReport)*10);
+    	temp = circular_buf_get_range(getBuffer, cbuf, 28, 10);
+    	if(temp > 1)
+    		printf("temp : %d\r\n", temp);
+    	free(getBuffer);
+    }
+
     low_bat_check();
     low_pow_enter_check();
   }
