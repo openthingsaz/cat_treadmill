@@ -151,7 +151,8 @@ int main(void)
   	process();
 
   	amountOfExercise(exData, Roll_offset, Stable_state);
-    if(cbuf->head >= maxCnt-1) {
+    if((running_mode == STAT_SLEEP) && Stable_state)
+    {
     	/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
     	int temp = 0;
     	exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport)*10);
