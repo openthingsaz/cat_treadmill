@@ -119,8 +119,8 @@ int main(void)
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  //MX_TIM1_Init();
-  //MX_TIM11_Init();
+  MX_TIM1_Init();
+  MX_TIM11_Init();
   MX_SPI1_Init();
 
   /* Initialize interrupts */

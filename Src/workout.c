@@ -187,54 +187,6 @@ void amountOfExercise( dataExercise *exData, uint16_t Roll_offset, uint8_t enabl
 			//recod the last time
 			exData->previousTime[__1000ms] = HAL_GetTick();
 		}
-
-		//15분이 경과하면 데이터를 플래시에 기록한다
-		if(cbuf->head >= maxCnt-1) {
-			/* 링버퍼 검색 함수 테스트 */
-//			printf("\r circular_buf_search : %d \n", circular_buf_search(cbuf, 23));
-
-//			/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
-//			int temp = 0;
-//			exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport)*10);
-//			assert(getBuffer);
-//			memset(getBuffer, 0x00, sizeof(exerciseReport)*10);
-//			temp = circular_buf_get_range(getBuffer, cbuf, 23, 10);
-//			if(temp > 1)
-//				printf("temp : %d\r\n", temp);
-//			free(getBuffer);
-
-			/* 링버퍼 get 함수 테스트 */
-//			while(!circular_buf_empty(cbuf))
-//			{
-//				exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport));
-//				assert(getBuffer);
-//
-//				circular_buf_get(cbuf, getBuffer);
-//				printf("\r\nStime : %lu \n", getBuffer->timeStamp);
-//				printf("\r\nAdist : %lu \n", getBuffer->distExercised);
-//				printf("\r\nAtime : %u \n", getBuffer->timeExercised);
-//
-//				assert(getBuffer);
-//				free(getBuffer);
-//			}
-
-//			플래쉬에 데이터 기록
-//			writeDataToFlash(exReport, day_index);
-//			loadDataFromFlash(exReport, day_index);
-//			day_index++;
-//
-//			변수 초기화
-//			resetReport();
-//			second_index = 0;
-//
-//			if(day_index > maxDay) {
-//				if(FLASH_If_Erase_Range(ADDR_FLASH_SECTOR_6, ADDR_FLASH_SECTOR_7) != FLASHIF_OK) {
-//					Error_Handler();
-//				}
-//				day_index = 0;
-//			}
-
-		}
 	}
 }
 

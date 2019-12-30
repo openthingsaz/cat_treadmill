@@ -162,7 +162,7 @@ int circular_buf_get_range(exReport_handle_t gbuf, cbuf_handle_t cbuf, uint32_t 
 {
 	int i = 0, cnt = 0, index = 0, copyiedCnt = 0;
 	uint32_t search_timeStamp = timeStamp;
-	uint32_t max_timeStamp = timeStamp + n;
+//	uint32_t max_timeStamp = timeStamp + n;
 
 	assert(gbuf && cbuf && timeStamp && n);
 
@@ -175,13 +175,19 @@ int circular_buf_get_range(exReport_handle_t gbuf, cbuf_handle_t cbuf, uint32_t 
 	{
 		for(i = cbuf->tail; i < cbuf->head; i++)
 		{
-			if(cbuf->buffer[i].timeStamp == search_timeStamp)
+			if(cbuf->buffer[i].timeStamp >= search_timeStamp)
 			{
-				//데이터 찾음
-				memcpy(&gbuf[index++], &cbuf->buffer[i], sizeof(exerciseReport));
-				search_timeStamp += 1;
-				copyiedCnt += 1;
-				if(search_timeStamp >= max_timeStamp) return copyiedCnt;
+				i++; //다음 데이터 부터 저장
+
+				for(index = 0; index < n; index++)
+				{
+					//데이터 찾음
+					memcpy(&gbuf[index], &cbuf->buffer[i++], sizeof(exerciseReport));
+					search_timeStamp += 1;
+					copyiedCnt += 1;
+					if((index == n-1) || (cbuf->buffer[i].timeStamp < search_timeStamp))
+						return copyiedCnt;
+				}
 			}
 		}
 	}
@@ -189,12 +195,19 @@ int circular_buf_get_range(exReport_handle_t gbuf, cbuf_handle_t cbuf, uint32_t 
 	{
 		for(i = cbuf->tail; i < cbuf->max; i++)  //탐색 방법 2
 		{
-			if(cbuf->buffer[i].timeStamp == search_timeStamp)
+			if(cbuf->buffer[i].timeStamp >= search_timeStamp)
 			{
-				memcpy(&gbuf[index++], &cbuf->buffer[i], sizeof(exerciseReport));
-				search_timeStamp += 1;
-				copyiedCnt += 1;
-				if(search_timeStamp >= max_timeStamp) return copyiedCnt;
+				i++; //다음 데이터 부터 저장
+
+				for(index = 0; index < n; index++)
+				{
+					//데이터 찾음
+					memcpy(&gbuf[index], &cbuf->buffer[i++], sizeof(exerciseReport));
+					search_timeStamp += 1;
+					copyiedCnt += 1;
+					if((index == n-1) || (cbuf->buffer[i].timeStamp < search_timeStamp))
+						return copyiedCnt;
+				}
 			}
 		}
 
@@ -202,12 +215,17 @@ int circular_buf_get_range(exReport_handle_t gbuf, cbuf_handle_t cbuf, uint32_t 
 
 		for(i = 0; i < cbuf->head; i++)  //탐색 방법 3
 		{
-			if(cbuf->buffer[i].timeStamp == search_timeStamp)
+			if(cbuf->buffer[i].timeStamp >= search_timeStamp)
 			{
-				memcpy(&gbuf[index++], &cbuf->buffer[i+cnt+1], sizeof(exerciseReport));
-				search_timeStamp += 1;
-				copyiedCnt += 1;
-				if(search_timeStamp >= max_timeStamp) return copyiedCnt;
+				for(index = 0; index < n; index++)
+				{
+					//데이터 찾음
+					memcpy(&gbuf[index++], &cbuf->buffer[i+cnt+1], sizeof(exerciseReport));
+					search_timeStamp += 1;
+					copyiedCnt += 1;
+					if((index == n-1) || (cbuf->buffer[i].timeStamp < search_timeStamp))
+						return copyiedCnt;
+				}
 			}
 		}
 	}
@@ -228,82 +246,3 @@ void print_buffer_status(cbuf_handle_t cbuf)
 				 circular_buf_empty(cbuf),
 				 circular_buf_size(cbuf));
 }
-
-//#define EXAMPLE_BUFFER_SIZE 10
-//void test_circular_buffer( void ) {
-//	uint8_t * buffer  = malloc(EXAMPLE_BUFFER_SIZE * sizeof(uint8_t));
-//
-//	printf("\r\n=== C Circular Buffer Check ===\n");
-//
-//	cbuf_handle_t cbuf = circular_buf_init(buffer, EXAMPLE_BUFFER_SIZE);
-//
-//	printf("Buffer initialized. ");
-//	print_buffer_status(cbuf);
-//
-//	printf("\r\n******\nAdding %d values\n", EXAMPLE_BUFFER_SIZE - 1);
-//	for(uint8_t i = 0; i < (EXAMPLE_BUFFER_SIZE - 1); i++)
-//	{
-//		circular_buf_put(cbuf, i);
-//		printf("\rAdded %u, Size now: %lu\n", i, circular_buf_size(cbuf));
-//	}
-//
-//	print_buffer_status(cbuf);
-//
-//	printf("\r\n******\nAdding %d values\n", EXAMPLE_BUFFER_SIZE);
-//	for(uint8_t i = 0; i < EXAMPLE_BUFFER_SIZE; i++)
-//	{
-//		circular_buf_put(cbuf, i);
-//		printf("\rAdded %u, Size now: %lu\n", i, circular_buf_size(cbuf));
-//	}
-//
-//	print_buffer_status(cbuf);
-//
-//	printf("\r\n******\nReading back values: ");
-//	while(!circular_buf_empty(cbuf))
-//	{
-//		uint8_t data;
-//		circular_buf_get(cbuf, &data);
-//		printf("%u ", data);
-//	}
-//	printf("\r\n");
-//
-//	print_buffer_status(cbuf);
-//
-//	printf("\r\n******\nAdding %d values\n", EXAMPLE_BUFFER_SIZE + 5);
-//	for(uint8_t i = 0; i < EXAMPLE_BUFFER_SIZE + 5; i++)
-//	{
-//		circular_buf_put(cbuf, i);
-//		printf("\rAdded %u, Size now: %lu\n", i, circular_buf_size(cbuf));
-//	}
-//
-//	print_buffer_status(cbuf);
-//
-//	printf("\r\n******\nReading back values: ");
-//	while(!circular_buf_empty(cbuf))
-//	{
-//		uint8_t data;
-//		circular_buf_get(cbuf, &data);
-//		printf("%u ", data);
-//	}
-//	printf("\r\n");
-//
-//	printf("\r\n******\nAdding %d values using non-overwrite version\n", EXAMPLE_BUFFER_SIZE + 5);
-//	for(uint8_t i = 0; i < EXAMPLE_BUFFER_SIZE + 5; i++)
-//	{
-//		circular_buf_put_non_overwrite(cbuf, i);
-//	}
-//
-//	print_buffer_status(cbuf);
-//
-//	printf("\r\n******\nReading back values: ");
-//	while(!circular_buf_empty(cbuf))
-//	{
-//		uint8_t data;
-//		circular_buf_get(cbuf, &data);
-//		printf("\r%u ", data);
-//	}
-//	printf("\r\n");
-//
-//	free(buffer);
-//	circular_buf_free(cbuf);
-//}
