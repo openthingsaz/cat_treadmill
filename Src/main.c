@@ -81,7 +81,7 @@ uint8_t led_control_mode = 0; // default(0) : Auto(Gyro), Manual(1) : User Selec
 uint8_t auto_time_off_mode = 0;
 uint32_t ntime_auto_off_mode = 0;
 uint32_t time_cnt = 0;
-uint8_t running_mode = 0;
+uint8_t running_mode = STAT_SLEEP;
 uint8_t low_power_mode = 0;
 
 /* USER CODE END 0 */
