@@ -68,6 +68,24 @@ static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void low_bat_check(void);
 void low_pow_enter_check(void);
+
+int run_led_toggle_flg = 0;
+void mcu_run_led(void)
+{
+	if ((timecnt % 5) == 0) {
+		if (run_led_toggle_flg == 0)
+		{
+			HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_RESET);
+			run_led_toggle_flg = 1;
+		}
+		else
+		{
+			HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_SET);
+			run_led_toggle_flg = 0;
+		}
+	}
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -139,7 +157,7 @@ int main(void)
   targetLedPos = (LED_TOTAL / 360.0f) * roundf(targetAnglel);
   HAL_TIM_Base_Start_IT(&htim11);
   /* USER CODE END 2 */
-  
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -149,11 +167,12 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
-
+  	/*
   	amountOfExercise(exData, Roll_offset, Stable_state);
     if((running_mode == STAT_SLEEP) && Stable_state)
     {
-    	/* 링버퍼 검색 및 메모리 복사 함수 테스트 */
+    	// 링버퍼 검색 및 메모리 복사 함수 테스트 //
+
     	int temp = 0; // 메모리 복사 된 갯수
     	exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport)*10); // 예제로 10개 데이터를 요청할 버퍼 생성
     	assert(getBuffer); // 버퍼 생성이 되었는지 확인
@@ -163,6 +182,7 @@ int main(void)
     		printf("temp : %d\r\n", temp);
     	free(getBuffer);
     }
+  */
 
     low_bat_check();
     low_pow_enter_check();
@@ -321,7 +341,7 @@ void low_bat_check(void)
   {
     if( abs(HAL_GetTick() - bat_previous_time) > 60000 )
     {
-      if (get_bat_val() <= 30) 
+      if (get_bat_val() <= 10)
       {
         /* Record cat movement information. */
         //////////////////////////////////////
@@ -346,8 +366,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM5) 
-  {
+  if (htim->Instance == TIM5) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
@@ -355,6 +374,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     power_off_time_check();
     timecnt++; // time count for timestamp
+    mcu_run_led();
   }
   /* USER CODE END Callback 1 */
 }
