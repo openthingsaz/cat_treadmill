@@ -68,23 +68,7 @@ static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void low_bat_check(void);
 void low_pow_enter_check(void);
-
-int run_led_toggle_flg = 0;
-void mcu_run_led(void)
-{
-	if ((timecnt % 5) == 0) {
-		if (run_led_toggle_flg == 0)
-		{
-			HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_RESET);
-			run_led_toggle_flg = 1;
-		}
-		else
-		{
-			HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_SET);
-			run_led_toggle_flg = 0;
-		}
-	}
-}
+void mcu_run_led(void);
 
 /* USER CODE END PFP */
 
@@ -101,7 +85,7 @@ uint32_t ntime_auto_off_mode = 0;
 uint32_t time_cnt = 0;
 uint8_t running_mode = STAT_SLEEP;
 uint8_t low_power_mode = 0;
-
+int run_led_toggle_flg = 0;
 /* USER CODE END 0 */
 
 /**
@@ -345,10 +329,27 @@ void low_bat_check(void)
       {
         /* Record cat movement information. */
         //////////////////////////////////////
+    	  HAL_PWR_EnterSTANDBYMode();
       }
       bat_previous_time = HAL_GetTick();
     }
   }
+}
+
+void mcu_run_led(void)
+{
+	if ((timecnt % 1) == 0) {
+		if (run_led_toggle_flg == 0)
+		{
+			HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_RESET);
+			run_led_toggle_flg = 1;
+		}
+		else
+		{
+			HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_SET);
+			run_led_toggle_flg = 0;
+		}
+	}
 }
 
 /* USER CODE END 4 */
@@ -374,7 +375,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     power_off_time_check();
     timecnt++; // time count for timestamp
-    mcu_run_led();
+    if (get_running_mode() == STAT_RUNNING)
+    	mcu_run_led();
   }
   /* USER CODE END Callback 1 */
 }

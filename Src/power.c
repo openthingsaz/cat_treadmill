@@ -19,6 +19,12 @@ void led_power_off(void)
   HAL_GPIO_WritePin(LED_3V3_PWR_EN_GPIO_Port, LED_3V3_PWR_EN_Pin, GPIO_PIN_RESET); // LED_3V3_PWR_nEN, High Enable, Low Disable
 }
 
+void mcu_run_led_off(void)
+{
+	HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_SET);
+}
+
+
 void led_power_on(void)
 {
   HAL_GPIO_WritePin(LED_3V3_PWR_EN_GPIO_Port, LED_3V3_PWR_EN_Pin, GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable, Device : U3
@@ -49,6 +55,7 @@ void power_dis(void)
   // power Controler
   HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, LED_LMIT_EN_Pin, GPIO_PIN_RESET); // LED_LMIT_EN, High Enable, Low Disable
   led_power_off();
+  mcu_run_led_off();
   if (power_mode == POWR_SAVE) 
   {
     ble_disable();
