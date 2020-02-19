@@ -293,11 +293,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-	printf("I2C Interrupt\r\n");
-}
-
 void power_off_time_check(void)
 {
   if (get_running_mode() != STAT_SLEEP) 
