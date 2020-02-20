@@ -227,10 +227,10 @@ void SystemClock_Config(void)
 static void MX_NVIC_Init(void)
 {
   /* USART2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(USART2_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
   /* USART1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
   /* TIM1_UP_TIM10_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 1, 0);
