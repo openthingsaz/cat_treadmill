@@ -89,10 +89,6 @@ void Error_Handler(void);
 #define BLE_UART2_TX_GPIO_Port GPIOA
 #define BLE_UART2_RX_Pin GPIO_PIN_3
 #define BLE_UART2_RX_GPIO_Port GPIOA
-#define LED_LMIT_FLAG_Pin GPIO_PIN_4
-#define LED_LMIT_FLAG_GPIO_Port GPIOC
-#define LED_LMIT_EN_Pin GPIO_PIN_5
-#define LED_LMIT_EN_GPIO_Port GPIOC
 #define DEBUG_UART1_TX_Pin GPIO_PIN_9
 #define DEBUG_UART1_TX_GPIO_Port GPIOA
 #define DEBUG_UART1_RX_Pin GPIO_PIN_10
