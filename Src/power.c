@@ -44,7 +44,6 @@ void power_en(void)
 {
   // power Controler
   peri_on();
-  HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, LED_LMIT_EN_Pin, GPIO_PIN_SET); // LED_LMIT_EN, High Enable, Low Disable, Device : U5
   led_power_on(); 
   ble_enable();
 }
@@ -53,7 +52,6 @@ void power_en(void)
 void power_dis(void)
 {
   // power Controler
-  HAL_GPIO_WritePin(LED_LMIT_EN_GPIO_Port, LED_LMIT_EN_Pin, GPIO_PIN_RESET); // LED_LMIT_EN, High Enable, Low Disable
   led_power_off();
   mcu_run_led_off();
   if (power_mode == POWR_SAVE) 
