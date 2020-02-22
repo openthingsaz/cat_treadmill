@@ -30,20 +30,10 @@ void led_power_on(void)
   HAL_GPIO_WritePin(LED_3V3_PWR_EN_GPIO_Port, LED_3V3_PWR_EN_Pin, GPIO_PIN_SET); // LED_3V3_PWR_nEN, High Enable, Low Disable, Device : U3
 }
 
-void peri_on(void)
-{
-  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_RESET); // PERI_3V3_PWR_nEN, Gyroscope, Accelerometer, High Disable, Low Enable, Device : U2
-}
-
-void peri_off(void)
-{
-  HAL_GPIO_WritePin(PERI_3V3_PWR_nEN_GPIO_Port, PERI_3V3_PWR_nEN_Pin, GPIO_PIN_SET); // PERI_3V3_PWR_nEN, Gyroscope, Bluetooth, High Disable, Low Enable
-}
 /* power Enable */
 void power_en(void)
 {
   // power Controler
-  peri_on();
   led_power_on(); 
   ble_enable();
 }
@@ -57,7 +47,6 @@ void power_dis(void)
   if (power_mode == POWR_SAVE) 
   {
     ble_disable();
-    peri_off();
   }
 }
 
