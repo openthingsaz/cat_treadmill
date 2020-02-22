@@ -52,8 +52,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(BLE_WAKEUP_GPIO_Port, BLE_WAKEUP_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, BLE_UART2_PD_Pin|BLE_RESET_Pin|BLE_FLASHED_DEFAULT_Pin|LED_3V3_PWR_EN_Pin 
-                          |PERI_3V3_PWR_nEN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, BLE_UART2_PD_Pin|BLE_RESET_Pin|BLE_FLASHED_DEFAULT_Pin|LED_3V3_PWR_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(MCU_RUN_GPIO_Port, MCU_RUN_Pin, GPIO_PIN_RESET);
@@ -85,12 +84,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(MCU_RUN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PCPin PCPin */
-  GPIO_InitStruct.Pin = LED_3V3_PWR_EN_Pin|PERI_3V3_PWR_nEN_Pin;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = LED_3V3_PWR_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(LED_3V3_PWR_EN_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);

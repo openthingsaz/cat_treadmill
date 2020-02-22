@@ -97,8 +97,6 @@ void Error_Handler(void);
 #define MCU_RUN_GPIO_Port GPIOA
 #define LED_3V3_PWR_EN_Pin GPIO_PIN_10
 #define LED_3V3_PWR_EN_GPIO_Port GPIOC
-#define PERI_3V3_PWR_nEN_Pin GPIO_PIN_11
-#define PERI_3V3_PWR_nEN_GPIO_Port GPIOC
 #define BATT_ALRT_INT_Pin GPIO_PIN_12
 #define BATT_ALRT_INT_GPIO_Port GPIOC
 #define BATT_ALRT_INT_EXTI_IRQn EXTI15_10_IRQn
