@@ -169,7 +169,7 @@ int main(void)
   */
 
     low_bat_check();
-    low_pow_enter_check();
+    //low_pow_enter_check();
   }
 
   /* USER CODE END 3 */
