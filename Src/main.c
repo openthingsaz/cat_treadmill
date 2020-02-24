@@ -151,25 +151,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
   	set_led_update(ledPos);
   	process();
-  	/*
-  	amountOfExercise(exData, Roll_offset, Stable_state);
-    if((running_mode == STAT_SLEEP) && Stable_state)
-    {
-    	// 링버퍼 검색 및 메모리 복사 함수 테스트 //
-
-    	int temp = 0; // 메모리 복사 된 갯수
-    	exReport_handle_t getBuffer = (exReport_handle_t)malloc(sizeof(exerciseReport)*10); // 예제로 10개 데이터를 요청할 버퍼 생성
-    	assert(getBuffer); // 버퍼 생성이 되었는지 확인
-    	memset(getBuffer, 0x00, sizeof(exerciseReport)*10); // 버퍼 초기화
-    	temp = circular_buf_get_range(getBuffer, cbuf, 28, 10); //생성한 getBuffer로 운동정보가 기록된 글로번 cbuf에서 데이터를 10개를 가져옴, 타임스템프가 28포함 10개 , 리턴값은 복사한 데이터 수
-    	if(temp > 1) // 데이터를 복사하였으면 복사한 수를 출력
-    		printf("temp : %d\r\n", temp);
-    	free(getBuffer);
-    }
-  */
-
     low_bat_check();
-    //low_pow_enter_check();
   }
 
   /* USER CODE END 3 */
